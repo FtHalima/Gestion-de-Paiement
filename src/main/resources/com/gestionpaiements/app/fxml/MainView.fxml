@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.control.Label?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.gestionpaiements.app.controller.MainViewController">
+   <center>
+      <Label fx:id="statusLabel" text="Loading..." />
+   </center>
+   <padding>
+      <Insets top="20" right="20" bottom="20" left="20"/>
+   </padding>
+</BorderPane>
