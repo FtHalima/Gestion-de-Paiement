@@ -3,7 +3,12 @@ package com.gestionpaiements.app.service;
 import com.gestionpaiements.app.dao.PaiementRepository;
 import com.gestionpaiements.app.model.Lot;
 import com.gestionpaiements.app.model.Paiement;
+import com.gestionpaiements.app.model.Professeur;
 import com.gestionpaiements.app.model.TypePaiement;
+import com.gestionpaiements.app.model.Utilisateur;
+import com.gestionpaiements.app.service.ProfesseurService;
+import com.gestionpaiements.app.service.LotService;
+import com.gestionpaiements.app.service.SessionUtilisateur;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,10 +23,16 @@ import java.util.Optional;
 public class PaiementService {
 
     private final PaiementRepository paiementRepository;
+    private final ProfesseurService professeurService;
+    private final SessionUtilisateur sessionUtilisateur;
+    private final LotService lotService;
 
     @Autowired
-    public PaiementService(PaiementRepository paiementRepository) {
+    public PaiementService(PaiementRepository paiementRepository, ProfesseurService professeurService, SessionUtilisateur sessionUtilisateur, LotService lotService) {
         this.paiementRepository = paiementRepository;
+        this.professeurService = professeurService;
+        this.sessionUtilisateur = sessionUtilisateur;
+        this.lotService = lotService;
     }
 
     /**
@@ -191,5 +202,46 @@ public class PaiementService {
      */
     public long compterParType(TypePaiement type) {
         return paiementRepository.findByTypePaiement(type).size();
+    }
+
+    /**
+     * Enregistre un paiement associé à un professeur (existants ou nouveau) et à l'utilisateur connecté.
+     * Le mode de paiement est forcé à "VIREMENT" et le type de référence à "RIB".
+     * Le calcul des montants est effectué si les champs nécessaires sont fournis.
+     *
+     * @param paiement le paiement à enregistrer (doit avoir professeur, typePaiement, nombreHeures, taux, tauxIr, etc.)
+     * @return le paiement sauvegardé avec son identifiant généré
+     */
+    @Transactional
+    public Paiement enregistrerPaiement(Paiement paiement) {
+        // Sauvegarde ou récupération du professeur
+        Professeur savedProf = professeurService.creerOuRecuperer(paiement.getProfesseur());
+        paiement.setProfesseur(savedProf);
+
+        // Utilisateur connecté
+        Utilisateur utilisateur = sessionUtilisateur.getUtilisateurConnecte();
+        if (utilisateur == null) {
+            throw new IllegalStateException("Aucun utilisateur connecté");
+        }
+        paiement.setUtilisateur(utilisateur);
+
+        // Lot actif (existant ou créé)
+        Lot actifLot = lotService.getOuCreerLotActif(utilisateur);
+        paiement.setLot(actifLot);
+
+        // Mode paiement et type de référence fixes
+        paiement.setModePaiement("VIREMENT");
+        paiement.setTypeReferenceReglement("RIB");
+
+        // Calcul des montants si les données de base sont présentes
+        if (paiement.getNombreHeures() != null && paiement.getTaux() != null && paiement.getTauxIr() != null) {
+            TauxIRResult result = calculerMontants(paiement.getTypePaiement(), paiement.getNombreHeures(), paiement.getTaux(), paiement.getTauxIr());
+            paiement.setMontantBrut(result.getMontantBrut());
+            paiement.setRetenueIr(result.getRetenueIr());
+            paiement.setMontantNet(result.getMontantNet());
+        }
+
+        // Sauvegarde du paiement
+        return paiementRepository.save(paiement);
     }
 }

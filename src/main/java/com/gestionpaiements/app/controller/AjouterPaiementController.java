@@ -1,7 +1,10 @@
 package com.gestionpaiements.app.controller;
 
 import com.gestionpaiements.app.model.Professeur;
+import com.gestionpaiements.app.model.Paiement;
 import com.gestionpaiements.app.model.TypePaiement;
+import com.gestionpaiements.app.model.Utilisateur;
+import com.gestionpaiements.app.model.Lot;
 import com.gestionpaiements.app.service.ProfesseurService;
 import com.gestionpaiements.app.service.PaiementService;
 import javafx.collections.FXCollections;
@@ -16,6 +19,8 @@ import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import com.gestionpaiements.app.service.LotService;
+import com.gestionpaiements.app.service.SessionUtilisateur;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -30,6 +35,12 @@ public class AjouterPaiementController {
 
     @Autowired
     private PaiementService paiementService;
+
+    @Autowired
+    private SessionUtilisateur sessionUtilisateur;
+
+    @Autowired
+    private LotService lotService;
 
     // Fields from FXML
     @FXML private TextField cinField;
@@ -72,7 +83,7 @@ public class AjouterPaiementController {
     @FXML private TextField tauxField; // non-editable
     @FXML private ComboBox<String> irCombo; // non-editable, holds "%" values
     @FXML private Label montantBrutLabel;
-    @FXML private Label retenuIrLabel;
+    @FXML private Label retenueIrLabel;
     @FXML private Label montantNetLabel;
     @FXML private Label modePaiementLabel;
     @FXML private Label typeReferenceReglementLabel;
@@ -406,7 +417,7 @@ public class AjouterPaiementController {
 
         PaiementService.TauxIRResult result = paiementService.calculerMontants(type, nombreHeures, taux, tauxIr);
         montantBrutLabel.setText(formatBigDecimal(result.getMontantBrut()));
-        retenuIrLabel.setText(formatBigDecimal(result.getRetenueIr()));
+        retenueIrLabel.setText(formatBigDecimal(result.getRetenueIr()));
         montantNetLabel.setText(formatBigDecimal(result.getMontantNet()));
     }
 
@@ -429,60 +440,98 @@ public class AjouterPaiementController {
         return bd.stripTrailingZeros().toPlainString().replace(".", ",");
     }
 
-    // Validation and save
+    // Enregistrement du paiement
     @FXML
     private void saveAction() {
         if (!validateForm()) {
             return;
         }
-        // Build summary message
-        StringBuilder summary = new StringBuilder("Récapitulatif du paiement :\n\n");
-        if (currentProfesseur != null && !isNewProfessorMode) {
-            summary.append("Professeur trouvé :\n")
-                    .append("CIN: ").append(currentProfesseur.getCin()).append("\n")
-                    .append("PPR: ").append(currentProfesseur.getPpr()).append("\n")
-                    .append("Nom: ").append(currentProfesseur.getNom()).append("\n")
-                    .append("Prénom: ").append(currentProfesseur.getPrenom()).append("\n\n");
-        } else if (isNewProfessorMode) {
-            summary.append("Nouveau professeur à créer :\n")
-                    .append("CIN: ").append(cinField.getText().trim()).append("\n")
-                    .append("PPR: ").append(pprField.getText().trim()).append("\n")
-                    .append("Nom: ").append(nomField.getText().trim()).append("\n")
-                    .append("Prénom: ").append(prenomField.getText().trim()).append("\n")
-                    .append("DDR: ").append(ddrPicker.getValue() != null ? ddrPicker.getValue().format(dateFormatter) : "-").append("\n")
-                    .append("Grade: ").append(gradeField.getValue() != null ? gradeField.getValue() : "-").append("\n")
-                    .append("Échelle: ").append(echelleField.getText().trim()).append("\n")
-                    .append("Affectation: ").append(affectationField.getText().trim()).append("\n\n");
+
+        try {
+            String cin = cinField.getText().trim();
+            String ppr = pprField.getText().trim();
+
+            // Préparer l'objet Professeur (à créer ou à récupérer)
+            Professeur prof = new Professeur();
+            prof.setCin(cin);
+            prof.setPpr(ppr);
+
+            if (isNewProfessorMode) {
+                // Création d'un nouveau professeur : remplir tous les champs
+                prof.setNom(nomField.getText().trim());
+                prof.setPrenom(prenomField.getText().trim());
+                prof.setDdr(ddrPicker.getValue());
+                prof.setGrade(gradeField.getValue());
+                String echelleStr = echelleField.getText().trim();
+                prof.setEchelle(echelleStr.isEmpty() ? null : Integer.parseInt(echelleStr));
+                prof.setAffectation(affectationField.getText().trim());
+                prof.setRibBanque(banqueField.getText());
+                prof.setRibVille(villeField.getText());
+                prof.setRibNumeroCompte(numeroCompteField.getText());
+                prof.setRibCle(cleField.getText());
+            }
+            // Si le professeur existe déjà, seuls CIN et PPR sont nécessaires pour la recherche
+
+            // Informations de paiement
+            TypePaiement typePaiement = typePaiementCombo.getSelectionModel().getSelectedItem();
+            String objetReglement = objetReglementLabel.getText();
+            String referenceReglement = referenceReglementLabel.getText();
+            LocalDate dateDebut = dateDebutField.getValue();
+            LocalDate dateFin = dateFinField.getValue();
+
+            BigDecimal nombreHeures = parseBigDecimal(nombreHeuresField.getText());
+            BigDecimal taux = parseBigDecimal(tauxField.getText());
+            BigDecimal tauxIr = new BigDecimal(irCombo.getSelectionModel().getSelectedItem()); // toujours sélectionné
+
+            // Calcul des montants
+            PaiementService.TauxIRResult result = paiementService.calculerMontants(typePaiement, nombreHeures, taux, tauxIr);
+
+            // Création du objet Paiement
+            Paiement paiement = new Paiement();
+            paiement.setProfesseur(prof); // sera éventuellement remplacé par le service
+            paiement.setTypePaiement(typePaiement);
+            paiement.setObjetReglement(objetReglement);
+            paiement.setDateDebut(dateDebut);
+            paiement.setDateFin(dateFin);
+            paiement.setNombreHeures(nombreHeures);
+            paiement.setTaux(taux);
+            paiement.setTauxIr(tauxIr);
+            paiement.setMontantBrut(result.getMontantBrut());
+            paiement.setRetenueIr(result.getRetenueIr());
+            paiement.setMontantNet(result.getMontantNet());
+            paiement.setModePaiement("VIREMENT");
+            paiement.setTypeReferenceReglement("RIB");
+            paiement.setReferenceReglement(referenceReglement);
+            paiement.setDatePaiement(datePaiementField.getValue()); // peut être null
+            // Utilisateur connecté
+            Utilisateur utilisateur = sessionUtilisateur.getUtilisateurConnecte();
+            paiement.setUtilisateur(utilisateur);
+            // Lot actif (existant ou créé)
+            Lot actifLot = lotService.getOuCreerLotActif(utilisateur);
+            paiement.setLot(actifLot);
+
+            // Enregistrement (transactionnel)
+            Paiement saved = paiementService.enregistrerPaiement(paiement);
+
+            // Confirmation
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Enregistrement réussi");
+            alert.setHeaderText(null);
+            alert.setContentText("Paiement enregistré avec succès (ID : " + saved.getIdPaiement() + ").");
+            alert.showAndWait();
+
+            // Réinitialiser le formulaire pour un nouveau paiement
+            resetAction();
+        } catch (Exception ex) {
+            // Gestion d'erreur générique (les détails peuvent être loggés)
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erreur d'enregistrement");
+            alert.setHeaderText(null);
+            alert.setContentText("Une erreur est survenue lors de l'enregistrement : " + ex.getMessage());
+            alert.showAndWait();
+            // Log détaillé (optionnel)
+            ex.printStackTrace();
         }
-
-        summary.append("RIB: ")
-                .append(banqueField.getText()).append(" ")
-                .append(villeField.getText()).append(" ")
-                .append(numeroCompteField.getText()).append(" ")
-                .append(cleField.getText()).append("\n\n");
-
-        summary.append("Type de paiement: ").append(typePaiementCombo.getSelectionModel().getSelectedItem()).append("\n")
-                .append("Objet règlement: ").append(objetReglementLabel.getText()).append("\n")
-                .append("Référence règlement: ").append(referenceReglementLabel.getText()).append("\n")
-                .append("Type référence règlement: ").append(typeReferenceReglementLabel.getText()).append("\n")
-                .append("Date début: ").append(dateDebutField.getValue() != null ? dateDebutField.getValue().format(dateFormatter) : "-").append("\n")
-                .append("Date fin: ").append(dateFinField.getValue() != null ? dateFinField.getValue().format(dateFormatter) : "-").append("\n\n");
-
-        summary.append("Nombre d'heures: ").append(nombreHeuresField.getText().trim()).append("\n")
-                .append("Taux: ").append(tauxField.getText().trim()).append("\n")
-                .append("IR %: ").append(irCombo.getSelectionModel().getSelectedItem()).append("\n")
-                .append("Montant brut: ").append(montantBrutLabel.getText()).append("\n")
-                .append("Retenue IR: ").append(retenuIrLabel.getText()).append("\n")
-                .append("Montant net: ").append(montantNetLabel.getText()).append("\n\n");
-
-        summary.append("Mode de paiement: ").append(modePaiementLabel.getText()).append("\n")
-                .append("Date paiement: ").append(datePaiementField.getValue() != null ? datePaiementField.getValue().format(dateFormatter) : "-");
-
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Récapitulatif paiement");
-        alert.setHeaderText(null);
-        alert.setContentText(summary.toString());
-        alert.showAndWait();
     }
 
     @FXML
@@ -523,7 +572,7 @@ public class AjouterPaiementController {
         tauxField.clear();
         irCombo.getSelectionModel().selectFirst();
         montantBrutLabel.setText("0,00");
-        retenuIrLabel.setText("0,00");
+        retenueIrLabel.setText("0,00");
         montantNetLabel.setText("0,00");
         modePaiementLabel.setText("VIREMENT");
         typeReferenceReglementLabel.setText("RIB");
@@ -541,14 +590,19 @@ public class AjouterPaiementController {
     private boolean validateForm() {
         StringBuilder errors = new StringBuilder();
 
-        // At least one of CIN or PPR required
         String cin = cinField.getText().trim();
         String ppr = pprField.getText().trim();
-        if (cin.isEmpty() && ppr.isEmpty()) {
-            errors.append("- CIN ou PPR obligatoire\n");
+
+        // CIN et PPR obligatoires
+        if (cin.isEmpty()) {
+            errors.append("- CIN obligatoire\n");
+        }
+        if (ppr.isEmpty()) {
+            errors.append("- PPR obligatoire\n");
         }
 
         if (isNewProfessorMode) {
+            // Champs obligatoires pour création de nouveau professeur
             if (nomField.getText().trim().isEmpty()) {
                 errors.append("- Nom du professeur obligatoire\n");
             }
@@ -575,7 +629,7 @@ public class AjouterPaiementController {
             }
         }
 
-        // RIB length validation
+        // Validation du RIB (toujours obligatoire)
         if (!banqueField.getText().matches("\\d{3}")) {
             errors.append("- Banque doit contenir exactement 3 chiffres\n");
         }
@@ -589,7 +643,7 @@ public class AjouterPaiementController {
             errors.append("- Clé doit contenir exactement 2 chiffres\n");
         }
 
-        // Paiement info
+        // Informations de paiement
         if (typePaiementCombo.getSelectionModel().getSelectedItem() == null) {
             errors.append("- Type de paiement obligatoire\n");
         }

@@ -1,5 +1,1 @@
-- [Modifications apportées à la page "Ajouter un paiement" pour répondre aux 14 points de la spécification utilisateur](modifier-ajouter-paiement-14-points.md)
-- [Modifications supplémentaires demandées par l'utilisateur sur la page "Ajouter un paiement"](modifier-ajouter-paiement-requests.md)
-- [Rendre le champ Taux éditable et supprimer le symbole € des montants brut, retenue et net](taux-editable-no-euro.md)
-- [Définir l'invite texte jj/mm/aaaa et le format de date pour tous les DatePicker (date de recrutement, date début, date fin, date paiement)](date-prompt-jj-mm-aaaa.md)
-- [Correction de la recherche professeur par CIN ou PPR pour éviter de retourner tous les enregistrements lorsqu'un champ est vide](fix-search-by-cin-or-ppr.md)
+- [Modifier la date de naissance en date de recrutement dans le formulaire d'ajout de paiement](modifier-date-naissance-recrutement.md)
