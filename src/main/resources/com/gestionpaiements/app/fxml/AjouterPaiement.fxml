@@ -12,6 +12,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.TitledPane?>
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
@@ -27,7 +28,7 @@
         <VBox spacing="8">
             <GridPane hgap="10" vgap="8">
                 <columnConstraints>
-                    <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="120" minWidth="100" prefWidth="120"/>
+                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="120" minWidth="100" prefWidth="120"/>
                     <ColumnConstraints hgrow="ALWAYS"/>
                 </columnConstraints>
                 <Label text="CIN :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
@@ -48,7 +49,7 @@
                     <VBox fx:id="profInfoDisplay">
                         <GridPane hgap="10" vgap="4">
                             <columnConstraints>
-                                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="100"/>
+                                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="100"/>
                                 <ColumnConstraints hgrow="ALWAYS"/>
                             </columnConstraints>
                             <Label text="Nom :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
@@ -70,7 +71,7 @@
                     <VBox fx:id="profInfoEdit" visible="false">
                         <GridPane hgap="10" vgap="4">
                             <columnConstraints>
-                                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="100"/>
+                                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="100"/>
                                 <ColumnConstraints hgrow="ALWAYS"/>
                             </columnConstraints>
                             <Label text="Nom :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
@@ -96,13 +97,13 @@
     <TitledPane text="Informations bancaires (RIB)">
         <GridPane hgap="10" vgap="8">
             <columnConstraints>
-                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="120"/>
+                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="120"/>
                 <ColumnConstraints hgrow="ALWAYS" maxWidth="80"/>
-                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="120"/>
+                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="120"/>
                 <ColumnConstraints hgrow="ALWAYS" maxWidth="80"/>
-                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="120"/>
+                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="120"/>
                 <ColumnConstraints hgrow="ALWAYS" maxWidth="120"/>
-                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="80"/>
+                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="80"/>
                 <ColumnConstraints hgrow="ALWAYS" maxWidth="80"/>
             </columnConstraints>
             <Label text="Banque :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
@@ -120,9 +121,9 @@
     <TitledPane text="Informations du règlement">
         <GridPane hgap="10" vgap="8">
             <columnConstraints>
-                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="120"/>
+                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="120"/>
                 <ColumnConstraints hgrow="ALWAYS"/>
-                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="120"/>
+                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="120"/>
                 <ColumnConstraints hgrow="ALWAYS"/>
             </columnConstraints>
             <Label text="Type de paiement :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
@@ -140,9 +141,9 @@
     <TitledPane text="Calcul du paiement">
         <GridPane hgap="10" vgap="8">
             <columnConstraints>
-                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="120"/>
+                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="120"/>
                 <ColumnConstraints hgrow="ALWAYS" maxWidth="150"/>
-                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="120"/>
+                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="120"/>
                 <ColumnConstraints hgrow="ALWAYS" maxWidth="150"/>
             </columnConstraints>
             <Label text="Nombre d'heures :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
@@ -164,9 +165,9 @@
     <TitledPane text="Paiement">
         <GridPane hgap="10" vgap="8">
             <columnConstraints>
-                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="140"/>
+                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="140"/>
                 <ColumnConstraints hgrow="ALWAYS"/>
-                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="140"/>
+                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="140"/>
                 <ColumnConstraints hgrow="ALWAYS"/>
             </columnConstraints>
             <Label text="Mode de paiement :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>

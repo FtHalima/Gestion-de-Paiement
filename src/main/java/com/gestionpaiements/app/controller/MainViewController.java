@@ -29,6 +29,8 @@ public class MainViewController {
             Stage stage = new Stage();
             stage.setTitle("Ajouter un paiement");
             stage.setScene(new Scene(root));
+            // Slightly reduce the height of the window
+            stage.setHeight(600.0);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
