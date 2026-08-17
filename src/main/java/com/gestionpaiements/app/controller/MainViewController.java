@@ -8,6 +8,8 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import org.springframework.stereotype.Component;
 
+import com.gestionpaiements.app.MainApp;
+
 import java.io.IOException;
 
 @Component
@@ -25,6 +27,7 @@ public class MainViewController {
     private void handleAddPaiement() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/gestionpaiements/app/fxml/AjouterPaiement.fxml"));
+            loader.setControllerFactory(MainApp.staticApplicationContext::getBean);
             Parent root = loader.load();
             Stage stage = new Stage();
             stage.setTitle("Ajouter un paiement");

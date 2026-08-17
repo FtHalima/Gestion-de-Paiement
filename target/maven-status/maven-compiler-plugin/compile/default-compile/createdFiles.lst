@@ -1,4 +1,5 @@
 com\gestionpaiements\app\service\SessionUtilisateur.class
+com\gestionpaiements\app\controller\AjouterPaiementController$1.class
 com\gestionpaiements\app\service\PaiementService.class
 com\gestionpaiements\app\controller\LoginController.class
 com\gestionpaiements\app\model\TypePaiement.class
@@ -6,6 +7,8 @@ com\gestionpaiements\app\dao\ProfesseurRepository.class
 com\gestionpaiements\app\model\ConfigurationApp.class
 com\gestionpaiements\app\model\Lot.class
 com\gestionpaiements\app\dao\PaiementRepository.class
+com\gestionpaiements\app\service\ProfesseurService$TauxIR.class
+com\gestionpaiements\app\service\PaiementService$TauxIRResult.class
 com\gestionpaiements\app\service\ProfesseurService.class
 com\gestionpaiements\app\controller\AjouterPaiementController.class
 com\gestionpaiements\app\Launcher.class
@@ -16,6 +19,7 @@ com\gestionpaiements\app\service\LotService.class
 com\gestionpaiements\app\service\UtilisateurService.class
 com\gestionpaiements\app\model\Professeur.class
 com\gestionpaiements\app\model\Paiement.class
+com\gestionpaiements\app\controller\AjouterPaiementController$2.class
 com\gestionpaiements\app\dao\LotRepository.class
 com\gestionpaiements\app\model\StatutLot.class
 com\gestionpaiements\app\model\Utilisateur.class

@@ -56,7 +56,7 @@
                             <Label fx:id="nomLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
                             <Label text="Prénom :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
                             <Label fx:id="prenomLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                            <Label text="Date de naissance (DDR) :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                            <Label text="Date de recrutement (DDR) :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
                             <Label fx:id="ddrLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
                             <Label text="Grade :" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
                             <Label fx:id="gradeLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
@@ -81,7 +81,7 @@
                             <Label text="Date de naissance (DDR) :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
                             <DatePicker fx:id="ddrPicker" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
                             <Label text="Grade :" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                            <TextField fx:id="gradeField" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                            <ComboBox fx:id="gradeField" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
                             <Label text="Échelle :" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
                             <TextField fx:id="echelleField" promptText="ex: 5" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
                             <Label text="Affectation :" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
@@ -129,11 +129,11 @@
             <Label text="Type de paiement :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
             <ComboBox fx:id="typePaiementCombo" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
             <Label text="Objet règlement :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-            <TextField fx:id="objetReglementField" promptText="Objet du règlement" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1"/>
+            <Label fx:id="objetReglementLabel" text="-" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.rowIndex="1"/>
             <Label text="Date début (jj/mm/aaaa) :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-            <TextField fx:id="dateDebutField" promptText="jj/mm/aaaa" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            <DatePicker fx:id="dateDebutField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
             <Label text="Date fin (jj/mm/aaaa) :" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-            <TextField fx:id="dateFinField" promptText="jj/mm/aaaa" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+            <DatePicker fx:id="dateFinField" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
         </GridPane>
     </TitledPane>
 
@@ -148,16 +148,16 @@
             </columnConstraints>
             <Label text="Nombre d'heures :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
             <TextField fx:id="nombreHeuresField" promptText="0.0" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-            <Label text="Taux (€/h) :" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-            <TextField fx:id="tauxField" promptText="0.00" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+            <Label text="Taux :" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+            <TextField fx:id="tauxField" promptText="0.00" editable="false" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
             <Label text="IR % :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-            <ComboBox fx:id="irCombo" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-            <Label text="Montant brut (€) :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-            <Label fx:id="montantBrutLabel" text="0,00 €" style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-            <Label text="Retenue IR (€) :" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-            <Label fx:id="retenueIrLabel" text="0,00 €" style="-fx-font-weight: bold;" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
-            <Label text="Montant net (€) :" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-            <Label fx:id="montantNetLabel" text="0,00 €" style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+            <ComboBox fx:id="irCombo" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+            <Label text="Montant brut  :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+            <Label fx:id="montantBrutLabel" text="0,00 " style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            <Label text="Retenue IR  :" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+            <Label fx:id="retenueIrLabel" text="0,00 " style="-fx-font-weight: bold;" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+            <Label text="Montant net  :" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+            <Label fx:id="montantNetLabel" text="0,00 " style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
         </GridPane>
     </TitledPane>
 
@@ -173,11 +173,11 @@
             <Label text="Mode de paiement :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
             <Label fx:id="modePaiementLabel" text="VIREMENT" style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
             <Label text="Type référence règlement :" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-            <TextField fx:id="typeReferenceReglementField" promptText="Type référence" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+            <Label fx:id="typeReferenceReglementLabel" text="RIB" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
             <Label text="Référence règlement :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-            <TextField fx:id="referenceReglementField" promptText="Référence" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1"/>
+            <Label fx:id="referenceReglementLabel" text="-" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1"/>
             <Label text="Date de paiement (jj/mm/aaaa) :" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-            <TextField fx:id="datePaiementField" promptText="jj/mm/aaaa" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+            <DatePicker fx:id="datePaiementField" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
         </GridPane>
     </TitledPane>
 

@@ -16,6 +16,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class MainApp extends Application {
 
     private ApplicationContext applicationContext;
+    public static ApplicationContext staticApplicationContext;
 
     @Override
     public void init() {
@@ -23,6 +24,7 @@ public class MainApp extends Application {
         applicationContext = new SpringApplicationBuilder()
                 .sources(MainApp.class)
                 .run(getParameters().getRaw().toArray(new String[0]));
+        staticApplicationContext = applicationContext;
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.gestionpaiements.app.controller;
 import com.gestionpaiements.app.model.Professeur;
 import com.gestionpaiements.app.model.TypePaiement;
 import com.gestionpaiements.app.service.ProfesseurService;
+import com.gestionpaiements.app.service.PaiementService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -12,11 +13,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -26,6 +27,9 @@ public class AjouterPaiementController {
 
     @Autowired
     private ProfesseurService professeurService;
+
+    @Autowired
+    private PaiementService paiementService;
 
     // Fields from FXML
     @FXML private TextField cinField;
@@ -47,7 +51,7 @@ public class AjouterPaiementController {
     @FXML private TextField nomField;
     @FXML private TextField prenomField;
     @FXML private DatePicker ddrPicker;
-    @FXML private TextField gradeField;
+    @FXML private ComboBox<String> gradeField; // Changed to ComboBox
     @FXML private TextField echelleField;
     @FXML private TextField affectationField;
     @FXML private VBox profInfoEdit;
@@ -60,19 +64,19 @@ public class AjouterPaiementController {
 
     // Paiement info
     @FXML private ComboBox<TypePaiement> typePaiementCombo;
-    @FXML private TextField objetReglementField;
-    @FXML private TextField dateDebutField;
-    @FXML private TextField dateFinField;
+    @FXML private Label objetReglementLabel;
+    @FXML private DatePicker dateDebutField;
+    @FXML private Label referenceReglementLabel;
+    @FXML private DatePicker dateFinField;
     @FXML private TextField nombreHeuresField;
-    @FXML private TextField tauxField;
-    @FXML private ComboBox<String> irCombo;
+    @FXML private TextField tauxField; // non-editable
+    @FXML private ComboBox<String> irCombo; // non-editable, holds "%" values
     @FXML private Label montantBrutLabel;
     @FXML private Label retenuIrLabel;
     @FXML private Label montantNetLabel;
     @FXML private Label modePaiementLabel;
-    @FXML private TextField typeReferenceReglementField;
-    @FXML private TextField referenceReglementField;
-    @FXML private TextField datePaiementField;
+    @FXML private Label typeReferenceReglementLabel;
+    @FXML private DatePicker datePaiementField;
 
     // Buttons
     @FXML private Button cancelButton;
@@ -85,7 +89,6 @@ public class AjouterPaiementController {
 
     // Formatters
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private final BigDecimal HUNDRED = new BigDecimal("100");
 
     @FXML
     public void initialize() {
@@ -93,9 +96,21 @@ public class AjouterPaiementController {
         typePaiementCombo.setItems(FXCollections.observableArrayList(TypePaiement.values()));
         irCombo.setItems(FXCollections.observableArrayList("30", "34", "37"));
         irCombo.getSelectionModel().selectFirst(); // default 30%
+        irCombo.setEditable(false);
+        tauxField.setEditable(true);
 
-        // Set default date paiement to today
-        datePaiementField.setText(LocalDate.now().format(dateFormatter));
+        // Grade ComboBox
+        gradeField.setItems(FXCollections.observableArrayList("PRIMAIRE", "SUPERIEUR"));
+
+        // Set default date paiement to empty (no default date)
+        datePaiementField.setValue(null);
+        datePaiementField.setPromptText("jj/mm/aaaa");
+
+        // Set labels defaults
+        objetReglementLabel.setText("-");
+        referenceReglementLabel.setText("-");
+        typeReferenceReglementLabel.setText("RIB");
+        modePaiementLabel.setText("VIREMENT");
 
         // Setup auto-focus for RIB fields
         setupRibAutoFocus();
@@ -108,6 +123,52 @@ public class AjouterPaiementController {
         // Enter key to trigger search
         cinField.setOnKeyPressed(this::handleEnterKey);
         pprField.setOnKeyPressed(this::handleEnterKey);
+
+        // Listeners for grade and echelle to update taux and IR
+        gradeField.valueProperty().addListener((obs, oldVal, newVal) -> updateTauxEtIR());
+        echelleField.textProperty().addListener((obs, oldVal, newVal) -> updateTauxEtIR());
+
+        // Listener for typePaiement to update objet and reference labels
+        typePaiementCombo.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> updateObjetEtReference());
+
+        // Listener for date validation
+        dateDebutField.valueProperty().addListener((obs, oldVal, newVal) -> validateDates());
+        dateFinField.valueProperty().addListener((obs, oldVal, newVal) -> validateDates());
+
+        // Apply date format and prompt to date pickers
+        applyDateFormat(dateDebutField);
+        applyDateFormat(dateFinField);
+        applyDateFormat(ddrPicker);
+        applyDateFormat(datePaiementField);
+    }
+
+    /**
+     * Applique un format de date jj/mm/aaaa et un invite texte au DatePicker donné.
+     */
+    private void applyDateFormat(DatePicker picker) {
+        picker.setPromptText("jj/mm/aaaa");
+        StringConverter<LocalDate> converter = new StringConverter<>() {
+            private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            @Override
+            public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override
+            public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
+        };
+        picker.setConverter(converter);
     }
 
     private void handleEnterKey(KeyEvent event) {
@@ -121,12 +182,12 @@ public class AjouterPaiementController {
     private void searchProfessor() {
         String cin = cinField.getText().trim();
         String ppr = pprField.getText().trim();
-        if (cin.isEmpty() || ppr.isEmpty()) {
-            showError("Veuillez saisir le CIN et le PPR.");
+        if (cin.isEmpty() && ppr.isEmpty()) {
+            showError("Veuillez saisir le CIN ou le PPR.");
             return;
         }
 
-        Optional<Professeur> opt = professeurService.rechercherParCinPpr(cin, ppr);
+        Optional<Professeur> opt = professeurService.rechercherParCinOuPpr(cin, ppr);
         if (opt.isPresent()) {
             currentProfesseur = opt.get();
             isNewProfessorMode = false;
@@ -154,7 +215,7 @@ public class AjouterPaiementController {
         nomField.clear();
         prenomField.clear();
         ddrPicker.setValue(null);
-        gradeField.clear();
+        gradeField.getSelectionModel().clearSelection();
         echelleField.clear();
         affectationField.clear();
         // Focus on nomField
@@ -275,26 +336,78 @@ public class AjouterPaiementController {
         }
     }
 
-    // Calculation
+    // Update taux and IR based on grade and echelle via service
+    private void updateTauxEtIR() {
+        String grade = gradeField.getValue();
+        String echelleStr = echelleField.getText().trim();
+        if (grade == null || grade.isEmpty() || echelleStr.isEmpty()) {
+            // Clear fields
+            tauxField.clear();
+            irCombo.getSelectionModel().clearSelection();
+            return;
+        }
+        Optional<ProfesseurService.TauxIR> opt = professeurService.trouverTauxEtIRParGradeEtEchelle(grade, echelleStr);
+        if (opt.isPresent()) {
+            ProfesseurService.TauxIR tirs = opt.get();
+            tauxField.setText(tirs.getTaux().stripTrailingZeros().toPlainString());
+            irCombo.getSelectionModel().select(tirs.getTauxIr().stripTrailingZeros().toPlainString());
+        } else {
+            // No configuration available -> clear fields and maybe show placeholder
+            tauxField.clear();
+            irCombo.getSelectionModel().clearSelection();
+        }
+        // After setting taux and IR, recalc amounts
+        calculate();
+    }
+
+    // Update objet règlement and référence règlement labels based on selected type of payment
+    private void updateObjetEtReference() {
+        TypePaiement type = typePaiementCombo.getSelectionModel().getSelectedItem();
+        if (type == null) {
+            objetReglementLabel.setText("-");
+            referenceReglementLabel.setText("-");
+            return;
+        }
+        switch (type) {
+            case VACATAIRE:
+                objetReglementLabel.setText("VACATAIRE");
+                referenceReglementLabel.setText("VACATAIRE");
+                break;
+            case HEURE_SUP:
+                objetReglementLabel.setText("HEURE SUPPLÉMENTAIRE");
+                referenceReglementLabel.setText("HEURE SUPPLÉMENTAIRE");
+                break;
+            case DEPLACEMENT:
+                objetReglementLabel.setText("DEPLACEMENT");
+                referenceReglementLabel.setText("DEPLACEMENT");
+                break;
+            default:
+                objetReglementLabel.setText("-");
+                referenceReglementLabel.setText("-");
+        }
+    }
+
+    // Validate that date fin >= date debut
+    private void validateDates() {
+        LocalDate debut = dateDebutField.getValue();
+        LocalDate fin = dateFinField.getValue();
+        if (debut != null && fin != null && fin.isBefore(debut)) {
+            showError("La date de fin doit être postérieure ou égale à la date de début.");
+        }
+    }
+
+    // Calculation using PaiementService
     private void calculate() {
+        TypePaiement type = typePaiementCombo.getSelectionModel().getSelectedItem();
         BigDecimal nombreHeures = parseBigDecimal(nombreHeuresField.getText());
         BigDecimal taux = parseBigDecimal(tauxField.getText());
         String irStr = irCombo.getSelectionModel().getSelectedItem();
         BigDecimal tauxIr = irStr != null ? new BigDecimal(irStr) : BigDecimal.ZERO;
 
-        if (nombreHeures == null || taux == null) {
-            clearAmounts();
-            return;
-        }
-
-        BigDecimal montantBrut = nombreHeures.multiply(taux).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal retenuIr = montantBrut.multiply(tauxIr).divide(HUNDRED, 10, RoundingMode.HALF_UP)
-                .setScale(2, RoundingMode.HALF_UP);
-        BigDecimal montantNet = montantBrut.subtract(retenuIr).setScale(2, RoundingMode.HALF_UP);
-
-        montantBrutLabel.setText(formatBigDecimal(montantBrut) + " €");
-        retenuIrLabel.setText(formatBigDecimal(retenuIr) + " €");
-        montantNetLabel.setText(formatBigDecimal(montantNet) + " €");
+        PaiementService.TauxIRResult result = paiementService.calculerMontants(type, nombreHeures, taux, tauxIr);
+        montantBrutLabel.setText(formatBigDecimal(result.getMontantBrut()));
+        retenuIrLabel.setText(formatBigDecimal(result.getRetenueIr()));
+        montantNetLabel.setText(formatBigDecimal(result.getMontantNet()));
     }
 
     private BigDecimal parseBigDecimal(String text) {
@@ -314,12 +427,6 @@ public class AjouterPaiementController {
             return "0,00";
         }
         return bd.stripTrailingZeros().toPlainString().replace(".", ",");
-    }
-
-    private void clearAmounts() {
-        montantBrutLabel.setText("0,00 €");
-        retenuIrLabel.setText("0,00 €");
-        montantNetLabel.setText("0,00 €");
     }
 
     // Validation and save
@@ -343,7 +450,7 @@ public class AjouterPaiementController {
                     .append("Nom: ").append(nomField.getText().trim()).append("\n")
                     .append("Prénom: ").append(prenomField.getText().trim()).append("\n")
                     .append("DDR: ").append(ddrPicker.getValue() != null ? ddrPicker.getValue().format(dateFormatter) : "-").append("\n")
-                    .append("Grade: ").append(gradeField.getText().trim()).append("\n")
+                    .append("Grade: ").append(gradeField.getValue() != null ? gradeField.getValue() : "-").append("\n")
                     .append("Échelle: ").append(echelleField.getText().trim()).append("\n")
                     .append("Affectation: ").append(affectationField.getText().trim()).append("\n\n");
         }
@@ -355,21 +462,21 @@ public class AjouterPaiementController {
                 .append(cleField.getText()).append("\n\n");
 
         summary.append("Type de paiement: ").append(typePaiementCombo.getSelectionModel().getSelectedItem()).append("\n")
-                .append("Objet règlement: ").append(objetReglementField.getText().trim()).append("\n")
-                .append("Date début: ").append(dateDebutField.getText().trim()).append("\n")
-                .append("Date fin: ").append(dateFinField.getText().trim()).append("\n\n");
+                .append("Objet règlement: ").append(objetReglementLabel.getText()).append("\n")
+                .append("Référence règlement: ").append(referenceReglementLabel.getText()).append("\n")
+                .append("Type référence règlement: ").append(typeReferenceReglementLabel.getText()).append("\n")
+                .append("Date début: ").append(dateDebutField.getValue() != null ? dateDebutField.getValue().format(dateFormatter) : "-").append("\n")
+                .append("Date fin: ").append(dateFinField.getValue() != null ? dateFinField.getValue().format(dateFormatter) : "-").append("\n\n");
 
         summary.append("Nombre d'heures: ").append(nombreHeuresField.getText().trim()).append("\n")
-                .append("Taux (€/h): ").append(tauxField.getText().trim()).append("\n")
+                .append("Taux: ").append(tauxField.getText().trim()).append("\n")
                 .append("IR %: ").append(irCombo.getSelectionModel().getSelectedItem()).append("\n")
                 .append("Montant brut: ").append(montantBrutLabel.getText()).append("\n")
                 .append("Retenue IR: ").append(retenuIrLabel.getText()).append("\n")
                 .append("Montant net: ").append(montantNetLabel.getText()).append("\n\n");
 
         summary.append("Mode de paiement: ").append(modePaiementLabel.getText()).append("\n")
-                .append("Type référence règlement: ").append(typeReferenceReglementField.getText().trim()).append("\n")
-                .append("Référence: ").append(referenceReglementField.getText().trim()).append("\n")
-                .append("Date paiement: ").append(datePaiementField.getText().trim());
+                .append("Date paiement: ").append(datePaiementField.getValue() != null ? datePaiementField.getValue().format(dateFormatter) : "-");
 
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Récapitulatif paiement");
@@ -408,17 +515,19 @@ public class AjouterPaiementController {
 
         // Reset paiement info
         typePaiementCombo.getSelectionModel().selectFirst();
-        objetReglementField.clear();
-        dateDebutField.clear();
-        dateFinField.clear();
+        objetReglementLabel.setText("-");
+        referenceReglementLabel.setText("-");
+        dateDebutField.setValue(null);
+        dateFinField.setValue(null);
         nombreHeuresField.clear();
         tauxField.clear();
         irCombo.getSelectionModel().selectFirst();
-        clearAmounts();
+        montantBrutLabel.setText("0,00");
+        retenuIrLabel.setText("0,00");
+        montantNetLabel.setText("0,00");
         modePaiementLabel.setText("VIREMENT");
-        typeReferenceReglementField.clear();
-        referenceReglementField.clear();
-        datePaiementField.setText(LocalDate.now().format(dateFormatter));
+        typeReferenceReglementLabel.setText("RIB");
+        datePaiementField.setValue(null);
     }
 
     @FXML
@@ -432,12 +541,11 @@ public class AjouterPaiementController {
     private boolean validateForm() {
         StringBuilder errors = new StringBuilder();
 
-        // CIN/PPR required (but if we are in new professor mode we still need them)
-        if (cinField.getText().trim().isEmpty()) {
-            errors.append("- CIN obligatoire\n");
-        }
-        if (pprField.getText().trim().isEmpty()) {
-            errors.append("- PPR obligatoire\n");
+        // At least one of CIN or PPR required
+        String cin = cinField.getText().trim();
+        String ppr = pprField.getText().trim();
+        if (cin.isEmpty() && ppr.isEmpty()) {
+            errors.append("- CIN ou PPR obligatoire\n");
         }
 
         if (isNewProfessorMode) {
@@ -448,9 +556,9 @@ public class AjouterPaiementController {
                 errors.append("- Prénom du professeur obligatoire\n");
             }
             if (ddrPicker.getValue() == null) {
-                errors.append("- Date de naissance (DDR) obligatoire\n");
+                errors.append("- Date de recrutement (DDR) obligatoire\n");
             }
-            if (gradeField.getText().trim().isEmpty()) {
+            if (gradeField.getValue() == null) {
                 errors.append("- Grade obligatoire\n");
             }
             if (echelleField.getText().trim().isEmpty()) {
@@ -485,18 +593,21 @@ public class AjouterPaiementController {
         if (typePaiementCombo.getSelectionModel().getSelectedItem() == null) {
             errors.append("- Type de paiement obligatoire\n");
         }
-        if (objetReglementField.getText().trim().isEmpty()) {
-            errors.append("- Objet du règlement obligatoire\n");
+        if (objetReglementLabel.getText().equals("-") || objetReglementLabel.getText().isEmpty()) {
+            errors.append("- Objet du règlement non déterminé\n");
         }
-        if (!isValidDate(dateDebutField.getText())) {
+        if (referenceReglementLabel.getText().equals("-") || referenceReglementLabel.getText().isEmpty()) {
+            errors.append("- Référence du règlement non déterminé\n");
+        }
+        if (!isValidDate(dateDebutField.getValue())) {
             errors.append("- Date de début invalide (jj/mm/aaaa)\n");
         }
-        if (!isValidDate(dateFinField.getText())) {
+        if (!isValidDate(dateFinField.getValue())) {
             errors.append("- Date de fin invalide (jj/mm/aaaa)\n");
         }
-        if (isValidDate(dateDebutField.getText()) && isValidDate(dateFinField.getText())) {
-            LocalDate debut = LocalDate.parse(dateDebutField.getText(), dateFormatter);
-            LocalDate fin = LocalDate.parse(dateFinField.getText(), dateFormatter);
+        if (isValidDate(dateDebutField.getValue()) && isValidDate(dateFinField.getValue())) {
+            LocalDate debut = dateDebutField.getValue();
+            LocalDate fin = dateFinField.getValue();
             if (fin.isBefore(debut)) {
                 errors.append("- La date de fin doit être postérieure ou égale à la date de début\n");
             }
@@ -528,16 +639,8 @@ public class AjouterPaiementController {
         return true;
     }
 
-    private boolean isValidDate(String text) {
-        if (text == null || text.isEmpty()) {
-            return false;
-        }
-        try {
-            LocalDate.parse(text, dateFormatter);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+    private boolean isValidDate(LocalDate date) {
+        return date != null;
     }
 
     private void showError(String message) {
