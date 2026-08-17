@@ -1,3 +1,14 @@
 com\gestionpaiements\app\Launcher.class
+com\gestionpaiements\app\dao\UtilisateurRepository.class
 com\gestionpaiements\app\MainApp.class
+com\gestionpaiements\app\model\TypePaiement.class
+com\gestionpaiements\app\dao\ProfesseurRepository.class
+com\gestionpaiements\app\model\ConfigurationApp.class
+com\gestionpaiements\app\model\Lot.class
 com\gestionpaiements\app\controller\MainViewController.class
+com\gestionpaiements\app\dao\PaiementRepository.class
+com\gestionpaiements\app\model\Professeur.class
+com\gestionpaiements\app\model\Paiement.class
+com\gestionpaiements\app\dao\LotRepository.class
+com\gestionpaiements\app\model\StatutLot.class
+com\gestionpaiements\app\model\Utilisateur.class
