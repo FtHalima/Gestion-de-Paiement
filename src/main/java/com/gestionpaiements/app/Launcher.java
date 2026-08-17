@@ -1,14 +1,12 @@
 package com.gestionpaiements.app;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
 /**
- * Spring Boot launcher class.
+ * Simple launcher for JavaFX + Spring.
+ * Does NOT extend Application to avoid 'missing JavaFX components' error when running with spring-boot:run.
  */
-@SpringBootApplication
 public class Launcher {
     public static void main(String[] args) {
-        SpringApplication.run(Launcher.class, args);
+        // Launch JavaFX application
+        javafx.application.Application.launch(MainApp.class, args);
     }
 }

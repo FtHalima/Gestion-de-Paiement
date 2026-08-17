@@ -7,10 +7,12 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationContext;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * JavaFX main application class that initializes the Spring context.
  */
+@SpringBootApplication
 public class MainApp extends Application {
 
     private ApplicationContext applicationContext;
@@ -18,31 +20,32 @@ public class MainApp extends Application {
     @Override
     public void init() {
         // Initialize Spring context
-        String[] args = getParameters().getUnnamed().toArray(new String[0]);
         applicationContext = new SpringApplicationBuilder()
-                .sources(Launcher.class)
-                .run(args);
+                .sources(MainApp.class)
+                .run(getParameters().getRaw().toArray(new String[0]));
     }
 
     @Override
-    public void start(Stage stage) throws Exception {
-        // Use Spring's ApplicationContext as the controller factory for FXMLLoader
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MainView.fxml"));
-        loader.setControllerFactory(applicationContext::getBean);
-        Parent root = loader.load();
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setTitle("Gestion Paiements");
-        stage.show();
+    public void start(Stage stage) {
+        try {
+            // Load login.fxml using Spring's ApplicationContext as controller factory
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/gestionpaiements/app/fxml/login.fxml"));
+            loader.setControllerFactory(applicationContext::getBean);
+            Parent root = loader.load();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.setTitle("Connexion");
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void stop() {
         // Close Spring context
-        // applicationContext.close(); // Spring Boot handles this automatically
-    }
-
-    public static void main(String[] args) {
-        launch(args);
+        if (applicationContext != null) {
+            ((org.springframework.context.ConfigurableApplicationContext) applicationContext).close();
+        }
     }
 }

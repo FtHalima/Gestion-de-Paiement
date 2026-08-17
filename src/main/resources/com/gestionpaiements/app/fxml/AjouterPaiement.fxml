@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.gestionpaiements.app.controller.AjouterPaiementController"
+      alignment="TOP_LEFT"
+      spacing="10">
+    <padding>
+        <Insets top="15" right="15" bottom="15" left="15"/>
+    </padding>
+
+    <!-- Section: Recherche du professeur -->
+    <TitledPane text="Recherche du professeur">
+        <VBox spacing="8">
+            <GridPane hgap="10" vgap="8">
+                <columnConstraints>
+                    <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="120" minWidth="100" prefWidth="120"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+                <Label text="CIN :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                <TextField fx:id="cinField" promptText="CIN" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                <Label text="PPR :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <TextField fx:id="pprField" promptText="PPR" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <HBox spacing="10" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="2">
+                    <Button text="RECHERCHER" fx:id="searchButton" onAction="#searchProfessor"/>
+                    <Button text="CRÉER UN NOUVEAU PROFESSEUR" fx:id="createProfButton" visible="false" onAction="#createNewProfessor"/>
+                </HBox>
+                <Label fx:id="profNotFoundLabel" text="Professeur introuvable." textFill="#d32f2f" visible="false" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="3"/>
+            </GridPane>
+
+            <!-- Informations du professeur (affichage ou saisie) -->
+            <TitledPane text="Informations du professeur" animated="false">
+                <VBox spacing="6">
+                    <!-- Affichage lecture seule -->
+                    <VBox fx:id="profInfoDisplay">
+                        <GridPane hgap="10" vgap="4">
+                            <columnConstraints>
+                                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="100"/>
+                                <ColumnConstraints hgrow="ALWAYS"/>
+                            </columnConstraints>
+                            <Label text="Nom :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                            <Label fx:id="nomLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                            <Label text="Prénom :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                            <Label fx:id="prenomLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                            <Label text="Date de naissance (DDR) :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                            <Label fx:id="ddrLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                            <Label text="Grade :" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                            <Label fx:id="gradeLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                            <Label text="Échelle :" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                            <Label fx:id="echelleLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                            <Label text="Affectation :" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+                            <Label fx:id="affectationLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                        </GridPane>
+                    </VBox>
+
+                    <!-- Saisie pour nouveau professeur -->
+                    <VBox fx:id="profInfoEdit" visible="false">
+                        <GridPane hgap="10" vgap="4">
+                            <columnConstraints>
+                                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="100"/>
+                                <ColumnConstraints hgrow="ALWAYS"/>
+                            </columnConstraints>
+                            <Label text="Nom :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                            <TextField fx:id="nomField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                            <Label text="Prénom :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                            <TextField fx:id="prenomField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                            <Label text="Date de naissance (DDR) :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                            <DatePicker fx:id="ddrPicker" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                            <Label text="Grade :" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                            <TextField fx:id="gradeField" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                            <Label text="Échelle :" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                            <TextField fx:id="echelleField" promptText="ex: 5" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                            <Label text="Affectation :" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+                            <TextField fx:id="affectationField" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                        </GridPane>
+                    </VBox>
+                </VBox>
+            </TitledPane>
+        </VBox>
+    </TitledPane>
+
+    <!-- Section: Informations bancaires (RIB) -->
+    <TitledPane text="Informations bancaires (RIB)">
+        <GridPane hgap="10" vgap="8">
+            <columnConstraints>
+                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="120"/>
+                <ColumnConstraints hgrow="ALWAYS" maxWidth="80"/>
+                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="120"/>
+                <ColumnConstraints hgrow="ALWAYS" maxWidth="80"/>
+                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="120"/>
+                <ColumnConstraints hgrow="ALWAYS" maxWidth="120"/>
+                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="80"/>
+                <ColumnConstraints hgrow="ALWAYS" maxWidth="80"/>
+            </columnConstraints>
+            <Label text="Banque :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <TextField fx:id="banqueField" maxWidth="40" promptText="000" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+            <Label text="Ville :" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+            <TextField fx:id="villeField" maxWidth="40" promptText="000" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+            <Label text="Numéro de compte :" GridPane.columnIndex="4" GridPane.rowIndex="0"/>
+            <TextField fx:id="numeroCompteField" maxWidth="120" promptText="0000000000000000" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.rowIndex="0"/>
+            <Label text="Clé :" GridPane.columnIndex="7" GridPane.rowIndex="0"/>
+            <TextField fx:id="cleField" maxWidth="30" promptText="00" GridPane.columnIndex="8" GridPane.rowIndex="0"/>
+        </GridPane>
+    </TitledPane>
+
+    <!-- Section: Informations du règlement -->
+    <TitledPane text="Informations du règlement">
+        <GridPane hgap="10" vgap="8">
+            <columnConstraints>
+                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="120"/>
+                <ColumnConstraints hgrow="ALWAYS"/>
+                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="120"/>
+                <ColumnConstraints hgrow="ALWAYS"/>
+            </columnConstraints>
+            <Label text="Type de paiement :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <ComboBox fx:id="typePaiementCombo" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+            <Label text="Objet règlement :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <TextField fx:id="objetReglementField" promptText="Objet du règlement" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1"/>
+            <Label text="Date début (jj/mm/aaaa) :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+            <TextField fx:id="dateDebutField" promptText="jj/mm/aaaa" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            <Label text="Date fin (jj/mm/aaaa) :" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+            <TextField fx:id="dateFinField" promptText="jj/mm/aaaa" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+        </GridPane>
+    </TitledPane>
+
+    <!-- Section: Calcul du paiement -->
+    <TitledPane text="Calcul du paiement">
+        <GridPane hgap="10" vgap="8">
+            <columnConstraints>
+                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="120"/>
+                <ColumnConstraints hgrow="ALWAYS" maxWidth="150"/>
+                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="120"/>
+                <ColumnConstraints hgrow="ALWAYS" maxWidth="150"/>
+            </columnConstraints>
+            <Label text="Nombre d'heures :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <TextField fx:id="nombreHeuresField" promptText="0.0" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+            <Label text="Taux (€/h) :" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+            <TextField fx:id="tauxField" promptText="0.00" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+            <Label text="IR % :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <ComboBox fx:id="irCombo" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+            <Label text="Montant brut (€) :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+            <Label fx:id="montantBrutLabel" text="0,00 €" style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            <Label text="Retenue IR (€) :" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+            <Label fx:id="retenueIrLabel" text="0,00 €" style="-fx-font-weight: bold;" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+            <Label text="Montant net (€) :" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+            <Label fx:id="montantNetLabel" text="0,00 €" style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+        </GridPane>
+    </TitledPane>
+
+    <!-- Section: Paiement -->
+    <TitledPane text="Paiement">
+        <GridPane hgap="10" vgap="8">
+            <columnConstraints>
+                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="140"/>
+                <ColumnConstraints hgrow="ALWAYS"/>
+                <ColumnConstraints halign="RIGHT" hgrow="SEROUG" maxWidth="140"/>
+                <ColumnConstraints hgrow="ALWAYS"/>
+            </columnConstraints>
+            <Label text="Mode de paiement :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <Label fx:id="modePaiementLabel" text="VIREMENT" style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+            <Label text="Type référence règlement :" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+            <TextField fx:id="typeReferenceReglementField" promptText="Type référence" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+            <Label text="Référence règlement :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <TextField fx:id="referenceReglementField" promptText="Référence" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1"/>
+            <Label text="Date de paiement (jj/mm/aaaa) :" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+            <TextField fx:id="datePaiementField" promptText="jj/mm/aaaa" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+        </GridPane>
+    </TitledPane>
+
+    <!-- Boutons d'action -->
+    <HBox spacing="10" alignment="BOTTOM_RIGHT">
+        <Button text="ANNULER" fx:id="cancelButton" onAction="#cancelAction"/>
+        <Button text="RÉINITIALISER" fx:id="resetButton" onAction="#resetAction"/>
+        <Button text="ENREGISTRER" fx:id="saveButton" onAction="#saveAction" defaultButton="true"/>
+    </HBox>
+</VBox>

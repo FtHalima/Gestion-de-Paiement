@@ -1,0 +1,62 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------< com.gestionpaiements.app:gestion-paiements-v2 >------------
+[INFO] Building gestion-paiements-v2 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.2.5:run (default-cli) > test-compile @ gestion-paiements-v2 >>>
+[WARNING] 6 problems were encountered while building the effective model for org.openjfx:javafx-controls:jar:21 during dependency collection step for project (use -X to see details)
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gestion-paiements-v2 ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 4 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gestion-paiements-v2 ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ gestion-paiements-v2 ---
+[INFO] skip non existing resourceDirectory C:\Users\PC\gest-paiement\gestion-paiements-v2\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ gestion-paiements-v2 ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] <<< spring-boot:3.2.5:run (default-cli) < test-compile @ gestion-paiements-v2 <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.2.5:run (default-cli) @ gestion-paiements-v2 ---
+[INFO] Attaching agents: []
+août 17, 2026 2:44:18 PM com.sun.javafx.application.PlatformImpl startup
+AVERTISSEMENT: Unsupported JavaFX configuration: classes were loaded from 'unnamed module @51dfaa52'
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.5)
+
+2026-08-17T14:44:19.271+01:00  INFO 23896 --- [JavaFX-Launcher] o.s.boot.SpringApplication               : Starting application using Java 21.0.12 with PID 23896 (started by PC in C:\Users\PC\gest-paiement\gestion-paiements-v2)
+2026-08-17T14:44:19.273+01:00  INFO 23896 --- [JavaFX-Launcher] o.s.boot.SpringApplication               : No active profile set, falling back to 1 default profile: "default"
+2026-08-17T14:44:19.608+01:00  INFO 23896 --- [JavaFX-Launcher] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-17T14:44:19.659+01:00  INFO 23896 --- [JavaFX-Launcher] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 45 ms. Found 4 JPA repository interfaces.
+2026-08-17T14:44:19.868+01:00  INFO 23896 --- [JavaFX-Launcher] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-08-17T14:44:20.128+01:00  INFO 23896 --- [JavaFX-Launcher] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3e6939ff
+2026-08-17T14:44:20.129+01:00  INFO 23896 --- [JavaFX-Launcher] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-08-17T14:44:20.186+01:00  INFO 23896 --- [JavaFX-Launcher] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-17T14:44:20.220+01:00  INFO 23896 --- [JavaFX-Launcher] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-08-17T14:44:20.262+01:00  INFO 23896 --- [JavaFX-Launcher] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-17T14:44:20.442+01:00  INFO 23896 --- [JavaFX-Launcher] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-17T14:44:21.601+01:00  INFO 23896 --- [JavaFX-Launcher] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-17T14:44:21.782+01:00  INFO 23896 --- [JavaFX-Launcher] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-17T14:44:22.584+01:00  INFO 23896 --- [JavaFX-Launcher] o.s.boot.SpringApplication               : Started application in 3.71 seconds (process running for 4.386)
+2026-08-17T14:44:50.961+01:00  INFO 23896 --- [lication Thread] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-17T14:44:50.962+01:00  INFO 23896 --- [lication Thread] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-08-17T14:44:50.973+01:00  INFO 23896 --- [lication Thread] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  35.119 s
+[INFO] Finished at: 2026-08-17T14:44:51+01:00
+[INFO] ------------------------------------------------------------------------

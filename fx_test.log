@@ -26,8 +26,8 @@
 [INFO] 
 [INFO] --- spring-boot:3.2.5:run (default-cli) @ gestion-paiements-v2 ---
 [INFO] Attaching agents: []
-août 17, 2026 3:14:51 PM com.sun.javafx.application.PlatformImpl startup
-AVERTISSEMENT: Unsupported JavaFX configuration: classes were loaded from 'unnamed module @4b52a719'
+août 17, 2026 3:30:42 PM com.sun.javafx.application.PlatformImpl startup
+AVERTISSEMENT: Unsupported JavaFX configuration: classes were loaded from 'unnamed module @51dfaa52'
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -37,20 +37,20 @@ AVERTISSEMENT: Unsupported JavaFX configuration: classes were loaded from 'unnam
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::                (v3.2.5)
 
-2026-08-17T15:14:52.211+01:00  INFO 16676 --- [JavaFX-Launcher] o.s.boot.SpringApplication               : Starting application using Java 21.0.12 with PID 16676 (started by PC in C:\Users\PC\gest-paiement\gestion-paiements-v2)
-2026-08-17T15:14:52.212+01:00  INFO 16676 --- [JavaFX-Launcher] o.s.boot.SpringApplication               : No active profile set, falling back to 1 default profile: "default"
-2026-08-17T15:14:52.471+01:00  INFO 16676 --- [JavaFX-Launcher] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-08-17T15:14:52.528+01:00  INFO 16676 --- [JavaFX-Launcher] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 52 ms. Found 4 JPA repository interfaces.
-2026-08-17T15:14:52.778+01:00  INFO 16676 --- [JavaFX-Launcher] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2026-08-17T15:14:52.812+01:00  INFO 16676 --- [JavaFX-Launcher] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
-2026-08-17T15:14:52.833+01:00  INFO 16676 --- [JavaFX-Launcher] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2026-08-17T15:14:52.975+01:00  INFO 16676 --- [JavaFX-Launcher] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-08-17T15:14:52.992+01:00  INFO 16676 --- [JavaFX-Launcher] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-08-17T15:14:53.204+01:00  INFO 16676 --- [JavaFX-Launcher] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@12496f15
-2026-08-17T15:14:53.205+01:00  INFO 16676 --- [JavaFX-Launcher] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-08-17T15:14:53.902+01:00  INFO 16676 --- [JavaFX-Launcher] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-17T15:30:42.856+01:00  INFO 11196 --- [JavaFX-Launcher] o.s.boot.SpringApplication               : Starting application using Java 21.0.12 with PID 11196 (started by PC in C:\Users\PC\gest-paiement\gestion-paiements-v2)
+2026-08-17T15:30:42.857+01:00  INFO 11196 --- [JavaFX-Launcher] o.s.boot.SpringApplication               : No active profile set, falling back to 1 default profile: "default"
+2026-08-17T15:30:43.132+01:00  INFO 11196 --- [JavaFX-Launcher] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-17T15:30:43.178+01:00  INFO 11196 --- [JavaFX-Launcher] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 41 ms. Found 4 JPA repository interfaces.
+2026-08-17T15:30:43.389+01:00  INFO 11196 --- [JavaFX-Launcher] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-17T15:30:43.416+01:00  INFO 11196 --- [JavaFX-Launcher] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-08-17T15:30:43.437+01:00  INFO 11196 --- [JavaFX-Launcher] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-17T15:30:43.582+01:00  INFO 11196 --- [JavaFX-Launcher] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-17T15:30:43.596+01:00  INFO 11196 --- [JavaFX-Launcher] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-08-17T15:30:43.784+01:00  INFO 11196 --- [JavaFX-Launcher] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@6fb98c45
+2026-08-17T15:30:43.786+01:00  INFO 11196 --- [JavaFX-Launcher] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-08-17T15:30:44.440+01:00  INFO 11196 --- [JavaFX-Launcher] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
 Hibernate: alter table lot drop foreign key FKg3syleu1kcro49tef1s7hbl8y
-2026-08-17T15:14:53.928+01:00  WARN 16676 --- [JavaFX-Launcher] o.h.t.s.i.ExceptionHandlerLoggedImpl     : GenerationTarget encountered exception accepting command : Error executing DDL "alter table lot drop foreign key FKg3syleu1kcro49tef1s7hbl8y" via JDBC [Table 'gestion_paiements.lot' doesn't exist]
+2026-08-17T15:30:44.458+01:00  WARN 11196 --- [JavaFX-Launcher] o.h.t.s.i.ExceptionHandlerLoggedImpl     : GenerationTarget encountered exception accepting command : Error executing DDL "alter table lot drop foreign key FKg3syleu1kcro49tef1s7hbl8y" via JDBC [Table 'gestion_paiements.lot' doesn't exist]
 
 org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "alter table lot drop foreign key FKg3syleu1kcro49tef1s7hbl8y" via JDBC [Table 'gestion_paiements.lot' doesn't exist]
 	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:94) ~[hibernate-core-6.4.4.Final.jar:6.4.4.Final]
@@ -106,7 +106,7 @@ Caused by: java.sql.SQLSyntaxErrorException: Table 'gestion_paiements.lot' doesn
 	... 41 common frames omitted
 
 Hibernate: alter table paiement drop foreign key FKteatlywda5oeioeb5xuasvsmk
-2026-08-17T15:14:53.932+01:00  WARN 16676 --- [JavaFX-Launcher] o.h.t.s.i.ExceptionHandlerLoggedImpl     : GenerationTarget encountered exception accepting command : Error executing DDL "alter table paiement drop foreign key FKteatlywda5oeioeb5xuasvsmk" via JDBC [Table 'gestion_paiements.paiement' doesn't exist]
+2026-08-17T15:30:44.463+01:00  WARN 11196 --- [JavaFX-Launcher] o.h.t.s.i.ExceptionHandlerLoggedImpl     : GenerationTarget encountered exception accepting command : Error executing DDL "alter table paiement drop foreign key FKteatlywda5oeioeb5xuasvsmk" via JDBC [Table 'gestion_paiements.paiement' doesn't exist]
 
 org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "alter table paiement drop foreign key FKteatlywda5oeioeb5xuasvsmk" via JDBC [Table 'gestion_paiements.paiement' doesn't exist]
 	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:94) ~[hibernate-core-6.4.4.Final.jar:6.4.4.Final]
@@ -162,7 +162,7 @@ Caused by: java.sql.SQLSyntaxErrorException: Table 'gestion_paiements.paiement' 
 	... 41 common frames omitted
 
 Hibernate: alter table paiement drop foreign key FK2ireu7236co4curnveod9b2j0
-2026-08-17T15:14:53.934+01:00  WARN 16676 --- [JavaFX-Launcher] o.h.t.s.i.ExceptionHandlerLoggedImpl     : GenerationTarget encountered exception accepting command : Error executing DDL "alter table paiement drop foreign key FK2ireu7236co4curnveod9b2j0" via JDBC [Table 'gestion_paiements.paiement' doesn't exist]
+2026-08-17T15:30:44.466+01:00  WARN 11196 --- [JavaFX-Launcher] o.h.t.s.i.ExceptionHandlerLoggedImpl     : GenerationTarget encountered exception accepting command : Error executing DDL "alter table paiement drop foreign key FK2ireu7236co4curnveod9b2j0" via JDBC [Table 'gestion_paiements.paiement' doesn't exist]
 
 org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "alter table paiement drop foreign key FK2ireu7236co4curnveod9b2j0" via JDBC [Table 'gestion_paiements.paiement' doesn't exist]
 	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:94) ~[hibernate-core-6.4.4.Final.jar:6.4.4.Final]
@@ -218,7 +218,7 @@ Caused by: java.sql.SQLSyntaxErrorException: Table 'gestion_paiements.paiement' 
 	... 41 common frames omitted
 
 Hibernate: alter table paiement drop foreign key FKlgaejmjhcf6n3wnk09e0a61w3
-2026-08-17T15:14:53.936+01:00  WARN 16676 --- [JavaFX-Launcher] o.h.t.s.i.ExceptionHandlerLoggedImpl     : GenerationTarget encountered exception accepting command : Error executing DDL "alter table paiement drop foreign key FKlgaejmjhcf6n3wnk09e0a61w3" via JDBC [Table 'gestion_paiements.paiement' doesn't exist]
+2026-08-17T15:30:44.469+01:00  WARN 11196 --- [JavaFX-Launcher] o.h.t.s.i.ExceptionHandlerLoggedImpl     : GenerationTarget encountered exception accepting command : Error executing DDL "alter table paiement drop foreign key FKlgaejmjhcf6n3wnk09e0a61w3" via JDBC [Table 'gestion_paiements.paiement' doesn't exist]
 
 org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "alter table paiement drop foreign key FKlgaejmjhcf6n3wnk09e0a61w3" via JDBC [Table 'gestion_paiements.paiement' doesn't exist]
 	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:94) ~[hibernate-core-6.4.4.Final.jar:6.4.4.Final]
@@ -290,11 +290,11 @@ Hibernate: alter table lot add constraint FKg3syleu1kcro49tef1s7hbl8y foreign ke
 Hibernate: alter table paiement add constraint FKteatlywda5oeioeb5xuasvsmk foreign key (id_lot) references lot (id_lot)
 Hibernate: alter table paiement add constraint FK2ireu7236co4curnveod9b2j0 foreign key (id_professeur) references professeur (id_professeur)
 Hibernate: alter table paiement add constraint FKlgaejmjhcf6n3wnk09e0a61w3 foreign key (id_utilisateur) references utilisateur (id_utilisateur)
-2026-08-17T15:14:54.711+01:00  INFO 16676 --- [JavaFX-Launcher] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-08-17T15:14:55.664+01:00  INFO 16676 --- [JavaFX-Launcher] o.s.boot.SpringApplication               : Started application in 3.825 seconds (process running for 4.451)
+2026-08-17T15:30:45.323+01:00  INFO 11196 --- [JavaFX-Launcher] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-17T15:30:45.641+01:00  INFO 11196 --- [JavaFX-Launcher] o.s.boot.SpringApplication               : Started application in 3.138 seconds (process running for 3.697)
 Hibernate: select u1_0.id_utilisateur,u1_0.mot_de_passe,u1_0.nom_utilisateur from utilisateur u1_0 where u1_0.nom_utilisateur=?
-javafx.fxml.LoadException: Padding is not a valid type.
-/C:/Users/PC/gest-paiement/gestion-paiements-v2/target/classes/com/gestionpaiements/app/fxml/MainView.fxml:19
+javafx.fxml.LoadException: TitledPane is not a valid type.
+/C:/Users/PC/gest-paiement/gestion-paiements-v2/target/classes/com/gestionpaiements/app/fxml/AjouterPaiement.fxml:26
 
 	at javafx.fxml.FXMLLoader.constructLoadException(FXMLLoader.java:2718)
 	at javafx.fxml.FXMLLoader.createElement(FXMLLoader.java:2920)
@@ -302,9 +302,7 @@ javafx.fxml.LoadException: Padding is not a valid type.
 	at javafx.fxml.FXMLLoader.loadImpl(FXMLLoader.java:2649)
 	at javafx.fxml.FXMLLoader.loadImpl(FXMLLoader.java:2563)
 	at javafx.fxml.FXMLLoader.load(FXMLLoader.java:2531)
-	at com.gestionpaiements.app.controller.LoginController.lambda$handleLogin$0(LoginController.java:63)
-	at java.base/java.util.Optional.ifPresentOrElse(Optional.java:196)
-	at com.gestionpaiements.app.controller.LoginController.handleLogin(LoginController.java:52)
+	at com.gestionpaiements.app.controller.MainViewController.handleAddPaiement(MainViewController.java:28)
 	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
 	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
 	at com.sun.javafx.reflect.Trampoline.invoke(MethodUtil.java:72)
@@ -359,7 +357,71 @@ javafx.fxml.LoadException: Padding is not a valid type.
 	at com.sun.glass.ui.win.WinApplication._runLoop(Native Method)
 	at com.sun.glass.ui.win.WinApplication.lambda$runLoop$3(WinApplication.java:185)
 	at java.base/java.lang.Thread.run(Thread.java:1583)
-2026-08-17T15:15:15.283+01:00  INFO 16676 --- [lication Thread] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+javafx.fxml.LoadException: TitledPane is not a valid type.
+/C:/Users/PC/gest-paiement/gestion-paiements-v2/target/classes/com/gestionpaiements/app/fxml/AjouterPaiement.fxml:26
+
+	at javafx.fxml.FXMLLoader.constructLoadException(FXMLLoader.java:2718)
+	at javafx.fxml.FXMLLoader.createElement(FXMLLoader.java:2920)
+	at javafx.fxml.FXMLLoader.processStartElement(FXMLLoader.java:2850)
+	at javafx.fxml.FXMLLoader.loadImpl(FXMLLoader.java:2649)
+	at javafx.fxml.FXMLLoader.loadImpl(FXMLLoader.java:2563)
+	at javafx.fxml.FXMLLoader.load(FXMLLoader.java:2531)
+	at com.gestionpaiements.app.controller.MainViewController.handleAddPaiement(MainViewController.java:28)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at com.sun.javafx.reflect.Trampoline.invoke(MethodUtil.java:72)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at com.sun.javafx.reflect.MethodUtil.invoke(MethodUtil.java:270)
+	at com.sun.javafx.fxml.MethodHelper.invoke(MethodHelper.java:84)
+	at javafx.fxml.FXMLLoader$MethodHandler.invoke(FXMLLoader.java:1855)
+	at javafx.fxml.FXMLLoader$ControllerMethodEventHandler.handle(FXMLLoader.java:1726)
+	at com.sun.javafx.event.CompositeEventHandler.dispatchBubblingEvent(CompositeEventHandler.java:86)
+	at com.sun.javafx.event.EventHandlerManager.dispatchBubblingEvent(EventHandlerManager.java:232)
+	at com.sun.javafx.event.EventHandlerManager.dispatchBubblingEvent(EventHandlerManager.java:189)
+	at com.sun.javafx.event.CompositeEventDispatcher.dispatchBubblingEvent(CompositeEventDispatcher.java:59)
+	at com.sun.javafx.event.BasicEventDispatcher.dispatchEvent(BasicEventDispatcher.java:58)
+	at com.sun.javafx.event.EventDispatchChainImpl.dispatchEvent(EventDispatchChainImpl.java:114)
+	at com.sun.javafx.event.BasicEventDispatcher.dispatchEvent(BasicEventDispatcher.java:56)
+	at com.sun.javafx.event.EventDispatchChainImpl.dispatchEvent(EventDispatchChainImpl.java:114)
+	at com.sun.javafx.event.BasicEventDispatcher.dispatchEvent(BasicEventDispatcher.java:56)
+	at com.sun.javafx.event.EventDispatchChainImpl.dispatchEvent(EventDispatchChainImpl.java:114)
+	at com.sun.javafx.event.EventUtil.fireEventImpl(EventUtil.java:74)
+	at com.sun.javafx.event.EventUtil.fireEvent(EventUtil.java:49)
+	at javafx.event.Event.fireEvent(Event.java:198)
+	at javafx.scene.Node.fireEvent(Node.java:8875)
+	at javafx.scene.control.Button.fire(Button.java:203)
+	at com.sun.javafx.scene.control.behavior.ButtonBehavior.mouseReleased(ButtonBehavior.java:207)
+	at com.sun.javafx.scene.control.inputmap.InputMap.handle(InputMap.java:274)
+	at com.sun.javafx.event.CompositeEventHandler$NormalEventHandlerRecord.handleBubblingEvent(CompositeEventHandler.java:247)
+	at com.sun.javafx.event.CompositeEventHandler.dispatchBubblingEvent(CompositeEventHandler.java:80)
+	at com.sun.javafx.event.EventHandlerManager.dispatchBubblingEvent(EventHandlerManager.java:232)
+	at com.sun.javafx.event.EventHandlerManager.dispatchBubblingEvent(EventHandlerManager.java:189)
+	at com.sun.javafx.event.CompositeEventDispatcher.dispatchBubblingEvent(CompositeEventDispatcher.java:59)
+	at com.sun.javafx.event.BasicEventDispatcher.dispatchEvent(BasicEventDispatcher.java:58)
+	at com.sun.javafx.event.EventDispatchChainImpl.dispatchEvent(EventDispatchChainImpl.java:114)
+	at com.sun.javafx.event.BasicEventDispatcher.dispatchEvent(BasicEventDispatcher.java:56)
+	at com.sun.javafx.event.EventDispatchChainImpl.dispatchEvent(EventDispatchChainImpl.java:114)
+	at com.sun.javafx.event.BasicEventDispatcher.dispatchEvent(BasicEventDispatcher.java:56)
+	at com.sun.javafx.event.EventDispatchChainImpl.dispatchEvent(EventDispatchChainImpl.java:114)
+	at com.sun.javafx.event.EventUtil.fireEventImpl(EventUtil.java:74)
+	at com.sun.javafx.event.EventUtil.fireEvent(EventUtil.java:54)
+	at javafx.event.Event.fireEvent(Event.java:198)
+	at javafx.scene.Scene$MouseHandler.process(Scene.java:3984)
+	at javafx.scene.Scene.processMouseEvent(Scene.java:1890)
+	at javafx.scene.Scene$ScenePeerListener.mouseEvent(Scene.java:2708)
+	at com.sun.javafx.tk.quantum.GlassViewEventHandler$MouseEventNotification.run(GlassViewEventHandler.java:411)
+	at com.sun.javafx.tk.quantum.GlassViewEventHandler$MouseEventNotification.run(GlassViewEventHandler.java:301)
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+	at com.sun.javafx.tk.quantum.GlassViewEventHandler.lambda$handleMouseEvent$2(GlassViewEventHandler.java:450)
+	at com.sun.javafx.tk.quantum.QuantumToolkit.runWithoutRenderLock(QuantumToolkit.java:424)
+	at com.sun.javafx.tk.quantum.GlassViewEventHandler.handleMouseEvent(GlassViewEventHandler.java:449)
+	at com.sun.glass.ui.View.handleMouseEvent(View.java:551)
+	at com.sun.glass.ui.View.notifyMouse(View.java:937)
+	at com.sun.glass.ui.win.WinApplication._runLoop(Native Method)
+	at com.sun.glass.ui.win.WinApplication.lambda$runLoop$3(WinApplication.java:185)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-08-17T15:31:19.468+01:00  INFO 11196 --- [lication Thread] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
 Hibernate: alter table lot drop foreign key FKg3syleu1kcro49tef1s7hbl8y
 Hibernate: alter table paiement drop foreign key FKteatlywda5oeioeb5xuasvsmk
 Hibernate: alter table paiement drop foreign key FK2ireu7236co4curnveod9b2j0
@@ -369,11 +431,11 @@ Hibernate: drop table if exists lot
 Hibernate: drop table if exists paiement
 Hibernate: drop table if exists professeur
 Hibernate: drop table if exists utilisateur
-2026-08-17T15:15:15.677+01:00  INFO 16676 --- [lication Thread] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
-2026-08-17T15:15:15.696+01:00  INFO 16676 --- [lication Thread] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-08-17T15:31:19.812+01:00  INFO 11196 --- [lication Thread] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-08-17T15:31:19.820+01:00  INFO 11196 --- [lication Thread] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  26.819 s
-[INFO] Finished at: 2026-08-17T15:15:16+01:00
+[INFO] Total time:  40.053 s
+[INFO] Finished at: 2026-08-17T15:31:20+01:00
 [INFO] ------------------------------------------------------------------------

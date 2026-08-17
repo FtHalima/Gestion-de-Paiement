@@ -1,12 +1,15 @@
 package com.gestionpaiements.app.controller;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
 import org.springframework.stereotype.Component;
 
-/**
- * Controller for the main view.
- */
+import java.io.IOException;
+
 @Component
 public class MainViewController {
 
@@ -14,7 +17,21 @@ public class MainViewController {
     private Label statusLabel;
 
     @FXML
-    public void initialize() {
+    private void initialize() {
         statusLabel.setText("OK");
+    }
+
+    @FXML
+    private void handleAddPaiement() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/gestionpaiements/app/fxml/AjouterPaiement.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Ajouter un paiement");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

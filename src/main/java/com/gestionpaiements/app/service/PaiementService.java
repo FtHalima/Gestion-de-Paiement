@@ -43,8 +43,8 @@ public class PaiementService {
         montantBrut = montantBrut.setScale(2, RoundingMode.HALF_UP);
 
         // Calcul de la retenue IR : montantBrut × (tauxIr / 100)
-        BigDecimal retenueIr = montantBrut.multiply(tauxIr.divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP));
-        retenueIr = retenuIr.setScale(2, RoundingMode.HALF_UP);
+        BigDecimal retenuIr = montantBrut.multiply(tauxIr.divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP));
+        retenuIr = retenuIr.setScale(2, RoundingMode.HALF_UP);
 
         // Calcul du montant net : montantBrut - retenueIr
         BigDecimal montantNet = montantBrut.subtract(retenuIr);

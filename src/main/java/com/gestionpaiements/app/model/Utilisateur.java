@@ -8,17 +8,17 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "utilisateur", uniqueConstraints = @jakarta.persistence.UniqueConstraint(columnNames = "nomUtilisateur"))
+@Table(name = "utilisateur", uniqueConstraints = @jakarta.persistence.UniqueConstraint(columnNames = "nom_utilisateur"))
 public class Utilisateur {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idUtilisateur;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "nom_utilisateur", nullable = false, unique = true)
     private String nomUtilisateur;
 
-    @Column(nullable = false)
+    @Column(name = "mot_de_passe", nullable = false)
     private String motDePasse;
 
     // Default constructor
