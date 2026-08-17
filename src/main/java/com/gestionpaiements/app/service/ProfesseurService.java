@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -84,16 +86,34 @@ public class ProfesseurService {
         }
     }
 
+    // Map for taux and IR by grade|echelle
+    private static final Map<String, TauxIR> TAUX_IR_MAP = new HashMap<>();
+    static {
+        TAUX_IR_MAP.put("Professeur d'Enseignement Superieur|12", new TauxIR(new BigDecimal("222"), new BigDecimal("37")));
+        TAUX_IR_MAP.put("Professeur Encadrant|12", new TauxIR(new BigDecimal("222"), new BigDecimal("37")));
+        TAUX_IR_MAP.put("Professeur Qualifié|12", new TauxIR(new BigDecimal("195"), new BigDecimal("37")));
+        TAUX_IR_MAP.put("Professeur Adjoint|12", new TauxIR(new BigDecimal("156"), new BigDecimal("37")));
+        TAUX_IR_MAP.put("Inspecteur|12", new TauxIR(new BigDecimal("156"), new BigDecimal("37")));
+        TAUX_IR_MAP.put("Inspecteur|11", new TauxIR(new BigDecimal("144"), new BigDecimal("34")));
+        TAUX_IR_MAP.put("Personnel d'Enseignement|12", new TauxIR(new BigDecimal("156"), new BigDecimal("37")));
+        TAUX_IR_MAP.put("Personnel d'Enseignement|11", new TauxIR(new BigDecimal("144"), new BigDecimal("34")));
+        TAUX_IR_MAP.put("Personnel d'Enseignement|10", new TauxIR(new BigDecimal("117"), new BigDecimal("30")));
+        TAUX_IR_MAP.put("Professeur Agrégé|12", new TauxIR(new BigDecimal("327"), new BigDecimal("37")));
+        // Add more if needed
+    }
+
     /**
      * Retourne le taux et le taux d'IR associés au grade et à l'échelle du professeur.
-     * À implémenter selon la configuration officielle.
      *
      * @param grade  le grade du professeur (ex: PRIMAIRE, SUPERIEUR)
      * @param echelle l'échelle du professeur (ex: 5)
      * @return Optional contenant le taux et le taux d'IR, vide si non configuré
      */
     public Optional<TauxIR> trouverTauxEtIRParGradeEtEchelle(String grade, String echelle) {
-        // Stub : aucune configuration officielle fournie pour le moment
-        return Optional.empty();
+        if (grade == null || echelle == null) {
+            return Optional.empty();
+        }
+        String key = grade.trim() + "|" + echelle.trim();
+        return Optional.ofNullable(TAUX_IR_MAP.get(key));
     }
 }

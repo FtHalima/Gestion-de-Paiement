@@ -1,10 +1,7 @@
 package com.gestionpaiements.app.controller;
 
 import com.gestionpaiements.app.model.Professeur;
-import com.gestionpaiements.app.model.Paiement;
 import com.gestionpaiements.app.model.TypePaiement;
-import com.gestionpaiements.app.model.Utilisateur;
-import com.gestionpaiements.app.model.Lot;
 import com.gestionpaiements.app.service.ProfesseurService;
 import com.gestionpaiements.app.service.PaiementService;
 import javafx.collections.FXCollections;
@@ -16,15 +13,16 @@ import javafx.scene.layout.VBox;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
-import javafx.util.StringConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import com.gestionpaiements.app.service.LotService;
-import com.gestionpaiements.app.service.SessionUtilisateur;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Component
@@ -35,12 +33,6 @@ public class AjouterPaiementController {
 
     @Autowired
     private PaiementService paiementService;
-
-    @Autowired
-    private SessionUtilisateur sessionUtilisateur;
-
-    @Autowired
-    private LotService lotService;
 
     // Fields from FXML
     @FXML private TextField cinField;
@@ -83,7 +75,7 @@ public class AjouterPaiementController {
     @FXML private TextField tauxField; // non-editable
     @FXML private ComboBox<String> irCombo; // non-editable, holds "%" values
     @FXML private Label montantBrutLabel;
-    @FXML private Label retenueIrLabel;
+    @FXML private Label retenuIrLabel;
     @FXML private Label montantNetLabel;
     @FXML private Label modePaiementLabel;
     @FXML private Label typeReferenceReglementLabel;
@@ -101,6 +93,11 @@ public class AjouterPaiementController {
     // Formatters
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
+    // Mapping of grade -> list of echelle per occurrence (to support duplicates in ComboBox)
+    private final Map<String, List<Integer>> gradeEchelleMap = new HashMap<>();
+    // Parallel list: echelle for each index in gradeField items
+    private final List<Integer> echelleForIndex = new ArrayList<>();
+
     @FXML
     public void initialize() {
         // Populate comboboxes
@@ -110,8 +107,26 @@ public class AjouterPaiementController {
         irCombo.setEditable(false);
         tauxField.setEditable(true);
 
-        // Grade ComboBox
-        gradeField.setItems(FXCollections.observableArrayList("PRIMAIRE", "SUPERIEUR"));
+        // Grade ComboBox with duplicates as requested
+        ObservableList<String> grades = FXCollections.observableArrayList(
+                "Professeur d'Enseignement Superieur",
+                "Professeur Encadrant",
+                "Professeur Qualifié",
+                "Professeur Adjoint",
+                "Inspecteur",
+                "Personnel d'Enseignement",
+                "Professeur Agrégé");
+        gradeField.setItems(grades);
+
+        // Build echelle mapping based on occurrence
+        Map<String, Integer> occurrence = new HashMap<>();
+        for (String g : grades) {
+            occurrence.put(g, occurrence.getOrDefault(g, 0) + 1);
+            int occ = occurrence.get(g);
+            int echelle = echelleForGradeAndOccurrence(g, occ);
+            gradeEchelleMap.computeIfAbsent(g, k -> new ArrayList<>()).add(echelle);
+            echelleForIndex.add(echelle);
+        }
 
         // Set default date paiement to empty (no default date)
         datePaiementField.setValue(null);
@@ -136,8 +151,8 @@ public class AjouterPaiementController {
         pprField.setOnKeyPressed(this::handleEnterKey);
 
         // Listeners for grade and echelle to update taux and IR
-        gradeField.valueProperty().addListener((obs, oldVal, newVal) -> updateTauxEtIR());
-        echelleField.textProperty().addListener((obs, oldVal, newVal) -> updateTauxEtIR());
+        gradeField.valueProperty().addListener((obs, oldVal, newVal) -> handleGradeChange());
+        echelleField.textProperty().addListener((obs, oldVal, newVal) -> handleEchelleChange());
 
         // Listener for typePaiement to update objet and reference labels
         typePaiementCombo.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> updateObjetEtReference());
@@ -145,41 +160,6 @@ public class AjouterPaiementController {
         // Listener for date validation
         dateDebutField.valueProperty().addListener((obs, oldVal, newVal) -> validateDates());
         dateFinField.valueProperty().addListener((obs, oldVal, newVal) -> validateDates());
-
-        // Apply date format and prompt to date pickers
-        applyDateFormat(dateDebutField);
-        applyDateFormat(dateFinField);
-        applyDateFormat(ddrPicker);
-        applyDateFormat(datePaiementField);
-    }
-
-    /**
-     * Applique un format de date jj/mm/aaaa et un invite texte au DatePicker donné.
-     */
-    private void applyDateFormat(DatePicker picker) {
-        picker.setPromptText("jj/mm/aaaa");
-        StringConverter<LocalDate> converter = new StringConverter<>() {
-            private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-            @Override
-            public String toString(LocalDate date) {
-                if (date != null) {
-                    return dateFormatter.format(date);
-                } else {
-                    return "";
-                }
-            }
-
-            @Override
-            public LocalDate fromString(String string) {
-                if (string != null && !string.isEmpty()) {
-                    return LocalDate.parse(string, dateFormatter);
-                } else {
-                    return null;
-                }
-            }
-        };
-        picker.setConverter(converter);
     }
 
     private void handleEnterKey(KeyEvent event) {
@@ -347,23 +327,41 @@ public class AjouterPaiementController {
         }
     }
 
-    // Update taux and IR based on grade and echelle via service
-    private void updateTauxEtIR() {
+    // Grade change -> set echelle based on occurrence and compute taux/IR
+    private void handleGradeChange() {
         String grade = gradeField.getValue();
-        String echelleStr = echelleField.getText().trim();
-        if (grade == null || grade.isEmpty() || echelleStr.isEmpty()) {
-            // Clear fields
+        if (grade == null || grade.isEmpty()) {
+            echelleField.clear();
             tauxField.clear();
             irCombo.getSelectionModel().clearSelection();
             return;
         }
+        int idx = gradeField.getSelectionModel().getSelectedIndex();
+        Integer echelle = echelleForIndex.get(idx);
+        echelleField.setText(String.valueOf(echelle));
+        computeTauxEtIR(grade, String.valueOf(echelle));
+    }
+
+    // Echelle change -> compute taux/IR based on current echelle (do not override echelleField)
+    private void handleEchelleChange() {
+        String grade = gradeField.getValue();
+        String echelleStr = echelleField.getText().trim();
+        if (grade == null || grade.isEmpty() || echelleStr.isEmpty()) {
+            tauxField.clear();
+            irCombo.getSelectionModel().clearSelection();
+            return;
+        }
+        computeTauxEtIR(grade, echelleStr);
+    }
+
+    // Compute taux and IR based on grade and echelle via service
+    private void computeTauxEtIR(String grade, String echelleStr) {
         Optional<ProfesseurService.TauxIR> opt = professeurService.trouverTauxEtIRParGradeEtEchelle(grade, echelleStr);
         if (opt.isPresent()) {
             ProfesseurService.TauxIR tirs = opt.get();
             tauxField.setText(tirs.getTaux().stripTrailingZeros().toPlainString());
             irCombo.getSelectionModel().select(tirs.getTauxIr().stripTrailingZeros().toPlainString());
         } else {
-            // No configuration available -> clear fields and maybe show placeholder
             tauxField.clear();
             irCombo.getSelectionModel().clearSelection();
         }
@@ -381,8 +379,8 @@ public class AjouterPaiementController {
         }
         switch (type) {
             case VACATAIRE:
-                objetReglementLabel.setText("VACATAIRE");
-                referenceReglementLabel.setText("VACATAIRE");
+                objetReglementLabel.setText("VACATION");
+                referenceReglementLabel.setText("VACATION");
                 break;
             case HEURE_SUP:
                 objetReglementLabel.setText("HEURE SUPPLÉMENTAIRE");
@@ -417,7 +415,7 @@ public class AjouterPaiementController {
 
         PaiementService.TauxIRResult result = paiementService.calculerMontants(type, nombreHeures, taux, tauxIr);
         montantBrutLabel.setText(formatBigDecimal(result.getMontantBrut()));
-        retenueIrLabel.setText(formatBigDecimal(result.getRetenueIr()));
+        retenuIrLabel.setText(formatBigDecimal(result.getRetenueIr()));
         montantNetLabel.setText(formatBigDecimal(result.getMontantNet()));
     }
 
@@ -440,98 +438,60 @@ public class AjouterPaiementController {
         return bd.stripTrailingZeros().toPlainString().replace(".", ",");
     }
 
-    // Enregistrement du paiement
+    // Validation and save
     @FXML
     private void saveAction() {
         if (!validateForm()) {
             return;
         }
-
-        try {
-            String cin = cinField.getText().trim();
-            String ppr = pprField.getText().trim();
-
-            // Préparer l'objet Professeur (à créer ou à récupérer)
-            Professeur prof = new Professeur();
-            prof.setCin(cin);
-            prof.setPpr(ppr);
-
-            if (isNewProfessorMode) {
-                // Création d'un nouveau professeur : remplir tous les champs
-                prof.setNom(nomField.getText().trim());
-                prof.setPrenom(prenomField.getText().trim());
-                prof.setDdr(ddrPicker.getValue());
-                prof.setGrade(gradeField.getValue());
-                String echelleStr = echelleField.getText().trim();
-                prof.setEchelle(echelleStr.isEmpty() ? null : Integer.parseInt(echelleStr));
-                prof.setAffectation(affectationField.getText().trim());
-                prof.setRibBanque(banqueField.getText());
-                prof.setRibVille(villeField.getText());
-                prof.setRibNumeroCompte(numeroCompteField.getText());
-                prof.setRibCle(cleField.getText());
-            }
-            // Si le professeur existe déjà, seuls CIN et PPR sont nécessaires pour la recherche
-
-            // Informations de paiement
-            TypePaiement typePaiement = typePaiementCombo.getSelectionModel().getSelectedItem();
-            String objetReglement = objetReglementLabel.getText();
-            String referenceReglement = referenceReglementLabel.getText();
-            LocalDate dateDebut = dateDebutField.getValue();
-            LocalDate dateFin = dateFinField.getValue();
-
-            BigDecimal nombreHeures = parseBigDecimal(nombreHeuresField.getText());
-            BigDecimal taux = parseBigDecimal(tauxField.getText());
-            BigDecimal tauxIr = new BigDecimal(irCombo.getSelectionModel().getSelectedItem()); // toujours sélectionné
-
-            // Calcul des montants
-            PaiementService.TauxIRResult result = paiementService.calculerMontants(typePaiement, nombreHeures, taux, tauxIr);
-
-            // Création du objet Paiement
-            Paiement paiement = new Paiement();
-            paiement.setProfesseur(prof); // sera éventuellement remplacé par le service
-            paiement.setTypePaiement(typePaiement);
-            paiement.setObjetReglement(objetReglement);
-            paiement.setDateDebut(dateDebut);
-            paiement.setDateFin(dateFin);
-            paiement.setNombreHeures(nombreHeures);
-            paiement.setTaux(taux);
-            paiement.setTauxIr(tauxIr);
-            paiement.setMontantBrut(result.getMontantBrut());
-            paiement.setRetenueIr(result.getRetenueIr());
-            paiement.setMontantNet(result.getMontantNet());
-            paiement.setModePaiement("VIREMENT");
-            paiement.setTypeReferenceReglement("RIB");
-            paiement.setReferenceReglement(referenceReglement);
-            paiement.setDatePaiement(datePaiementField.getValue()); // peut être null
-            // Utilisateur connecté
-            Utilisateur utilisateur = sessionUtilisateur.getUtilisateurConnecte();
-            paiement.setUtilisateur(utilisateur);
-            // Lot actif (existant ou créé)
-            Lot actifLot = lotService.getOuCreerLotActif(utilisateur);
-            paiement.setLot(actifLot);
-
-            // Enregistrement (transactionnel)
-            Paiement saved = paiementService.enregistrerPaiement(paiement);
-
-            // Confirmation
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Enregistrement réussi");
-            alert.setHeaderText(null);
-            alert.setContentText("Paiement enregistré avec succès (ID : " + saved.getIdPaiement() + ").");
-            alert.showAndWait();
-
-            // Réinitialiser le formulaire pour un nouveau paiement
-            resetAction();
-        } catch (Exception ex) {
-            // Gestion d'erreur générique (les détails peuvent être loggés)
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Erreur d'enregistrement");
-            alert.setHeaderText(null);
-            alert.setContentText("Une erreur est survenue lors de l'enregistrement : " + ex.getMessage());
-            alert.showAndWait();
-            // Log détaillé (optionnel)
-            ex.printStackTrace();
+        // Build summary message
+        StringBuilder summary = new StringBuilder("Récapitulatif du paiement :\n\n");
+        if (currentProfesseur != null && !isNewProfessorMode) {
+            summary.append("Professeur trouvé :\n")
+                    .append("CIN: ").append(currentProfesseur.getCin()).append("\n")
+                    .append("PPR: ").append(currentProfesseur.getPpr()).append("\n")
+                    .append("Nom: ").append(currentProfesseur.getNom()).append("\n")
+                    .append("Prénom: ").append(currentProfesseur.getPrenom()).append("\n\n");
+        } else if (isNewProfessorMode) {
+            summary.append("Nouveau professeur à créer :\n")
+                    .append("CIN: ").append(cinField.getText().trim()).append("\n")
+                    .append("PPR: ").append(pprField.getText().trim()).append("\n")
+                    .append("Nom: ").append(nomField.getText().trim()).append("\n")
+                    .append("Prénom: ").append(prenomField.getText().trim()).append("\n")
+                    .append("DDR: ").append(ddrPicker.getValue() != null ? ddrPicker.getValue().format(dateFormatter) : "-").append("\n")
+                    .append("Grade: ").append(gradeField.getValue() != null ? gradeField.getValue() : "-").append("\n")
+                    .append("Échelle: ").append(echelleField.getText().trim()).append("\n")
+                    .append("Affectation: ").append(affectationField.getText().trim()).append("\n\n");
         }
+
+        summary.append("RIB: ")
+                .append(banqueField.getText()).append(" ")
+                .append(villeField.getText()).append(" ")
+                .append(numeroCompteField.getText()).append(" ")
+                .append(cleField.getText()).append("\n\n");
+
+        summary.append("Type de paiement: ").append(typePaiementCombo.getSelectionModel().getSelectedItem()).append("\n")
+                .append("Objet règlement: ").append(objetReglementLabel.getText()).append("\n")
+                .append("Référence règlement: ").append(referenceReglementLabel.getText()).append("\n")
+                .append("Type référence règlement: ").append(typeReferenceReglementLabel.getText()).append("\n")
+                .append("Date début: ").append(dateDebutField.getValue() != null ? dateDebutField.getValue().format(dateFormatter) : "-").append("\n")
+                .append("Date fin: ").append(dateFinField.getValue() != null ? dateFinField.getValue().format(dateFormatter) : "-").append("\n\n");
+
+        summary.append("Nombre d'heures: ").append(nombreHeuresField.getText().trim()).append("\n")
+                .append("Taux: ").append(tauxField.getText().trim()).append("\n")
+                .append("IR %: ").append(irCombo.getSelectionModel().getSelectedItem()).append("\n")
+                .append("Montant brut: ").append(montantBrutLabel.getText()).append("\n")
+                .append("Retenue IR: ").append(retenuIrLabel.getText()).append("\n")
+                .append("Montant net: ").append(montantNetLabel.getText()).append("\n\n");
+
+        summary.append("Mode de paiement: ").append(modePaiementLabel.getText()).append("\n")
+                .append("Date paiement: ").append(datePaiementField.getValue() != null ? datePaiementField.getValue().format(dateFormatter) : "-");
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Récapitulatif paiement");
+        alert.setHeaderText(null);
+        alert.setContentText(summary.toString());
+        alert.showAndWait();
     }
 
     @FXML
@@ -571,9 +531,9 @@ public class AjouterPaiementController {
         nombreHeuresField.clear();
         tauxField.clear();
         irCombo.getSelectionModel().selectFirst();
-        montantBrutLabel.setText("0,00");
-        retenueIrLabel.setText("0,00");
-        montantNetLabel.setText("0,00");
+        montantBrutLabel.setText("0,00 ");
+        retenuIrLabel.setText("0,00 ");
+        montantNetLabel.setText("0,00 ");
         modePaiementLabel.setText("VIREMENT");
         typeReferenceReglementLabel.setText("RIB");
         datePaiementField.setValue(null);
@@ -590,19 +550,15 @@ public class AjouterPaiementController {
     private boolean validateForm() {
         StringBuilder errors = new StringBuilder();
 
-        String cin = cinField.getText().trim();
-        String ppr = pprField.getText().trim();
-
-        // CIN et PPR obligatoires
-        if (cin.isEmpty()) {
+        // CIN/PPR required (but if we are in new professor mode we still need them)
+        if (cinField.getText().trim().isEmpty()) {
             errors.append("- CIN obligatoire\n");
         }
-        if (ppr.isEmpty()) {
+        if (pprField.getText().trim().isEmpty()) {
             errors.append("- PPR obligatoire\n");
         }
 
         if (isNewProfessorMode) {
-            // Champs obligatoires pour création de nouveau professeur
             if (nomField.getText().trim().isEmpty()) {
                 errors.append("- Nom du professeur obligatoire\n");
             }
@@ -610,7 +566,7 @@ public class AjouterPaiementController {
                 errors.append("- Prénom du professeur obligatoire\n");
             }
             if (ddrPicker.getValue() == null) {
-                errors.append("- Date de recrutement (DDR) obligatoire\n");
+                errors.append("- Date de naissance (DDR) obligatoire\n");
             }
             if (gradeField.getValue() == null) {
                 errors.append("- Grade obligatoire\n");
@@ -629,7 +585,7 @@ public class AjouterPaiementController {
             }
         }
 
-        // Validation du RIB (toujours obligatoire)
+        // RIB length validation
         if (!banqueField.getText().matches("\\d{3}")) {
             errors.append("- Banque doit contenir exactement 3 chiffres\n");
         }
@@ -643,7 +599,7 @@ public class AjouterPaiementController {
             errors.append("- Clé doit contenir exactement 2 chiffres\n");
         }
 
-        // Informations de paiement
+        // Paiement info
         if (typePaiementCombo.getSelectionModel().getSelectedItem() == null) {
             errors.append("- Type de paiement obligatoire\n");
         }
@@ -703,5 +659,32 @@ public class AjouterPaiementController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    /**
+     * Returns the echelle for a given grade and occurrence number (1-based).
+     * Occurrence corresponds to the position of the duplicate in the ComboBox list.
+     */
+    private int echelleForGradeAndOccurrence(String grade, int occurrence) {
+        switch (grade) {
+            case "Professeur d'Enseignement Superieur":
+                return 12;
+            case "Professeur Encadrant":
+                return 12;
+            case "Professeur Qualifié":
+                return 12;
+            case "Professeur Adjoint":
+                return 12;
+            case "Inspecteur":
+                return occurrence == 1 ? 12 : 11;
+            case "Personnel d'Enseignement":
+                if (occurrence == 1) return 12;
+                if (occurrence == 2) return 11;
+                return 10; // occurrence == 3
+            case "Professeur Agrégé":
+                return 12;
+            default:
+                return 12; // fallback
+        }
     }
 }

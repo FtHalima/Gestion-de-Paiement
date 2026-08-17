@@ -19,7 +19,6 @@ com\gestionpaiements\app\service\LotService.class
 com\gestionpaiements\app\service\UtilisateurService.class
 com\gestionpaiements\app\model\Professeur.class
 com\gestionpaiements\app\model\Paiement.class
-com\gestionpaiements\app\controller\AjouterPaiementController$2.class
 com\gestionpaiements\app\dao\LotRepository.class
 com\gestionpaiements\app\model\StatutLot.class
 com\gestionpaiements\app\model\Utilisateur.class
