@@ -19,6 +19,7 @@ public class Paiement {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_paiement")
     private Long idPaiement;
 
     @ManyToOne
@@ -49,7 +50,7 @@ public class Paiement {
     @Column(name = "nombre_heures", precision = 10, scale = 2)
     private BigDecimal nombreHeures;
 
-    @Column(precision = 10, scale = 2)
+    @Column(name = "taux", precision = 10, scale = 2)
     private BigDecimal taux;
 
     @Column(name = "taux_ir", precision = 10, scale = 2)

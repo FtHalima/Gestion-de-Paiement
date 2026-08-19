@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 @Table(name = "professeur", uniqueConstraints = {
@@ -37,9 +38,13 @@ public class Professeur {
     private String grade;
     private Integer echelle;
     private String affectation;
+    @Column(name = "rib_banque")
     private String ribBanque;
+    @Column(name = "rib_ville")
     private String ribVille;
+    @Column(name = "rib_numero_compte")
     private String ribNumeroCompte;
+    @Column(name = "rib_cle")
     private String ribCle;
 
     // Default constructor
@@ -167,5 +172,18 @@ public class Professeur {
 
     public void setRibCle(String ribCle) {
         this.ribCle = ribCle;
+    }
+
+    /**
+     * Returns the full RIB as concatenation of its parts:
+     * ribBanque + ribVille + ribNumeroCompte + ribCle
+     * Null parts are treated as empty strings.
+     */
+    public String getRibComplet() {
+        String ribBanque = (this.ribBanque != null) ? this.ribBanque : "";
+        String ribVille = (this.ribVille != null) ? this.ribVille : "";
+        String ribNumeroCompte = (this.ribNumeroCompte != null) ? this.ribNumeroCompte : "";
+        String ribCle = (this.ribCle != null) ? this.ribCle : "";
+        return ribBanque + ribVille + ribNumeroCompte + ribCle;
     }
 }

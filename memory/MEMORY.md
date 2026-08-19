@@ -1,0 +1,1 @@
+- [Save persistence and delete professor](save-persistence-and-delete-professor.md) — Implemented save persistence and delete professor functionality in AjouterPaiementController

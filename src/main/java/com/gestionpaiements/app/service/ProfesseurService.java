@@ -1,12 +1,16 @@
 package com.gestionpaiements.app.service;
 
 import com.gestionpaiements.app.dao.ProfesseurRepository;
+import com.gestionpaiements.app.dao.PaiementRepository;
 import com.gestionpaiements.app.model.Professeur;
+import com.gestionpaiements.app.model.Paiement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -14,10 +18,12 @@ import java.util.Optional;
 public class ProfesseurService {
 
     private final ProfesseurRepository professeurRepository;
+    private final PaiementRepository paiementRepository;
 
     @Autowired
-    public ProfesseurService(ProfesseurRepository professeurRepository) {
+    public ProfesseurService(ProfesseurRepository professeurRepository, PaiementRepository paiementRepository) {
         this.professeurRepository = professeurRepository;
+        this.paiementRepository = paiementRepository;
     }
 
     /**
@@ -49,20 +55,24 @@ public class ProfesseurService {
     }
 
     /**
-     * Crée un nouveau professeur si son id est null, sinon retourne l'existant.
+     * Sauvegarde le professeur (insert si id null, update sinon).
+     *
+     * @param professeur le professeur à sauvegarder
+     * @return le professeur sauvegardé
+     */
+    public Professeur sauver(Professeur professeur) {
+        return professeurRepository.save(professeur);
+    }
+
+    /**
+     * Crée un nouveau professeur si son id est null, sinon retourne l'existant après sauvegarde des éventuelles modifications.
      *
      * @param professeur le professeur à créer ou récupérer
-     * @return le professeur sauvegardé ou déjà existant
+     * @return le professeur sauvegardé ou déjà existant (avec mises à jour appliquées)
      */
     public Professeur creerOuRecuperer(Professeur professeur) {
-        if (professeur.getIdProfesseur() == null) {
-            // Nouveau professeur : on le sauvegarde
-            return professeurRepository.save(professeur);
-        } else {
-            // Professeur existant : on le retourne tel quel (on pourrait aussi le recharger)
-            return professeurRepository.findById(professeur.getIdProfesseur())
-                    .orElseGet(() -> professeurRepository.save(professeur));
-        }
+        // Toujours sauvegarder : insert si id null, update sinon
+        return professeurRepository.save(professeur);
     }
 
     /**
@@ -115,5 +125,24 @@ public class ProfesseurService {
         }
         String key = grade.trim() + "|" + echelle.trim();
         return Optional.ofNullable(TAUX_IR_MAP.get(key));
+    }
+
+    public void supprimerProfesseur(Long id) {
+        professeurRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void supprimerProfesseurAvecPaiements(Long id) {
+        // Retrieve professor
+        Professeur professeur = professeurRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Professeur not found with id: " + id));
+        // Retrieve associated payments
+        List<Paiement> paiements = paiementRepository.findByProfesseur(professeur);
+        // Delete payments
+        if (!paiements.isEmpty()) {
+            paiementRepository.deleteAll(paiements);
+        }
+        // Delete professor
+        professeurRepository.deleteById(id);
     }
 }

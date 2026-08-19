@@ -190,8 +190,9 @@ public class PaiementService {
      * @param type le type de paiement
      * @return liste des paiements de ce type
      */
+    @Transactional(readOnly = true)
     public List<Paiement> listerParType(TypePaiement type) {
-        return paiementRepository.findByTypePaiement(type);
+        return paiementRepository.findByTypePaiementWithProfesseur(type);
     }
 
     /**

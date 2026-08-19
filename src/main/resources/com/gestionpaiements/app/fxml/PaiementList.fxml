@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.gestionpaiements.app.controller.PaiementListController">
+   <top>
+      <HBox spacing="10" alignment="CENTER_LEFT">
+         <Label text="Recherche (CIN, PPR, Nom, Prénom):"/>
+         <TextField fx:id="searchField" promptText="Entrer terme de recherche" prefWidth="200"/>
+         <Button text="Actualiser" fx:id="refreshButton" onAction="#handleRefresh"/>
+         <padding>
+            <Insets top="10" right="10" bottom="10" left="10"/>
+         </padding>
+      </HBox>
+   </top>
+   <center>
+      <StackPane>
+         <TableView fx:id="paiementTable">
+            <columns>
+               <TableColumn text="CIN" fx:id="colCin" prefWidth="80"/>
+               <TableColumn text="PPR" fx:id="colPpr" prefWidth="80"/>
+               <TableColumn text="Nom" fx:id="colNom" prefWidth="120"/>
+               <TableColumn text="Prénom" fx:id="colPrenom" prefWidth="120"/>
+               <TableColumn text="Grade" fx:id="colGrade" prefWidth="120"/>
+               <TableColumn text="Échelle" fx:id="colEchelle" prefWidth="60"/>
+               <TableColumn text="RIB" fx:id="colRib" prefWidth="150"/>
+               <TableColumn text="Objet règlement" fx:id="colObjetReglement" prefWidth="120"/>
+               <TableColumn text="Date début" fx:id="colDateDebut" prefWidth="90"/>
+               <TableColumn text="Date fin" fx:id="colDateFin" prefWidth="90"/>
+               <TableColumn text="Nb heures" fx:id="colNombreHeures" prefWidth="80"/>
+               <TableColumn text="Taux" fx:id="colTaux" prefWidth="80"/>
+               <TableColumn text="IR (%)" fx:id="colIr" prefWidth="60"/>
+               <TableColumn text="Montant brut" fx:id="colMontantBrut" prefWidth="100"/>
+               <TableColumn text="Retenue IR" fx:id="colRetenueIr" prefWidth="100"/>
+               <TableColumn text="Montant net" fx:id="colMontantNet" prefWidth="100"/>
+               <TableColumn text="Type référence" fx:id="colTypeReference" prefWidth="100"/>
+               <TableColumn text="Référence" fx:id="colReference" prefWidth="100"/>
+               <TableColumn text="Date paiement" fx:id="colDatePaiement" prefWidth="100"/>
+            </columns>
+         </TableView>
+         <Label fx:id="emptyLabel" text="Aucun paiement enregistré pour ce type." style="-fx-font-size: 14px; -fx-text-fill: gray;" visible="false" />
+      </StackPane>
+   </center>
+   <bottom>
+      <Button text="Retour" fx:id="retourButton" onAction="#handleRetour" alignment="BASELINE_RIGHT">
+         <padding>
+            <Insets top="10" right="10" bottom="10" left="10"/>
+         </padding>
+      </Button>
+   </bottom>
+   <padding>
+      <Insets top="10" right="10" bottom="10" left="10"/>
+   </padding>
+</BorderPane>

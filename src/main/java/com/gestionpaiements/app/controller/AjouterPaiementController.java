@@ -2,6 +2,7 @@ package com.gestionpaiements.app.controller;
 
 import com.gestionpaiements.app.model.Professeur;
 import com.gestionpaiements.app.model.TypePaiement;
+import com.gestionpaiements.app.model.Paiement;
 import com.gestionpaiements.app.service.ProfesseurService;
 import com.gestionpaiements.app.service.PaiementService;
 import javafx.collections.FXCollections;
@@ -9,6 +10,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.layout.VBox;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -48,6 +50,8 @@ public class AjouterPaiementController {
     @FXML private Label gradeLabel;
     @FXML private Label echelleLabel;
     @FXML private Label affectationLabel;
+    @FXML private Label ribCompletLabel;
+    @FXML private Button deleteProfButton;
     @FXML private VBox profInfoDisplay;
 
     // Edit fields (for new professor)
@@ -178,9 +182,16 @@ public class AjouterPaiementController {
             return;
         }
 
+        System.out.println("RECHERCHE PROFESSEUR : cin='" + cin + "', ppr='" + ppr + "'");
         Optional<Professeur> opt = professeurService.rechercherParCinOuPpr(cin, ppr);
         if (opt.isPresent()) {
             currentProfesseur = opt.get();
+            System.out.println("PROFESSEUR TROUVÉ : id=" + currentProfesseur.getIdProfesseur()
+                    + ", ribBanque=" + currentProfesseur.getRibBanque()
+                    + ", ribVille=" + currentProfesseur.getRibVille()
+                    + ", ribNumeroCompte=" + currentProfesseur.getRibNumeroCompte()
+                    + ", ribCle=" + currentProfesseur.getRibCle()
+                    + ", ribComplet=" + currentProfesseur.getRibComplet());
             isNewProfessorMode = false;
             showProfesseurInfo(currentProfesseur);
             hideProfessorNotFound();
@@ -193,6 +204,7 @@ public class AjouterPaiementController {
             hideProfessorEdit();
             showProfessorNotFound();
             // Pre-fill CIN and PPR already in fields; ready for creation
+            System.out.println("PROFESSEUR NON TROUVÉ");
         }
     }
 
@@ -221,6 +233,7 @@ public class AjouterPaiementController {
         gradeLabel.setText(prof.getGrade());
         echelleLabel.setText(prof.getEchelle() != null ? prof.getEchelle().toString() : "-");
         affectationLabel.setText(prof.getAffectation());
+        ribCompletLabel.setText(prof.getRibComplet());
     }
 
     private void showProfessorDisplay() {
@@ -438,60 +451,113 @@ public class AjouterPaiementController {
         return bd.stripTrailingZeros().toPlainString().replace(".", ",");
     }
 
-    // Validation and save
     @FXML
     private void saveAction() {
         if (!validateForm()) {
             return;
         }
-        // Build summary message
-        StringBuilder summary = new StringBuilder("Récapitulatif du paiement :\n\n");
+
+        // Prepare professeur
+        Professeur professeurToSave;
         if (currentProfesseur != null && !isNewProfessorMode) {
-            summary.append("Professeur trouvé :\n")
-                    .append("CIN: ").append(currentProfesseur.getCin()).append("\n")
-                    .append("PPR: ").append(currentProfesseur.getPpr()).append("\n")
-                    .append("Nom: ").append(currentProfesseur.getNom()).append("\n")
-                    .append("Prénom: ").append(currentProfesseur.getPrenom()).append("\n\n");
-        } else if (isNewProfessorMode) {
-            summary.append("Nouveau professeur à créer :\n")
-                    .append("CIN: ").append(cinField.getText().trim()).append("\n")
-                    .append("PPR: ").append(pprField.getText().trim()).append("\n")
-                    .append("Nom: ").append(nomField.getText().trim()).append("\n")
-                    .append("Prénom: ").append(prenomField.getText().trim()).append("\n")
-                    .append("DDR: ").append(ddrPicker.getValue() != null ? ddrPicker.getValue().format(dateFormatter) : "-").append("\n")
-                    .append("Grade: ").append(gradeField.getValue() != null ? gradeField.getValue() : "-").append("\n")
-                    .append("Échelle: ").append(echelleField.getText().trim()).append("\n")
-                    .append("Affectation: ").append(affectationField.getText().trim()).append("\n\n");
+            professeurToSave = currentProfesseur;
+            // No field updates needed for existing professor in this UI
+        } else {
+            professeurToSave = new Professeur();
+            professeurToSave.setCin(cinField.getText().trim());
+            professeurToSave.setPpr(pprField.getText().trim());
+            professeurToSave.setNom(nomField.getText().trim());
+            professeurToSave.setPrenom(prenomField.getText().trim());
+            professeurToSave.setDdr(ddrPicker.getValue());
+            professeurToSave.setGrade(gradeField.getValue());
+            professeurToSave.setEchelle(echelleField.getText().trim().isEmpty() ? null : Integer.valueOf(echelleField.getText().trim()));
+            professeurToSave.setAffectation(affectationField.getText().trim());
+            // Set RIB fields from the form
+            professeurToSave.setRibBanque(banqueField.getText());
+            professeurToSave.setRibVille(villeField.getText());
+            professeurToSave.setRibNumeroCompte(numeroCompteField.getText());
+            professeurToSave.setRibCle(cleField.getText());
         }
 
-        summary.append("RIB: ")
-                .append(banqueField.getText()).append(" ")
-                .append(villeField.getText()).append(" ")
-                .append(numeroCompteField.getText()).append(" ")
-                .append(cleField.getText()).append("\n\n");
+        // Log RIB before saving professor
+        System.out.println("AVANT ENREGISTREMENT PROFESSEUR : ribBanque=" + professeurToSave.getRibBanque()
+                + ", ribVille=" + professeurToSave.getRibVille()
+                + ", ribNumeroCompte=" + professeurToSave.getRibNumeroCompte()
+                + ", ribCle=" + professeurToSave.getRibCle());
 
-        summary.append("Type de paiement: ").append(typePaiementCombo.getSelectionModel().getSelectedItem()).append("\n")
-                .append("Objet règlement: ").append(objetReglementLabel.getText()).append("\n")
-                .append("Référence règlement: ").append(referenceReglementLabel.getText()).append("\n")
-                .append("Type référence règlement: ").append(typeReferenceReglementLabel.getText()).append("\n")
-                .append("Date début: ").append(dateDebutField.getValue() != null ? dateDebutField.getValue().format(dateFormatter) : "-").append("\n")
-                .append("Date fin: ").append(dateFinField.getValue() != null ? dateFinField.getValue().format(dateFormatter) : "-").append("\n\n");
+        // Save professor (insert if new, update if existing)
+        Professeur savedProf = professeurService.sauver(professeurToSave);
 
-        summary.append("Nombre d'heures: ").append(nombreHeuresField.getText().trim()).append("\n")
-                .append("Taux: ").append(tauxField.getText().trim()).append("\n")
-                .append("IR %: ").append(irCombo.getSelectionModel().getSelectedItem()).append("\n")
-                .append("Montant brut: ").append(montantBrutLabel.getText()).append("\n")
-                .append("Retenue IR: ").append(retenuIrLabel.getText()).append("\n")
-                .append("Montant net: ").append(montantNetLabel.getText()).append("\n\n");
+        // Log after saving professor
+        System.out.println("APRÈS ENREGISTREMENT PROFESSEUR : idProfesseur=" + savedProf.getIdProfesseur()
+                + ", ribBanque=" + savedProf.getRibBanque()
+                + ", ribVille=" + savedProf.getRibVille()
+                + ", ribNumeroCompte=" + savedProf.getRibNumeroCompte()
+                + ", ribCle=" + savedProf.getRibCle());
 
-        summary.append("Mode de paiement: ").append(modePaiementLabel.getText()).append("\n")
-                .append("Date paiement: ").append(datePaiementField.getValue() != null ? datePaiementField.getValue().format(dateFormatter) : "-");
+        // Create paiement with saved professor
+        Paiement paiement = new Paiement();
+        paiement.setProfesseur(savedProf);
+        paiement.setTypePaiement(typePaiementCombo.getSelectionModel().getSelectedItem());
+        // Objet et référence règlement : convert "-" to null for cleaner DB
+        String objetReglement = objetReglementLabel.getText();
+        paiement.setObjetReglement("-".equals(objetReglement) || objetReglement.isEmpty() ? null : objetReglement);
+        String referenceReglement = referenceReglementLabel.getText();
+        paiement.setReferenceReglement("-".equals(referenceReglement) || referenceReglement.isEmpty() ? null : referenceReglement);
+        paiement.setDateDebut(dateDebutField.getValue());
+        paiement.setDateFin(dateFinField.getValue());
+        paiement.setNombreHeures(parseBigDecimal(nombreHeuresField.getText()));
+        paiement.setTaux(parseBigDecimal(tauxField.getText()));
+        paiement.setTauxIr(parseBigDecimal(irCombo.getSelectionModel().getSelectedItem()));
+        paiement.setModePaiement(modePaiementLabel.getText());
+        paiement.setTypeReferenceReglement(typeReferenceReglementLabel.getText());
+        paiement.setDatePaiement(datePaiementField.getValue());
 
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Récapitulatif paiement");
-        alert.setHeaderText(null);
-        alert.setContentText(summary.toString());
-        alert.showAndWait();
+        // Save via service (this will persist paiement and compute amounts)
+        Paiement savedPaiement = paiementService.enregistrerPaiement(paiement);
+
+        // Optional: log final paiement ID
+        System.out.println("PAIEMENT ENREGISTRÉ : idPaiement=" + savedPaiement.getIdPaiement());
+
+        // Show success
+        Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+        successAlert.setTitle("Paiement enregistré");
+        successAlert.setHeaderText(null);
+        successAlert.setContentText("Paiement enregistré avec succès. ID: " + savedPaiement.getIdPaiement());
+        successAlert.showAndWait();
+
+        // Optionally reset form
+        resetAction();
+    }
+
+    @FXML
+    private void handleDeleteProf() {
+        if (currentProfesseur != null && !isNewProfessorMode) {
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("Confirmation de suppression");
+            confirm.setHeaderText("Supprimer le professeur ?");
+            confirm.setContentText("Voulez-vous vraiment supprimer le professeur " + currentProfesseur.getNom() + " " + currentProfesseur.getPrenom() + " ?");
+            ButtonType ok = new ButtonType("OUI");
+            ButtonType cancel = new ButtonType("NON", ButtonBar.ButtonData.CANCEL_CLOSE);
+            confirm.getButtonTypes().setAll(ok, cancel);
+            Optional<ButtonType> result = confirm.showAndWait();
+            if (result.isPresent() && result.get() == ok) {
+                try {
+                    professeurService.supprimerProfesseurAvecPaiements(currentProfesseur.getIdProfesseur());
+                    // reset form to initial state
+                    resetAction();
+                    Alert info = new Alert(Alert.AlertType.INFORMATION);
+                    info.setTitle("Succès");
+                    info.setHeaderText(null);
+                    info.setContentText("Professeur et ses paiements associés supprimés avec succès.");
+                    info.showAndWait();
+                } catch (Exception e) {
+                    showError("Erreur lors de la suppression : " + e.getMessage());
+                }
+            }
+        } else {
+            showError("Aucun professeur à supprimer ou vous êtes en mode création.");
+        }
     }
 
     @FXML
@@ -603,10 +669,12 @@ public class AjouterPaiementController {
         if (typePaiementCombo.getSelectionModel().getSelectedItem() == null) {
             errors.append("- Type de paiement obligatoire\n");
         }
-        if (objetReglementLabel.getText().equals("-") || objetReglementLabel.getText().isEmpty()) {
+        String objetReglement = objetReglementLabel.getText();
+        if (objetReglement.equals("-") || objetReglement.isEmpty()) {
             errors.append("- Objet du règlement non déterminé\n");
         }
-        if (referenceReglementLabel.getText().equals("-") || referenceReglementLabel.getText().isEmpty()) {
+        String referenceReglement = referenceReglementLabel.getText();
+        if (referenceReglement.equals("-") || referenceReglement.isEmpty()) {
             errors.append("- Référence du règlement non déterminé\n");
         }
         if (!isValidDate(dateDebutField.getValue())) {

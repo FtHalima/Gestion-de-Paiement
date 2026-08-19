@@ -14,6 +14,7 @@ com\gestionpaiements\app\controller\AjouterPaiementController.class
 com\gestionpaiements\app\Launcher.class
 com\gestionpaiements\app\dao\UtilisateurRepository.class
 com\gestionpaiements\app\MainApp.class
+com\gestionpaiements\app\controller\PaiementListController.class
 com\gestionpaiements\app\controller\MainViewController.class
 com\gestionpaiements\app\service\LotService.class
 com\gestionpaiements\app\service\UtilisateurService.class

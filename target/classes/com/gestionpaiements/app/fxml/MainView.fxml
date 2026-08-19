@@ -5,13 +5,29 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.gestionpaiements.app.controller.MainViewController">
+   <top>
+      <VBox spacing="5" alignment="CENTER">
+         <Label text="Gestion des Paiements" style="-fx-font-size: 18px; -fx-font-weight: bold;">
+            <padding>
+               <Insets bottom="5"/>
+            </padding>
+         </Label>
+         <Label fx:id="statusLabel" text="-" />
+      </VBox>
+   </top>
    <center>
-      <Label fx:id="statusLabel" text="Loading..." />
+      <VBox spacing="20" alignment="CENTER">
+         <Button text="Vacataire" fx:id="vacataireButton" onAction="#handleVacataire" minWidth="150"/>
+         <Button text="Heure supplémentaire" fx:id="heureSupButton" onAction="#handleHeureSup" minWidth="150"/>
+         <Button text="Déplacement" fx:id="deplacementButton" onAction="#handleDeplacement" minWidth="150"/>
+      </VBox>
    </center>
    <bottom>
       <VBox alignment="CENTER" spacing="10">
