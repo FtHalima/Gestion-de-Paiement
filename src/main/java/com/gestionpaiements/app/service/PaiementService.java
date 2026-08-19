@@ -45,32 +45,11 @@ public class PaiementService {
      */
     @Transactional
     public Paiement calculerEtEnregistrer(Paiement paiement) {
-        BigDecimal nombreHeures = paiement.getNombreHeures();
-        BigDecimal taux = paiement.getTaux();
-        BigDecimal tauxIr = paiement.getTauxIr();
-        TypePaiement type = paiement.getTypePaiement();
-
-        BigDecimal montantBrut = BigDecimal.ZERO;
-        BigDecimal retenuIr = BigDecimal.ZERO;
-
-        if (nombreHeures != null && taux != null && tauxIr != null) {
-            // Calcul du montant brut : nombreHeures × taux
-            montantBrut = nombreHeures.multiply(taux);
-            montantBrut = montantBrut.setScale(2, RoundingMode.HALF_UP);
-
-            // Calcul de la retenue IR : montantBrut × (tauxIr / 100)
-            retenuIr = montantBrut.multiply(tauxIr.divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP));
-            retenuIr = retenuIr.setScale(2, RoundingMode.HALF_UP);
-        }
-
-        // Calcul du montant net : montantBrut - retenueIr
-        BigDecimal montantNet = montantBrut.subtract(retenuIr);
-        montantNet = montantNet.setScale(2, RoundingMode.HALF_UP);
-
-        // Fixation des champs calculés
-        paiement.setMontantBrut(montantBrut);
-        paiement.setRetenueIr(retenuIr);
-        paiement.setMontantNet(montantNet);
+        // Deleguer le calcul à la méthode unique
+        TauxIRResult result = calculerMontants(paiement.getTypePaiement(), paiement.getNombreHeures(), paiement.getTaux(), paiement.getTauxIr());
+        paiement.setMontantBrut(result.getMontantBrut());
+        paiement.setRetenueIr(result.getRetenueIr());
+        paiement.setMontantNet(result.getMontantNet());
 
         // Sauvegarde
         return paiementRepository.save(paiement);
@@ -215,6 +194,11 @@ public class PaiementService {
      */
     @Transactional
     public Paiement enregistrerPaiement(Paiement paiement) {
+        // Log AVANT SERVICE
+        System.out.println("AVANT SERVICE : nombreHeures=" + paiement.getNombreHeures()
+                + ", taux=" + paiement.getTaux()
+                + ", tauxIr=" + paiement.getTauxIr());
+
         // Sauvegarde ou récupération du professeur
         Professeur savedProf = professeurService.creerOuRecuperer(paiement.getProfesseur());
         paiement.setProfesseur(savedProf);
@@ -234,15 +218,42 @@ public class PaiementService {
         paiement.setModePaiement("VIREMENT");
         paiement.setTypeReferenceReglement("RIB");
 
-        // Calcul des montants si les données de base sont présentes
-        if (paiement.getNombreHeures() != null && paiement.getTaux() != null && paiement.getTauxIr() != null) {
-            TauxIRResult result = calculerMontants(paiement.getTypePaiement(), paiement.getNombreHeures(), paiement.getTaux(), paiement.getTauxIr());
-            paiement.setMontantBrut(result.getMontantBrut());
-            paiement.setRetenueIr(result.getRetenueIr());
-            paiement.setMontantNet(result.getMontantNet());
-        }
+        // Calcul systématique des montants (utilise la méthode unique)
+        TauxIRResult result = calculerMontants(paiement.getTypePaiement(), paiement.getNombreHeures(), paiement.getTaux(), paiement.getTauxIr());
+        paiement.setMontantBrut(result.getMontantBrut());
+        paiement.setRetenueIr(result.getRetenueIr());
+        paiement.setMontantNet(result.getMontantNet());
+
+        // Log APRÈS CALCUL
+        System.out.println("APRÈS CALCUL : montantBrut=" + paiement.getMontantBrut()
+                + ", retenueIr=" + paiement.getRetenueIr()
+                + ", montantNet=" + paiement.getMontantNet());
+
+        // Log AVANT REPOSITORY
+        System.out.println("AVANT REPOSITORY : taux=" + paiement.getTaux() + ", tauxIr=" + paiement.getTauxIr()
+                + ", montantBrut=" + paiement.getMontantBrut()
+                + ", retenueIr=" + paiement.getRetenueIr()
+                + ", montantNet=" + paiement.getMontantNet());
 
         // Sauvegarde du paiement
-        return paiementRepository.save(paiement);
+        Paiement saved = paiementRepository.save(paiement);
+
+        // Log APRÈS REPOSITORY
+        System.out.println("APRÈS REPOSITORY : taux=" + saved.getTaux() + ", tauxIr=" + saved.getTauxIr()
+                + ", montantBrut=" + saved.getMontantBrut()
+                + ", retenueIr=" + saved.getRetenueIr()
+                + ", montantNet=" + saved.getMontantNet());
+
+        return saved;
+    }
+
+    /**
+     * Retourne le paiement le plus récent associé à un professeur donné.
+     *
+     * @param professeur le professeur
+     * @return le paiement le plus récent, ou vide si aucun paiement n'existe
+     */
+    public Optional<Paiement> trouverDernierPaiementParProfesseur(Professeur professeur) {
+        return paiementRepository.findFirstByProfesseurOrderByIdPaiementDesc(professeur);
     }
 }

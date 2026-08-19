@@ -1,1 +1,2 @@
 - [Modifier la date de naissance en date de recrutement dans le formulaire d'ajout de paiement](modifier-date-naissance-recrutement.md)
+- [PDF generation styling](memory/pdf-generation-styling.md) — Implemented PDF generation styling for État des sommes dues selon les spécifications de l'utilisateur

@@ -135,7 +135,7 @@ public class PaiementListController {
         colTaux.setCellValueFactory(new PropertyValueFactory<>("taux"));
         colIr.setCellValueFactory(new PropertyValueFactory<>("tauxIr"));
         colMontantBrut.setCellValueFactory(new PropertyValueFactory<>("montantBrut"));
-        colRetenueIr.setCellValueFactory(new PropertyValueFactory<>("retenuIr"));
+        colRetenueIr.setCellValueFactory(new PropertyValueFactory<>("retenueIr"));
         colMontantNet.setCellValueFactory(new PropertyValueFactory<>("montantNet"));
         colTypeReference.setCellValueFactory(new PropertyValueFactory<>("typeReferenceReglement"));
         colReference.setCellValueFactory(new PropertyValueFactory<>("referenceReglement"));

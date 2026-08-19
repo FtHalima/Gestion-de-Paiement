@@ -5,6 +5,7 @@ import com.gestionpaiements.app.model.TypePaiement;
 import com.gestionpaiements.app.model.Paiement;
 import com.gestionpaiements.app.service.ProfesseurService;
 import com.gestionpaiements.app.service.PaiementService;
+import com.gestionpaiements.app.service.PdfGenerationService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -15,6 +16,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
+import javafx.stage.FileChooser;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +42,9 @@ public class AjouterPaiementController {
     @Autowired
     private PaiementService paiementService;
 
+    @Autowired
+    private PdfGenerationService pdfGenerationService;
+
     // Fields from FXML
     @FXML private TextField cinField;
     @FXML private TextField pprField;
@@ -52,6 +61,7 @@ public class AjouterPaiementController {
     @FXML private Label affectationLabel;
     @FXML private Label ribCompletLabel;
     @FXML private Button deleteProfButton;
+    @FXML private Button pdfButton;
     @FXML private VBox profInfoDisplay;
 
     // Edit fields (for new professor)
@@ -79,11 +89,18 @@ public class AjouterPaiementController {
     @FXML private TextField tauxField; // non-editable
     @FXML private ComboBox<String> irCombo; // non-editable, holds "%" values
     @FXML private Label montantBrutLabel;
-    @FXML private Label retenuIrLabel;
+    @FXML private Label retenueIrLabel;
     @FXML private Label montantNetLabel;
     @FXML private Label modePaiementLabel;
     @FXML private Label typeReferenceReglementLabel;
     @FXML private DatePicker datePaiementField;
+
+    // New fields for Exercice, Code CGNC, Article, Par, Lig
+    @FXML private TextField exerciceField;
+    @FXML private TextField codeCgncField;
+    @FXML private TextField articleField;
+    @FXML private TextField parField;
+    @FXML private TextField ligField;
 
     // Buttons
     @FXML private Button cancelButton;
@@ -164,6 +181,9 @@ public class AjouterPaiementController {
         // Listener for date validation
         dateDebutField.valueProperty().addListener((obs, oldVal, newVal) -> validateDates());
         dateFinField.valueProperty().addListener((obs, oldVal, newVal) -> validateDates());
+
+        // Initial calculation to display correct amounts based on default values
+        calculate();
     }
 
     private void handleEnterKey(KeyEvent event) {
@@ -193,10 +213,47 @@ public class AjouterPaiementController {
                     + ", ribCle=" + currentProfesseur.getRibCle()
                     + ", ribComplet=" + currentProfesseur.getRibComplet());
             isNewProfessorMode = false;
-            showProfesseurInfo(currentProfesseur);
+            // Load professor data into edit fields
+            loadProfessorIntoEditFields(currentProfesseur);
+            // Load latest paiement for this professor
+            Optional<Paiement> latestPaiement = paiementService.trouverDernierPaiementParProfesseur(currentProfesseur);
+            if (latestPaiement.isPresent()) {
+                Paiement p = latestPaiement.get();
+                typePaiementCombo.setValue(p.getTypePaiement());
+                dateDebutField.setValue(p.getDateDebut());
+                dateFinField.setValue(p.getDateFin());
+                nombreHeuresField.setText(formatBigDecimal(p.getNombreHeures()));
+                tauxField.setText(formatBigDecimal(p.getTaux()));
+                String irStr = p.getTauxIr().stripTrailingZeros().toPlainString();
+                irCombo.getSelectionModel().select(irStr);
+                // Set new payment fields
+                exerciceField.setText(p.getExercice() != null ? p.getExercice() : "");
+                codeCgncField.setText(p.getCodeCgnc() != null ? p.getCodeCgnc() : "");
+                articleField.setText(p.getArticle() != null ? p.getArticle() : "");
+                parField.setText(p.getPar() != null ? p.getPar() : "");
+                ligField.setText(p.getLig() != null ? p.getLig() : "");
+                // Update calculated labels
+                calculate();
+            } else {
+                // No previous paiement: clear payment fields
+                typePaiementCombo.getSelectionModel().selectFirst();
+                dateDebutField.setValue(null);
+                dateFinField.setValue(null);
+                nombreHeuresField.clear();
+                tauxField.clear();
+                irCombo.getSelectionModel().clearSelection();
+                // Clear new fields
+                exerciceField.clear();
+                codeCgncField.clear();
+                articleField.clear();
+                parField.clear();
+                ligField.clear();
+                calculate(); // will set zero
+            }
+            // Show edit fields (allow editing)
+            hideProfessorDisplay();
+            showProfessorEdit();
             hideProfessorNotFound();
-            hideProfessorEdit();
-            showProfessorDisplay();
         } else {
             currentProfesseur = null;
             isNewProfessorMode = true;
@@ -221,8 +278,28 @@ public class AjouterPaiementController {
         gradeField.getSelectionModel().clearSelection();
         echelleField.clear();
         affectationField.clear();
+        // Clear payment fields
+        typePaiementCombo.getSelectionModel().clearSelection();
+        dateDebutField.setValue(null);
+        dateFinField.setValue(null);
+        nombreHeuresField.clear();
+        tauxField.clear();
+        irCombo.getSelectionModel().clearSelection();
+        // Clear RIB fields
+        banqueField.clear();
+        villeField.clear();
+        numeroCompteField.clear();
+        cleField.clear();
+        // Clear new fields
+        exerciceField.clear();
+        codeCgncField.clear();
+        articleField.clear();
+        parField.clear();
+        ligField.clear();
         // Focus on nomField
         nomField.requestFocus();
+        // Reset amount labels to zero
+        calculate();
     }
 
     // UI helpers
@@ -234,6 +311,22 @@ public class AjouterPaiementController {
         echelleLabel.setText(prof.getEchelle() != null ? prof.getEchelle().toString() : "-");
         affectationLabel.setText(prof.getAffectation());
         ribCompletLabel.setText(prof.getRibComplet());
+    }
+
+    private void loadProfessorIntoEditFields(Professeur prof) {
+        // Set CIN and PPR (though they are already in search fields)
+        cinField.setText(prof.getCin());
+        pprField.setText(prof.getPpr());
+        nomField.setText(prof.getNom());
+        prenomField.setText(prof.getPrenom());
+        ddrPicker.setValue(prof.getDdr());
+        gradeField.setValue(prof.getGrade());
+        echelleField.setText(prof.getEchelle() != null ? prof.getEchelle().toString() : "");
+        affectationField.setText(prof.getAffectation());
+        banqueField.setText(prof.getRibBanque());
+        villeField.setText(prof.getRibVille());
+        numeroCompteField.setText(prof.getRibNumeroCompte());
+        cleField.setText(prof.getRibCle());
     }
 
     private void showProfessorDisplay() {
@@ -428,7 +521,7 @@ public class AjouterPaiementController {
 
         PaiementService.TauxIRResult result = paiementService.calculerMontants(type, nombreHeures, taux, tauxIr);
         montantBrutLabel.setText(formatBigDecimal(result.getMontantBrut()));
-        retenuIrLabel.setText(formatBigDecimal(result.getRetenueIr()));
+        retenueIrLabel.setText(formatBigDecimal(result.getRetenueIr()));
         montantNetLabel.setText(formatBigDecimal(result.getMontantNet()));
     }
 
@@ -460,8 +553,20 @@ public class AjouterPaiementController {
         // Prepare professeur
         Professeur professeurToSave;
         if (currentProfesseur != null && !isNewProfessorMode) {
+            // Update existing professor with form values
+            currentProfesseur.setCin(cinField.getText().trim());
+            currentProfesseur.setPpr(pprField.getText().trim());
+            currentProfesseur.setNom(nomField.getText().trim());
+            currentProfesseur.setPrenom(prenomField.getText().trim());
+            currentProfesseur.setDdr(ddrPicker.getValue());
+            currentProfesseur.setGrade(gradeField.getValue());
+            currentProfesseur.setEchelle(echelleField.getText().trim().isEmpty() ? null : Integer.valueOf(echelleField.getText().trim()));
+            currentProfesseur.setAffectation(affectationField.getText().trim());
+            currentProfesseur.setRibBanque(banqueField.getText());
+            currentProfesseur.setRibVille(villeField.getText());
+            currentProfesseur.setRibNumeroCompte(numeroCompteField.getText());
+            currentProfesseur.setRibCle(cleField.getText());
             professeurToSave = currentProfesseur;
-            // No field updates needed for existing professor in this UI
         } else {
             professeurToSave = new Professeur();
             professeurToSave.setCin(cinField.getText().trim());
@@ -512,6 +617,15 @@ public class AjouterPaiementController {
         paiement.setModePaiement(modePaiementLabel.getText());
         paiement.setTypeReferenceReglement(typeReferenceReglementLabel.getText());
         paiement.setDatePaiement(datePaiementField.getValue());
+        // Set new fields
+        paiement.setExercice(exerciceField.getText().trim());
+        paiement.setCodeCgnc(codeCgncField.getText().trim());
+        paiement.setArticle(articleField.getText().trim());
+        paiement.setPar(parField.getText().trim());
+        paiement.setLig(ligField.getText().trim());
+
+        // Log AVANT CONTROLLER
+        System.out.println("AVANT CONTROLLER : taux=" + paiement.getTaux() + ", tauxIr=" + paiement.getTauxIr());
 
         // Save via service (this will persist paiement and compute amounts)
         Paiement savedPaiement = paiementService.enregistrerPaiement(paiement);
@@ -598,11 +712,232 @@ public class AjouterPaiementController {
         tauxField.clear();
         irCombo.getSelectionModel().selectFirst();
         montantBrutLabel.setText("0,00 ");
-        retenuIrLabel.setText("0,00 ");
+        retenueIrLabel.setText("0,00 ");
         montantNetLabel.setText("0,00 ");
         modePaiementLabel.setText("VIREMENT");
         typeReferenceReglementLabel.setText("RIB");
         datePaiementField.setValue(null);
+        // Reset new fields
+        exerciceField.clear();
+        codeCgncField.clear();
+        articleField.clear();
+        parField.clear();
+        ligField.clear();
+    }
+
+    @FXML
+    private void genererPdfAction(ActionEvent event) {
+        try {
+            // Validate required fields
+            StringBuilder errors = new StringBuilder();
+
+            // CIN/PPR required
+            if (cinField.getText().trim().isEmpty()) {
+                errors.append("- CIN obligatoire\n");
+            }
+            if (pprField.getText().trim().isEmpty()) {
+                errors.append("- PPR obligatoire\n");
+            }
+
+            // If in new professor mode, validate professor fields
+            if (isNewProfessorMode) {
+                if (nomField.getText().trim().isEmpty()) {
+                    errors.append("- Nom du professeur obligatoire\n");
+                }
+                if (prenomField.getText().trim().isEmpty()) {
+                    errors.append("- Prénom du professeur obligatoire\n");
+                }
+                if (ddrPicker.getValue() == null) {
+                    errors.append("- Date de recrutement (DDR) obligatoire\n");
+                }
+                if (gradeField.getValue() == null) {
+                    errors.append("- Grade obligatoire\n");
+                }
+                if (echelleField.getText().trim().isEmpty()) {
+                    errors.append("- Échelle obligatoire\n");
+                }
+                if (affectationField.getText().trim().isEmpty()) {
+                    errors.append("- Affectation obligatoire\n");
+                }
+
+                // Validate RIB fields (all or nothing)
+                String banque = banqueField.getText().trim();
+                String ville = villeField.getText().trim();
+                String compte = numeroCompteField.getText().trim();
+                String cle = cleField.getText().trim();
+
+                boolean ribFieldsEmpty = banque.isEmpty() && ville.isEmpty() && compte.isEmpty() && cle.isEmpty();
+                boolean ribFieldsFull = banque.length() == 3 && ville.length() == 3 && compte.length() == 16 && cle.length() == 2;
+
+                if (!ribFieldsEmpty && !ribFieldsFull) {
+                    errors.append("- RIB incomplet: Banque (3), Ville (3), Compte (16), Clé (2)\n");
+                }
+            }
+
+            if (errors.length() > 0) {
+                showError("Veuillez corriger les erreurs suivantes :\n" + errors.toString());
+                return;
+            }
+
+            // Additional validation for payment fields
+            if (typePaiementCombo.getSelectionModel().getSelectedItem() == null) {
+                showError("Veuillez sélectionner un type de paiement");
+                return;
+            }
+
+            if (dateDebutField.getValue() == null) {
+                showError("Veuillez saisir une date de début");
+                return;
+            }
+
+            if (dateFinField.getValue() == null) {
+                showError("Veuillez saisir une date de fin");
+                return;
+            }
+
+            if (dateFinField.getValue().isBefore(dateDebutField.getValue())) {
+                showError("La date de fin doit être postérieure ou égale à la date de début");
+                return;
+            }
+
+            try {
+                BigDecimal nombreHeures = parseBigDecimal(nombreHeuresField.getText());
+                if (nombreHeures == null || nombreHeures.compareTo(BigDecimal.ZERO) <= 0) {
+                    showError("Veuillez saisir un nombre d'heures valide (supérieur à zéro)");
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                showError("Veuillez saisir un nombre d'heures valide");
+                return;
+            }
+
+            try {
+                BigDecimal taux = parseBigDecimal(tauxField.getText());
+                if (taux == null || taux.compareTo(BigDecimal.ZERO) < 0) {
+                    showError("Veuillez saisir un taux valide (supérieur ou égal à zéro)");
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                showError("Veuillez saisir un taux valide");
+                return;
+            }
+
+            // Save professor (insert if new, update if existing)
+            Professeur professeurToSave;
+            if (currentProfesseur != null && !isNewProfessorMode) {
+                // Update existing professor
+                currentProfesseur.setNom(nomField.getText().trim());
+                currentProfesseur.setPrenom(prenomField.getText().trim());
+                currentProfesseur.setDdr(ddrPicker.getValue());
+                currentProfesseur.setGrade(gradeField.getValue());
+                currentProfesseur.setEchelle(echelleField.getText().trim().isEmpty() ? null : Integer.valueOf(echelleField.getText().trim()));
+                currentProfesseur.setAffectation(affectationField.getText().trim());
+                currentProfesseur.setRibBanque(banqueField.getText());
+                currentProfesseur.setRibVille(villeField.getText());
+                currentProfesseur.setRibNumeroCompte(numeroCompteField.getText());
+                currentProfesseur.setRibCle(cleField.getText());
+                professeurToSave = currentProfesseur;
+            } else {
+                // Create new professor
+                professeurToSave = new Professeur();
+                professeurToSave.setCin(cinField.getText().trim());
+                professeurToSave.setPpr(pprField.getText().trim());
+                professeurToSave.setNom(nomField.getText().trim());
+                professeurToSave.setPrenom(prenomField.getText().trim());
+                professeurToSave.setDdr(ddrPicker.getValue());
+                professeurToSave.setGrade(gradeField.getValue());
+                professeurToSave.setEchelle(echelleField.getText().trim().isEmpty() ? null : Integer.valueOf(echelleField.getText().trim()));
+                professeurToSave.setAffectation(affectationField.getText().trim());
+                professeurToSave.setRibBanque(banqueField.getText());
+                currentProfesseur.setRibVille(villeField.getText());
+                currentProfesseur.setRibNumeroCompte(numeroCompteField.getText());
+                currentProfesseur.setRibCle(cleField.getText());
+                professeurToSave = currentProfesseur;
+            }
+
+            // Log RIB before saving professor
+            System.out.println("AVANT ENREGISTREMENT PROFESSEUR (PDF) : ribBanque=" + professeurToSave.getRibBanque()
+                    + ", ribVille=" + professeurToSave.getRibVille()
+                    + ", ribNumeroCompte=" + professeurToSave.getRibNumeroCompte()
+                    + ", ribCle=" + professeurToSave.getRibCle());
+
+            // Save professor (insert if new, update if existing)
+            Professeur savedProf = professeurService.sauver(professeurToSave);
+
+            // Log after saving professor
+            System.out.println("APRÈS ENREGISTREMENT PROFESSEUR (PDF) : idProfesseur=" + savedProf.getIdProfesseur()
+                    + ", ribBanque=" + savedProf.getRibBanque()
+                    + ", ribVille=" + savedProf.getRibVille()
+                    + ", ribNumeroCompte=" + savedProf.getRibNumeroCompte()
+                    + ", ribCle=" + savedProf.getRibCle());
+
+            // Create paiement with saved professor
+            Paiement paiement = new Paiement();
+            paiement.setProfesseur(savedProf);
+            paiement.setTypePaiement(typePaiementCombo.getSelectionModel().getSelectedItem());
+            // Objet et référence règlement : convert "-" to null for cleaner DB
+            String objetReglement = objetReglementLabel.getText();
+            paiement.setObjetReglement("-".equals(objetReglement) || objetReglement.isEmpty() ? null : objetReglement);
+            String referenceReglement = referenceReglementLabel.getText();
+            paiement.setReferenceReglement("-".equals(referenceReglement) || referenceReglement.isEmpty() ? null : referenceReglement);
+            paiement.setDateDebut(dateDebutField.getValue());
+            paiement.setDateFin(dateFinField.getValue());
+            paiement.setNombreHeures(parseBigDecimal(nombreHeuresField.getText()));
+            paiement.setTaux(parseBigDecimal(tauxField.getText()));
+            paiement.setTauxIr(parseBigDecimal(irCombo.getSelectionModel().getSelectedItem()));
+            paiement.setModePaiement(modePaiementLabel.getText());
+            paiement.setTypeReferenceReglement(typeReferenceReglementLabel.getText());
+            paiement.setDatePaiement(datePaiementField.getValue());
+            // Set new fields
+            paiement.setExercice(exerciceField.getText().trim());
+            paiement.setCodeCgnc(codeCgncField.getText().trim());
+            paiement.setArticle(articleField.getText().trim());
+            paiement.setPar(parField.getText().trim());
+            paiement.setLig(ligField.getText().trim());
+
+            // Log AVANT CONTROLLER
+            System.out.println("AVANT CONTROLLER (PDF) : taux=" + paiement.getTaux() + ", tauxIr=" + paiement.getTauxIr());
+
+            // Save via service (this will persist paiement and compute amounts)
+            Paiement savedPaiement = paiementService.enregistrerPaiement(paiement);
+
+            // Optional: log final paiement ID
+            System.out.println("PAIEMENT ENREGISTRÉ (PDF) : idPaiement=" + savedPaiement.getIdPaiement());
+
+            // Generate PDF
+            ByteArrayInputStream pdfInputStream = pdfGenerationService.genererPdfEstadoSums(savedPaiement.getIdPaiement());
+
+            // Save PDF to file using FileChooser
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Enregistrer le PDF");
+            fileChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("PDF Files", "*.pdf")
+            );
+            fileChooser.setInitialFileName("etat_sommes_dues_" + savedPaiement.getIdPaiement() + ".pdf");
+
+            File file = fileChooser.showSaveDialog(
+                    ((Button) event.getSource()).getScene().getWindow());
+
+            if (file != null) {
+                try (FileOutputStream fos = new FileOutputStream(file)) {
+                    byte[] buffer = new byte[1024];
+                    int bytesRead;
+                    while ((bytesRead = pdfInputStream.read(buffer)) != -1) {
+                        fos.write(buffer, 0, bytesRead);
+                    }
+
+                    showInfo("PDF généré avec succès et enregistré dans : " + file.getAbsolutePath());
+                } catch (IOException ex) {
+                    showError("Erreur lors de l'écriture du fichier PDF : " + ex.getMessage());
+                }
+            } else {
+                showInfo("Génération du PDF annulée par l'utilisateur");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Erreur lors de la génération du PDF : " + e.getMessage());
+        }
     }
 
     @FXML
@@ -724,6 +1059,14 @@ public class AjouterPaiementController {
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Erreur de validation");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showInfo(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();

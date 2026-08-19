@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PaiementRepository extends JpaRepository<Paiement, Long> {
@@ -19,4 +20,6 @@ public interface PaiementRepository extends JpaRepository<Paiement, Long> {
 
     @Query("select p from Paiement p join fetch p.professeur where p.typePaiement = :type")
     List<Paiement> findByTypePaiementWithProfesseur(TypePaiement type);
+
+    Optional<Paiement> findFirstByProfesseurOrderByIdPaiementDesc(Professeur professeur);
 }

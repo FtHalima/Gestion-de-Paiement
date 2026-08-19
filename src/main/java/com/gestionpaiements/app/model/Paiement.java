@@ -77,6 +77,22 @@ public class Paiement {
     @Column(name = "date_paiement")
     private LocalDate datePaiement;
 
+    // New fields as requested
+    @Column(name = "exercice")
+    private String exercice;
+
+    @Column(name = "code_cgnc")
+    private String codeCgnc;
+
+    @Column(name = "article")
+    private String article;
+
+    @Column(name = "par")
+    private String par;
+
+    @Column(name = "lig")
+    private String lig;
+
     // Default constructor
     public Paiement() {
     }
@@ -250,5 +266,46 @@ public class Paiement {
 
     public void setDatePaiement(LocalDate datePaiement) {
         this.datePaiement = datePaiement;
+    }
+
+    // Getters and setters for new fields
+    public String getExercice() {
+        return exercice;
+    }
+
+    public void setExercice(String exercice) {
+        this.exercice = exercice;
+    }
+
+    public String getCodeCgnc() {
+        return codeCgnc;
+    }
+
+    public void setCodeCgnc(String codeCgnc) {
+        this.codeCgnc = codeCgnc;
+    }
+
+    public String getArticle() {
+        return article;
+    }
+
+    public void setArticle(String article) {
+        this.article = article;
+    }
+
+    public String getPar() {
+        return par;
+    }
+
+    public void setPar(String par) {
+        this.par = par;
+    }
+
+    public String getLig() {
+        return lig;
+    }
+
+    public void setLig(String lig) {
+        this.lig = lig;
     }
 }
