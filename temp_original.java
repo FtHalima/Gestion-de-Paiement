@@ -34,12 +34,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.Locale;
 
-//image
-import com.itextpdf.layout.properties.HorizontalAlignment;
 /**
  * Service for generating PDF État des sommes dues for payments.
  */
@@ -122,7 +117,7 @@ public class PdfGenerationService {
     }
 
     // ========== SECTION METHODS ==========
-    //
+
     private void addHeader(Document document, String affectation) {
         // ROYAUME DU MAROC
         Paragraph royaume = new Paragraph("ROYAUME DU MAROC")
@@ -139,7 +134,7 @@ public class PdfGenerationService {
                 Image logo = new Image(ImageDataFactory.create(LOGO_PATH))
                         .setWidth(60)
                         .setHeight(60)
-                        .setHorizontalAlignment(HorizontalAlignment.CENTER); // ✅ centre réellement l'image
+                        .setTextAlignment(TextAlignment.CENTER);
                 document.add(logo);
             } else {
                 System.err.println("WARNING: Logo not found at " + LOGO_PATH);
@@ -430,25 +425,24 @@ public class PdfGenerationService {
             return;
         }
 
-        Table table = new Table(new float[]{1, 3}); // label, value
+        Table table = new Table(1);
         table.setWidth(UnitValue.createPercentValue(100));
         table.setMarginBottom(4);
-        // No background color
+        table.setBackgroundColor(LIGHT_GRAY_BG);
+        // Set border: dashed 1.5px primary blue
+        table.setBorder(new DashedBorder(PRIMARY_BLUE, 1.5f));
 
-        // Label
-        Cell labelCell = new Cell().add(new Paragraph("RIB :"))
-                .setFontSize(9)
+        Paragraph ribPara = new Paragraph(rib)
+                .setTextAlignment(TextAlignment.CENTER)
+                .setFontSize(11)
                 .setFontColor(PRIMARY_BLUE)
-                .setPadding(4);
-        // Value
-        Cell valueCell = new Cell().add(new Paragraph(rib))
-                .setFontSize(9)
-                .setFontColor(BLACK)
-                .setBorderBottom(new DottedBorder(BLACK, 1f))
-                .setPaddingBottom(2)
-                .setPadding(4);
-        table.addCell(labelCell);
-        table.addCell(valueCell);
+                .setBold()
+                .setMarginTop(5)
+                .setMarginBottom(5);
+        Cell cell = new Cell().add(ribPara)
+                .setBorder(Border.NO_BORDER)
+                .setPadding(6);
+        table.addCell(cell);
 
         document.add(table);
     }
@@ -553,12 +547,12 @@ public class PdfGenerationService {
     }
 
     private void addNetAPayerBlock(Document document, Paiement paiement) {
-        // Outer table with light border
+        // Outer table with blue background and padding to simulate rounded corners
         Table outerTable = new Table(1);
         outerTable.setWidth(UnitValue.createPercentValue(100));
         outerTable.setMarginBottom(8);
         outerTable.setBorder(new SolidBorder(LIGHT_BORDER, 1f));
-        outerTable.setPadding(2); // reduced padding
+        outerTable.setPadding(4); // padding to simulate rounded corners and provide space inside
 
         // Inner table with two columns for label and value
         Table innerTable = new Table(new float[]{3, 2});
@@ -570,13 +564,15 @@ public class PdfGenerationService {
                 .setFontSize(10)
                 .setFontColor(BLACK)
                 .setTextAlignment(TextAlignment.LEFT)
-                .setPadding(2);
+                .setPadding(3);
         Cell montantBrutValue = new Cell().add(new Paragraph(
-                formatMontant(paiement.getMontantBrut()) + " DH"))
+                        getFieldValue(paiement.getMontantBrut() != null ?
+                                paiement.getMontantBrut().stripTrailingZeros().toPlainString().replace(".", ",") : "0,00") +
+                                " DH"))
                 .setFontSize(10)
-                .setFontColor(BLACK)
+                .setFontColor(BLACK) // black/gray as spec
                 .setTextAlignment(TextAlignment.RIGHT)
-                .setPadding(2);
+                .setPadding(3);
         innerTable.addCell(montantBrutLabel);
         innerTable.addCell(montantBrutValue);
 
@@ -592,35 +588,40 @@ public class PdfGenerationService {
             retiLabel = "Retenue IR (" + taux.toPlainString() + "%) :";
         }
         Cell retenueIRLabel = new Cell().add(new Paragraph(retiLabel))
-                .setFontSize(10) // not bold per spec
+                .setBold()
+                .setFontSize(10)
                 .setFontColor(BLACK)
                 .setTextAlignment(TextAlignment.LEFT)
-                .setPadding(2);
+                .setPadding(3);
         Cell retenueIRValue = new Cell().add(new Paragraph(
-                formatMontant(paiement.getRetenueIr()) + " DH"))
+                        getFieldValue(paiement.getRetenueIr() != null ?
+                                paiement.getRetenueIr().stripTrailingZeros().toPlainString().replace(".", ",") : "0,00") +
+                                " DH"))
                 .setFontSize(10)
                 .setFontColor(ALERT_RED)
                 .setTextAlignment(TextAlignment.RIGHT)
-                .setPadding(2);
+                .setPadding(3);
         innerTable.addCell(retenueIRLabel);
         innerTable.addCell(retenueIRValue);
 
-        // NET À PAYER line with top border
+        // NET À PAYER banner - full width blue background, white text, bold, larger size
         Cell netLabelCell = new Cell().add(new Paragraph("NET À PAYER :"))
                 .setBold()
                 .setFontSize(11)
                 .setFontColor(NET_LABEL_GRAY)
                 .setTextAlignment(TextAlignment.LEFT)
-                .setPadding(2)
-                .setBorderTop(new SolidBorder(LIGHT_BORDER, 0.5f));
+                .setPadding(5)
+                .setBorderTop(new SolidBorder(LIGHT_BORDER, 1f));
         Cell netValueCell = new Cell().add(new Paragraph(
-                formatMontant(paiement.getMontantNet()) + " DH"))
+                        getFieldValue(paiement.getMontantNet() != null ?
+                                paiement.getMontantNet().stripTrailingZeros().toPlainString().replace(".", ",") : "0,00") +
+                                " DH"))
                 .setBold()
                 .setFontSize(11)
                 .setFontColor(NET_LABEL_GRAY)
                 .setTextAlignment(TextAlignment.RIGHT)
-                .setPadding(2)
-                .setBorderTop(new SolidBorder(LIGHT_BORDER, 0.5f));
+                .setPadding(5)
+                .setBorderTop(new SolidBorder(LIGHT_BORDER, 1f));
 
         innerTable.addCell(netLabelCell);
         innerTable.addCell(netValueCell);
@@ -684,11 +685,10 @@ public class PdfGenerationService {
     private String getTexteAdministratif(TypePaiement type) {
         switch (type) {
             case VACATAIRE:
-                //"VUE..." + "\n" + "VUE..."
-                return "VUE LE DECRET N°2.24.143 DU 05 RAJAB 1446 (06/01/2025)" + "\n" +"VUE LE DECRET N°2.25.539 DU 18 RABII 1ER 1447 (11/09/2025)" + "\n" + "FIXANT LES CONDITIONS D’ATTRIBUTION D’UNE INDEMNITÉ AUX FONCTIONNAIRES CHARGÉS DE L’ENCADREMENT ET DE L’ANIMATION DES STAGES DE FORMATION CONTINUE";
+                return "Vu le décret n°2-93-534 du 20 Rabia I 1414 (8 septembre 1993) modifié par le décret n°2-02-427 du 9/10/2002 fixant les taux de vacations pour les heures de cours du personnel.";
             default:
                 // HEURE_SUP and DEPLACEMENT
-                return "VUE LE DECRET N°2.24.143 DU 05 RAJAB 1446 (06/01/2025)" + "\n" + "VUE LE DECRET N°2.25.539 DU 18 RABII 1ER 1447 (11/09/2025)" + "\n" + "FIXANT LES CONDITIONS D’ATTRIBUTION D’UNE INDEMNITÉ AUX FONCTIONNAIRES CHARGÉS DE L’ENCADREMENT ET DE L’ANIMATION DES STAGES DE FORMATION CONTINUE";
+                return "VUE LE DECRET N°2.24.143 DU 05 RAJAB 1446 (06/01/2025) VUE LE DECRET N°2.25.539 DU 18 RABII 1ER 1447 (11/09/2025) FIXANT LES CONDITIONS D’ATTRIBUTION D’UNE INDEMNITÉ AUX FONCTIONNAIRES CHARGÉS DE L’ENCADREMENT ET DE L’ANIMATION DES STAGES DE FORMATION CONTINUE";
         }
     }
 
@@ -772,9 +772,9 @@ public class PdfGenerationService {
                 .setFontColor(labelColor)
                 .setBorder(Border.NO_BORDER);
         Cell valueCell = new Cell().add(new Paragraph(
-                getFieldValue(amount != null ?
-                        amount.stripTrailingZeros().toPlainString().replace(".", ",") : "0,00") +
-                " DH"))
+                        getFieldValue(amount != null ?
+                                amount.stripTrailingZeros().toPlainString().replace(".", ",") : "0,00") +
+                                " DH"))
                 .setFontColor(valueColor)
                 .setBorder(Border.NO_BORDER);
         table.addCell(labelCell);
@@ -783,18 +783,6 @@ public class PdfGenerationService {
 
     private String getFieldValue(String value) {
         return Objects.requireNonNullElse(value, "");
-    }
-
-    private String formatMontant(BigDecimal amount) {
-        if (amount == null) {
-            amount = BigDecimal.ZERO;
-        }
-        DecimalFormat df = new DecimalFormat("#,##0.00");
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.FRENCH);
-        symbols.setGroupingSeparator(' ');
-        symbols.setDecimalSeparator(',');
-        df.setDecimalFormatSymbols(symbols);
-        return df.format(amount);
     }
 
     private String getFormattedRib(Professeur professeur) {
