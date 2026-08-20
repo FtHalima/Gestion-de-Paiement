@@ -40,6 +40,8 @@ import java.util.Locale;
 
 //image
 import com.itextpdf.layout.properties.HorizontalAlignment;
+import java.time.format.DateTimeFormatter;
+
 /**
  * Service for generating PDF État des sommes dues for payments.
  */
@@ -55,7 +57,8 @@ public class PdfGenerationService {
     private static final Color WHITE = ColorConstants.WHITE;
     private static final Color BLACK = ColorConstants.BLACK;
 
-    private static final String LOGO_PATH = "C:/Users/PC/gest-paiement/gestion-paiements-v2/Logo.png";
+
+    private static final String LOGO_CLASSPATH = "images/royaume-du-maroc-kingdom-of-morocco-seeklogo.png";
     private static final String MINISTERE = "Ministère de l'Éducation Nationale, du Préscolaire et des Sports";
     private static final String DIRECTION = "Direction Provinciale de Nador";
     private static final String TITRE_BASE = "ETAT DES SOMMES DUES POUR FRAIS DE ";
@@ -134,19 +137,21 @@ public class PdfGenerationService {
 
         // Try to add logo
         try {
-            File logoFile = new File(LOGO_PATH);
-            if (logoFile.exists()) {
-                Image logo = new Image(ImageDataFactory.create(LOGO_PATH))
-                        .setWidth(60)
-                        .setHeight(60)
-                        .setHorizontalAlignment(HorizontalAlignment.CENTER); // ✅ centre réellement l'image
-                document.add(logo);
-            } else {
-                System.err.println("WARNING: Logo not found at " + LOGO_PATH);
-            }
+                ClassPathResource logoResource = new ClassPathResource(LOGO_CLASSPATH);
+                if (logoResource.exists()) {
+                        byte[] logoBytes = logoResource.getInputStream().readAllBytes();
+                        Image logo = new Image(ImageDataFactory.create(logoBytes))
+                                .setWidth(60)
+                                .setHeight(60)
+                                .setHorizontalAlignment(HorizontalAlignment.CENTER);
+                        document.add(logo);
+                } else {
+                    System.err.println("WARNING: Logo not found in classpath at " + LOGO_CLASSPATH);
+               }
         } catch (Exception e) {
-            System.err.println("ERROR loading logo: " + e.getMessage());
+        System.err.println("ERROR loading logo: " + e.getMessage());
         }
+
 
         // Ministry and Direction
         Paragraph ministere = new Paragraph(MINISTERE)
@@ -169,111 +174,53 @@ public class PdfGenerationService {
 
     private void addMainTitle(Document document, TypePaiement type) {
         String titre = getDynamicTitle(type);
-        Paragraph titrePara = new Paragraph(titre)
+
+        Table titleTable = new Table(1);
+        titleTable.setWidth(UnitValue.createPercentValue(75)); // ✅ largeur réduite
+        titleTable.setHorizontalAlignment(HorizontalAlignment.CENTER); // ✅ centré sur la page
+        titleTable.setMarginTop(10);
+        titleTable.setMarginBottom(5);
+
+        Cell cell = new Cell().add(new Paragraph(titre)
                 .setTextAlignment(TextAlignment.CENTER)
                 .setBold()
-                .setFontSize(16)
-                .setFontColor(BLACK)
-                .setMarginTop(10)
-                .setMarginBottom(5);
-        document.add(titrePara);
-        // Underline using a line below
+                .setFontSize(14) // légèrement réduit pour tenir sur une ligne
+                .setFontColor(BLACK))
+                .setBorder(Border.NO_BORDER)
+                .setPadding(0);
+        titleTable.addCell(cell);
+        document.add(titleTable);
+
         addHorizontalLine(document, PRIMARY_BLUE, 1f, 8f);
-    }
+        }
 
     private void addBudgetBlock(Document document, Paiement paiement) {
-        Table table = new Table(new float[]{1.2f, 0.8f, 1.5f, 0.6f, 1.2f, 0.6f, 0.8f, 0.6f, 0.8f, 0.6f});
-        table.setWidth(UnitValue.createPercentValue(100));
-        table.setBackgroundColor(LIGHT_GRAY_BG);
-        table.setMarginBottom(4);
+        Table outer = new Table(1);
+        outer.setWidth(UnitValue.createPercentValue(100));
+        outer.setMarginBottom(4);
 
-        // Exercice
-        Cell label1 = new Cell().add(new Paragraph("Exercice:")
-                .setBold()
-                .setFontColor(PRIMARY_BLUE)
-                .setFontSize(9))
-                .setBorder(Border.NO_BORDER)
-                .setPadding(4);
-        Cell value1 = new Cell().add(new Paragraph(getFieldValue(paiement.getExercice()))
-                .setBold()
-                .setFontColor(BLACK)
-                .setFontSize(9))
-                .setBorder(new DottedBorder(BLACK, 1f))
-                .setPaddingBottom(2)
-                .setPadding(4);
-        table.addCell(label1);
-        table.addCell(value1);
+        Paragraph line = new Paragraph()
+                .add(new Paragraph("Exercice : ").setBold().setFontColor(PRIMARY_BLUE).setFontSize(9))
+                .add(new Paragraph(getFieldValue(paiement.getExercice())).setBold().setFontColor(BLACK).setFontSize(9).setUnderline())
+                .add(new Paragraph("              Code CGNC : ").setBold().setFontColor(PRIMARY_BLUE).setFontSize(9))
+                .add(new Paragraph(getFieldValue(paiement.getCodeCgnc())).setBold().setFontColor(BLACK).setFontSize(9).setUnderline())
+                .add(new Paragraph("              Article : ").setBold().setFontColor(PRIMARY_BLUE).setFontSize(9))
+                .add(new Paragraph(getFieldValue(paiement.getArticle())).setBold().setFontColor(BLACK).setFontSize(9).setUnderline())
+                .add(new Paragraph("              Par : ").setBold().setFontColor(PRIMARY_BLUE).setFontSize(9))
+                .add(new Paragraph(getFieldValue(paiement.getPar())).setBold().setFontColor(BLACK).setFontSize(9).setUnderline())
+                .add(new Paragraph("              Lig : ").setBold().setFontColor(PRIMARY_BLUE).setFontSize(9))
+                .add(new Paragraph(getFieldValue(paiement.getLig())).setBold().setFontColor(BLACK).setFontSize(9).setUnderline())
+                .setMultipliedLeading(1f);
 
-        // Code CGNC
-        Cell label2 = new Cell().add(new Paragraph("Code CGNC:")
-                .setBold()
-                .setFontColor(PRIMARY_BLUE)
-                .setFontSize(9))
-                .setBorder(Border.NO_BORDER)
-                .setPadding(4);
-        Cell value2 = new Cell().add(new Paragraph(getFieldValue(paiement.getCodeCgnc()))
-                .setBold()
-                .setFontColor(BLACK)
-                .setFontSize(9))
-                .setBorder(new DottedBorder(BLACK, 1f))
-                .setPaddingBottom(2)
-                .setPadding(4);
-        table.addCell(label2);
-        table.addCell(value2);
+        Cell cell = new Cell().add(line)
+                .setBackgroundColor(LIGHT_GRAY_BG)
+                .setBorder(new SolidBorder(LIGHT_BORDER, 0.5f))
+                .setPadding(6)
+                .setTextAlignment(TextAlignment.CENTER);
+        outer.addCell(cell);
 
-        // Article
-        Cell label3 = new Cell().add(new Paragraph("Article:")
-                .setBold()
-                .setFontColor(PRIMARY_BLUE)
-                .setFontSize(9))
-                .setBorder(Border.NO_BORDER)
-                .setPadding(4);
-        Cell value3 = new Cell().add(new Paragraph(getFieldValue(paiement.getArticle()))
-                .setBold()
-                .setFontColor(BLACK)
-                .setFontSize(9))
-                .setBorder(new DottedBorder(BLACK, 1f))
-                .setPaddingBottom(2)
-                .setPadding(4);
-        table.addCell(label3);
-        table.addCell(value3);
-
-        // Par
-        Cell label4 = new Cell().add(new Paragraph("Par:")
-                .setBold()
-                .setFontColor(PRIMARY_BLUE)
-                .setFontSize(9))
-                .setBorder(Border.NO_BORDER)
-                .setPadding(4);
-        Cell value4 = new Cell().add(new Paragraph(getFieldValue(paiement.getPar()))
-                .setBold()
-                .setFontColor(BLACK)
-                .setFontSize(9))
-                .setBorder(new DottedBorder(BLACK, 1f))
-                .setPaddingBottom(2)
-                .setPadding(4);
-        table.addCell(label4);
-        table.addCell(value4);
-
-        // Lig
-        Cell label5 = new Cell().add(new Paragraph("Lig:")
-                .setBold()
-                .setFontColor(PRIMARY_BLUE)
-                .setFontSize(9))
-                .setBorder(Border.NO_BORDER)
-                .setPadding(4);
-        Cell value5 = new Cell().add(new Paragraph(getFieldValue(paiement.getLig()))
-                .setBold()
-                .setFontColor(BLACK)
-                .setFontSize(9))
-                .setBorder(new DottedBorder(BLACK, 1f))
-                .setPaddingBottom(2)
-                .setPadding(4);
-        table.addCell(label5);
-        table.addCell(value5);
-
-        document.add(table);
-    }
+        document.add(outer);
+ }
 
     private void addAdministrativeText(Document document, TypePaiement type) {
         String text = getTexteAdministratif(type);
@@ -310,8 +257,8 @@ public class PdfGenerationService {
                 .setBold()
                 .setFontColor(BLACK)
                 .setFontSize(9))
-                .setBorder(new DottedBorder(BLACK, 1f))
-                .setPaddingBottom(2)
+                .setBorder(Border.NO_BORDER)
+                .setPaddingLeft(10)
                 .setPadding(4);
         table.addCell(label1);
         table.addCell(value1);
@@ -327,8 +274,8 @@ public class PdfGenerationService {
                 .setBold()
                 .setFontColor(BLACK)
                 .setFontSize(9))
-                .setBorder(new DottedBorder(BLACK, 1f))
-                .setPaddingBottom(2)
+                .setBorder(Border.NO_BORDER)
+                .setPaddingLeft(10)
                 .setPadding(4);
         table.addCell(label2);
         table.addCell(value2);
@@ -344,8 +291,8 @@ public class PdfGenerationService {
                 .setBold()
                 .setFontColor(BLACK)
                 .setFontSize(9))
-                .setBorder(new DottedBorder(BLACK, 1f))
-                .setPaddingBottom(2)
+                .setBorder(Border.NO_BORDER)
+                .setPaddingLeft(10)
                 .setPadding(4);
         table.addCell(label3);
         table.addCell(value3);
@@ -361,8 +308,8 @@ public class PdfGenerationService {
                 .setBold()
                 .setFontColor(BLACK)
                 .setFontSize(9))
-                .setBorder(new DottedBorder(BLACK, 1f))
-                .setPaddingBottom(2)
+                .setBorder(Border.NO_BORDER)
+                .setPaddingLeft(10)
                 .setPadding(4);
         table.addCell(label4);
         table.addCell(value4);
@@ -378,8 +325,8 @@ public class PdfGenerationService {
                 .setBold()
                 .setFontColor(BLACK)
                 .setFontSize(9))
-                .setBorder(new DottedBorder(BLACK, 1f))
-                .setPaddingBottom(2)
+                .setBorder(Border.NO_BORDER)
+                .setPaddingLeft(10)
                 .setPadding(4);
         table.addCell(label5);
         table.addCell(value5);
@@ -395,8 +342,8 @@ public class PdfGenerationService {
                 .setBold()
                 .setFontColor(BLACK)
                 .setFontSize(9))
-                .setBorder(new DottedBorder(BLACK, 1f))
-                .setPaddingBottom(2)
+                .setBorder(Border.NO_BORDER)
+                .setPaddingLeft(10)
                 .setPadding(4);
         table.addCell(label6);
         table.addCell(value6);
@@ -412,8 +359,8 @@ public class PdfGenerationService {
                 .setBold()
                 .setFontColor(BLACK)
                 .setFontSize(9))
-                .setBorder(new DottedBorder(BLACK, 1f))
-                .setPaddingBottom(2)
+                .setBorder(Border.NO_BORDER)
+                .setPaddingLeft(10)
                 .setPadding(4);
         table.addCell(affectationLabel);
         table.addCell(affectationValue);
@@ -422,44 +369,33 @@ public class PdfGenerationService {
     }
 
     private void addRibBlock(Document document, Professeur professeur) {
-        if (professeur == null) {
-            return;
-        }
+        if (professeur == null) return;
         String rib = getFormattedRib(professeur);
-        if (rib.isEmpty()) {
-            return;
-        }
+        if (rib.isEmpty()) return;
 
-        Table table = new Table(new float[]{1, 3}); // label, value
+        Table table = new Table(1);
         table.setWidth(UnitValue.createPercentValue(100));
         table.setMarginBottom(4);
-        // No background color
+        table.setBorder(new DottedBorder(LIGHT_BORDER, 1f));
 
-        // Label
-        Cell labelCell = new Cell().add(new Paragraph("RIB :"))
-                .setFontSize(9)
-                .setFontColor(PRIMARY_BLUE)
-                .setPadding(4);
-        // Value
-        Cell valueCell = new Cell().add(new Paragraph(rib))
-                .setFontSize(9)
-                .setFontColor(BLACK)
-                .setBorderBottom(new DottedBorder(BLACK, 1f))
-                .setPaddingBottom(2)
-                .setPadding(4);
-        table.addCell(labelCell);
-        table.addCell(valueCell);
+        Paragraph ribPara = new Paragraph()
+                .add(new Paragraph("RIB : ").setBold().setFontColor(PRIMARY_BLUE).setFontSize(9))
+                .add(new Paragraph(rib).setBold().setFontColor(PRIMARY_BLUE).setFontSize(10))
+                .setTextAlignment(TextAlignment.CENTER);
+
+        Cell cell = new Cell().add(ribPara)
+                .setBorder(Border.NO_BORDER)
+                .setPadding(5);
+        table.addCell(cell);
 
         document.add(table);
     }
 
     private void addOperationsTable(Document document, Paiement paiement) {
-        // Column widths: 3,2,2,2,2,2 (nature, date début, date fin, heures, taux, montant brut)
         Table table = new Table(new float[]{2.5f, 1.5f, 1.5f, 1f, 1f, 1.5f});
         table.setWidth(UnitValue.createPercentValue(100));
         table.setMarginBottom(4);
 
-        // Header row
         addTableHeaderCell(table, "NATURE DES OPÉRATIONS", PRIMARY_BLUE, WHITE);
         addTableHeaderCell(table, "DATE DÉBUT", PRIMARY_BLUE, WHITE);
         addTableHeaderCell(table, "DATE FIN", PRIMARY_BLUE, WHITE);
@@ -467,32 +403,46 @@ public class PdfGenerationService {
         addTableHeaderCell(table, "TAUX", PRIMARY_BLUE, WHITE);
         addTableHeaderCell(table, "MONTANT BRUT", PRIMARY_BLUE, WHITE);
 
-        // Data row
+        String heuresValue = getFieldValue(paiement.getNombreHeures() != null
+                ? paiement.getNombreHeures().stripTrailingZeros().toPlainString() : "");
+        String tauxValue = getFieldValue(paiement.getTaux() != null
+                ? paiement.getTaux().stripTrailingZeros().toPlainString() : "");
+        String montantBrutStr = formatMontant(paiement.getMontantBrut()) + " DH";
+
         addOperationsDataCell(table, getFieldValue(paiement.getObjetReglement()), null);
-        addOperationsDataCell(table, getFieldValue(paiement.getDateDebut() != null ? paiement.getDateDebut().toString() : ""), null);
-        addOperationsDataCell(table, getFieldValue(paiement.getDateFin() != null ? paiement.getDateFin().toString() : ""), null);
-        addOperationsDataCell(table, getFieldValue(paiement.getNombreHeures() != null ? paiement.getNombreHeures().stripTrailingZeros().toPlainString() : ""), null);
-        addOperationsDataCell(table, getFieldValue(paiement.getTaux() != null ? paiement.getTaux().stripTrailingZeros().toPlainString() : ""), null);
-        String montantBrutStr = getFieldValue(paiement.getMontantBrut() != null ?
-                paiement.getMontantBrut().stripTrailingZeros().toPlainString().replace(".", ",") : "") + " DH";
+        addOperationsDataCell(table, paiement.getDateDebut() != null ? paiement.getDateDebut().toString() : "", null);
+        addOperationsDataCell(table, paiement.getDateFin() != null ? paiement.getDateFin().toString() : "", null);
+        addOperationsDataCell(table, heuresValue, null);
+        addOperationsDataCell(table, tauxValue, null);
         addOperationsDataCell(table, montantBrutStr, null);
 
-        // Spacer row
+        // Ligne vide
         for (int i = 0; i < 6; i++) {
-            table.addCell(new Cell().setBorder(new SolidBorder(LIGHT_BORDER, 0.5f)).setHeight(10));
+                table.addCell(new Cell().setBorder(new SolidBorder(LIGHT_BORDER, 0.5f)).setHeight(10));
         }
 
-        // Total row
-        String heuresValue = getFieldValue(paiement.getNombreHeures() != null ? paiement.getNombreHeures().stripTrailingZeros().toPlainString() : "");
-        addOperationsDataCell(table, "TOTAL", LIGHT_GRAY_BG);
-        addOperationsDataCell(table, "", LIGHT_GRAY_BG);
-        addOperationsDataCell(table, "", LIGHT_GRAY_BG);
-        addOperationsDataCell(table, heuresValue, LIGHT_GRAY_BG);
-        addOperationsDataCell(table, "", LIGHT_GRAY_BG);
-        addOperationsDataCell(table, montantBrutStr, LIGHT_GRAY_BG);
+        // Ligne TOTAL fusionnée : vide | vide | "Total :" | heures | "Total brut:" | montant
+        table.addCell(new Cell().setBackgroundColor(LIGHT_GRAY_BG).setBorder(new SolidBorder(LIGHT_BORDER, 0.5f)));
+        table.addCell(new Cell().setBackgroundColor(LIGHT_GRAY_BG).setBorder(new SolidBorder(LIGHT_BORDER, 0.5f)));
+
+        table.addCell(new Cell()
+                .add(new Paragraph("Total :").setBold().setFontSize(9).setTextAlignment(TextAlignment.RIGHT))
+                .setBackgroundColor(LIGHT_GRAY_BG).setBorder(new SolidBorder(LIGHT_BORDER, 0.5f)).setPadding(4));
+
+        table.addCell(new Cell()
+                .add(new Paragraph(heuresValue).setBold().setFontSize(9).setTextAlignment(TextAlignment.CENTER))
+                .setBackgroundColor(LIGHT_GRAY_BG).setBorder(new SolidBorder(LIGHT_BORDER, 0.5f)).setPadding(4));
+
+        table.addCell(new Cell()
+                .add(new Paragraph("Total brut:").setBold().setFontSize(9).setTextAlignment(TextAlignment.RIGHT))
+                .setBackgroundColor(LIGHT_GRAY_BG).setBorder(new SolidBorder(LIGHT_BORDER, 0.5f)).setPadding(4));
+
+        table.addCell(new Cell()
+                .add(new Paragraph(montantBrutStr).setBold().setFontSize(9).setTextAlignment(TextAlignment.CENTER))
+                .setBackgroundColor(LIGHT_GRAY_BG).setBorder(new SolidBorder(LIGHT_BORDER, 0.5f)).setPadding(4));
 
         document.add(table);
-    }
+}
 
     private void addArreteDeSomme(Document document, BigDecimal montantNet) {
         // Create a paragraph with a left blue bar: we can use a table with two columns: first column width 3pt with background PRIMARY_BLUE, second column the text.
@@ -526,112 +476,71 @@ public class PdfGenerationService {
     }
 
     private void addIntermediateSignatures(Document document) {
-        // Two signature lines: Responsable and Intéressé
         Table signaturesTable = new Table(new float[]{1, 1});
         signaturesTable.setWidth(UnitValue.createPercentValue(100));
         signaturesTable.setMarginBottom(6);
 
-        // Première colonne : Le Responsable
-        Cell respLabel = new Cell().add(new Paragraph("Fait à Oujda, le __________"))
-                .setBorder(Border.NO_BORDER);
-        Cell respName = new Cell().add(new Paragraph("Le Responsable"))
-                .setBorder(Border.NO_BORDER)
-                .setTextAlignment(TextAlignment.CENTER);
-        signaturesTable.addCell(respLabel);
-        signaturesTable.addCell(respName);
+        signaturesTable.addCell(new Cell().add(new Paragraph("Fait à Oujda, le __________"))
+                .setBorder(Border.NO_BORDER));
+        signaturesTable.addCell(new Cell().add(new Paragraph("Fait à Oujda, le __________"))
+                .setBorder(Border.NO_BORDER));
 
-        // Deuxième colonne : L'Intéressé
-        Cell intLabel = new Cell().add(new Paragraph("Fait à Oujda, le __________"))
-                .setBorder(Border.NO_BORDER);
-        Cell intName = new Cell().add(new Paragraph("L'Intéressé"))
-                .setBorder(Border.NO_BORDER)
-                .setTextAlignment(TextAlignment.CENTER);
-        signaturesTable.addCell(intLabel);
-        signaturesTable.addCell(intName);
+        signaturesTable.addCell(new Cell().add(new Paragraph("Le Responsable").setBold().setUnderline())
+                .setBorder(Border.NO_BORDER));
+        signaturesTable.addCell(new Cell().add(new Paragraph("L'Intéressé").setBold().setUnderline())
+                .setBorder(Border.NO_BORDER));
 
         document.add(signaturesTable);
-    }
+  }
 
     private void addNetAPayerBlock(Document document, Paiement paiement) {
-        // Outer table with light border
         Table outerTable = new Table(1);
         outerTable.setWidth(UnitValue.createPercentValue(100));
         outerTable.setMarginBottom(8);
         outerTable.setBorder(new SolidBorder(LIGHT_BORDER, 1f));
-        outerTable.setPadding(2); // reduced padding
+        outerTable.setPadding(0);
 
-        // Inner table with two columns for label and value
         Table innerTable = new Table(new float[]{3, 2});
         innerTable.setWidth(UnitValue.createPercentValue(100));
 
-        // MONTANT BRUT line
-        Cell montantBrutLabel = new Cell().add(new Paragraph("MONTANT BRUT :"))
-                .setBold()
-                .setFontSize(10)
-                .setFontColor(BLACK)
-                .setTextAlignment(TextAlignment.LEFT)
-                .setPadding(2);
-        Cell montantBrutValue = new Cell().add(new Paragraph(
-                formatMontant(paiement.getMontantBrut()) + " DH"))
-                .setFontSize(10)
-                .setFontColor(BLACK)
-                .setTextAlignment(TextAlignment.RIGHT)
-                .setPadding(2);
-        innerTable.addCell(montantBrutLabel);
-        innerTable.addCell(montantBrutValue);
+        // MONTANT BRUT
+        innerTable.addCell(new Cell().add(new Paragraph("MONTANT BRUT :"))
+                .setBold().setFontSize(10).setFontColor(BLACK)
+                .setBorder(Border.NO_BORDER).setPadding(5));
+        innerTable.addCell(new Cell().add(new Paragraph(formatMontant(paiement.getMontantBrut()) + " DH"))
+                .setBold().setFontSize(10).setFontColor(BLACK)
+                .setTextAlignment(TextAlignment.RIGHT).setBorder(Border.NO_BORDER).setPadding(5));
 
-        // Retenue IR line
+        // Retenue IR (label ET valeur en rouge)
         String retiLabel = "Retenue IR :";
         if (paiement.getTauxIr() != null && paiement.getTauxIr().compareTo(BigDecimal.ZERO) > 0) {
-            retiLabel = "Retenue IR (" + paiement.getTauxIr().stripTrailingZeros().toPlainString() + "%) :";
+                retiLabel = "Retenue IR (" + paiement.getTauxIr().stripTrailingZeros().toPlainString() + "%) :";
         } else if (paiement.getMontantBrut() != null && paiement.getMontantBrut().compareTo(BigDecimal.ZERO) > 0 && paiement.getRetenueIr() != null) {
-            BigDecimal taux = paiement.getRetenueIr()
-                    .divide(paiement.getMontantBrut(), 4, RoundingMode.HALF_UP)
-                    .multiply(BigDecimal.valueOf(100))
-                    .setScale(0, RoundingMode.HALF_UP);
-            retiLabel = "Retenue IR (" + taux.toPlainString() + "%) :";
+                BigDecimal taux = paiement.getRetenueIr()
+                        .divide(paiement.getMontantBrut(), 4, RoundingMode.HALF_UP)
+                        .multiply(BigDecimal.valueOf(100))
+                        .setScale(0, RoundingMode.HALF_UP);
+                retiLabel = "Retenue IR (" + taux.toPlainString() + "%) :";
         }
-        Cell retenueIRLabel = new Cell().add(new Paragraph(retiLabel))
-                .setFontSize(10) // not bold per spec
-                .setFontColor(BLACK)
-                .setTextAlignment(TextAlignment.LEFT)
-                .setPadding(2);
-        Cell retenueIRValue = new Cell().add(new Paragraph(
-                formatMontant(paiement.getRetenueIr()) + " DH"))
-                .setFontSize(10)
-                .setFontColor(ALERT_RED)
+        innerTable.addCell(new Cell().add(new Paragraph(retiLabel))
+                .setBold().setFontSize(10).setFontColor(ALERT_RED)
+                .setBorder(Border.NO_BORDER).setPadding(5));
+        innerTable.addCell(new Cell().add(new Paragraph(formatMontant(paiement.getRetenueIr()) + " DH"))
+                .setFontSize(10).setFontColor(ALERT_RED)
+                .setTextAlignment(TextAlignment.RIGHT).setBorder(Border.NO_BORDER).setPadding(5));
+
+        // NET À PAYER
+        innerTable.addCell(new Cell().add(new Paragraph("NET À PAYER :"))
+                .setBold().setFontSize(11).setFontColor(NET_LABEL_GRAY)
+                .setBorder(Border.NO_BORDER).setBorderTop(new SolidBorder(LIGHT_BORDER, 1f)).setPadding(5));
+        innerTable.addCell(new Cell().add(new Paragraph(formatMontant(paiement.getMontantNet()) + " DH"))
+                .setBold().setFontSize(11).setFontColor(NET_LABEL_GRAY)
                 .setTextAlignment(TextAlignment.RIGHT)
-                .setPadding(2);
-        innerTable.addCell(retenueIRLabel);
-        innerTable.addCell(retenueIRValue);
+                .setBorder(Border.NO_BORDER).setBorderTop(new SolidBorder(LIGHT_BORDER, 1f)).setPadding(5));
 
-        // NET À PAYER line with top border
-        Cell netLabelCell = new Cell().add(new Paragraph("NET À PAYER :"))
-                .setBold()
-                .setFontSize(11)
-                .setFontColor(NET_LABEL_GRAY)
-                .setTextAlignment(TextAlignment.LEFT)
-                .setPadding(2)
-                .setBorderTop(new SolidBorder(LIGHT_BORDER, 0.5f));
-        Cell netValueCell = new Cell().add(new Paragraph(
-                formatMontant(paiement.getMontantNet()) + " DH"))
-                .setBold()
-                .setFontSize(11)
-                .setFontColor(NET_LABEL_GRAY)
-                .setTextAlignment(TextAlignment.RIGHT)
-                .setPadding(2)
-                .setBorderTop(new SolidBorder(LIGHT_BORDER, 0.5f));
-
-        innerTable.addCell(netLabelCell);
-        innerTable.addCell(netValueCell);
-
-        // Add inner table to outer table
-        Cell outerCell = new Cell().add(innerTable)
-                .setBorder(Border.NO_BORDER);
-        outerTable.addCell(outerCell);
-
+        outerTable.addCell(new Cell().add(innerTable).setBorder(Border.NO_BORDER));
         document.add(outerTable);
-    }
+  }
 
     private void addFooterValidation(Document document, BigDecimal montantNet) {
         // Paragraphe centré : "Arrêté par nous sous-Ordonnateur à la somme de: "
@@ -785,17 +694,14 @@ public class PdfGenerationService {
         return Objects.requireNonNullElse(value, "");
     }
 
-    private String formatMontant(BigDecimal amount) {
-        if (amount == null) {
-            amount = BigDecimal.ZERO;
-        }
-        DecimalFormat df = new DecimalFormat("#,##0.00");
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.FRENCH);
+    private String formatMontant(BigDecimal montant) {
+        if (montant == null) montant = BigDecimal.ZERO;
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.FRANCE);
         symbols.setGroupingSeparator(' ');
-        symbols.setDecimalSeparator(',');
-        df.setDecimalFormatSymbols(symbols);
-        return df.format(amount);
-    }
+        symbols.setDecimalSeparator('.');
+        DecimalFormat df = new DecimalFormat("#,##0.00", symbols);
+        return df.format(montant);
+}
 
     private String getFormattedRib(Professeur professeur) {
         if (professeur == null) {
