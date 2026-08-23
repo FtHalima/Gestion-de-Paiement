@@ -1,3 +1,14 @@
+error id: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/LoginController.java:_empty_/FXMLLoader#
+file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/LoginController.java
+empty definition using pc, found symbol in pc: _empty_/FXMLLoader#
+found definition using semanticdb; symbol local6
+empty definition using fallback
+non-local guesses:
+
+offset: 2118
+uri: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/LoginController.java
+text:
+```scala
 package com.gestionpaiements.app.controller;
 
 import com.gestionpaiements.app.model.Utilisateur;
@@ -62,8 +73,7 @@ public class LoginController {
                                 Stage loginStage = (Stage) loginButton.getScene().getWindow();
                                 loginStage.close();
                                 // Load main view
-                                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/gestionpaiements/app/fxml/MainView.fxml"));
-                                loader.setControllerFactory(MainApp.staticApplicationContext::getBean);  // ✅ ligne ajoutée
+                                @@FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/gestionpaiements/app/fxml/MainView.fxml"));
                                 Parent root = loader.load();
                                 Stage mainStage = new Stage();
                                 mainStage.setTitle("Gestion Paiements");
@@ -94,3 +104,9 @@ public class LoginController {
         alert.showAndWait();
     }
 }
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: _empty_/FXMLLoader#

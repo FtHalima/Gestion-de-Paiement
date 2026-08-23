@@ -32,10 +32,15 @@
    <bottom>
       <VBox alignment="CENTER" spacing="10">
          <Button text="Ajouter un paiement" fx:id="addPaiementButton" onAction="#handleAddPaiement"/>
+            <HBox spacing="10" alignment="CENTER">
+              <Button text="Exporter" fx:id="exportButton" onAction="#handleExport"/>
+             <Button text="Archives" fx:id="archivesButton" onAction="#handleArchives"/>
+            </HBox>
          <padding>
             <Insets top="10" right="10" bottom="10" left="10"/>
          </padding>
       </VBox>
+      
    </bottom>
    <padding>
       <Insets top="20" right="20" bottom="20" left="20"/>

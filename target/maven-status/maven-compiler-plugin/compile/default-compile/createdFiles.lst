@@ -10,6 +10,7 @@ com\gestionpaiements\app\service\PdfGenerationService.class
 com\gestionpaiements\app\dao\PaiementRepository.class
 com\gestionpaiements\app\service\ProfesseurService$TauxIR.class
 com\gestionpaiements\app\service\PaiementService$TauxIRResult.class
+com\gestionpaiements\app\service\ExcelFileManagerService.class
 com\gestionpaiements\app\service\ProfesseurService.class
 com\gestionpaiements\app\controller\PdfGenerationController.class
 com\gestionpaiements\app\controller\AjouterPaiementController.class

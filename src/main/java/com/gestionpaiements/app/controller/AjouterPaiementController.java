@@ -11,7 +11,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.ButtonBar;
 import javafx.scene.layout.VBox;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -21,9 +20,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -32,6 +28,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.gestionpaiements.app.service.ExcelFileManagerService;
 
 @Component
 public class AjouterPaiementController {
@@ -44,6 +44,9 @@ public class AjouterPaiementController {
 
     @Autowired
     private PdfGenerationService pdfGenerationService;
+
+    @Autowired
+    private ExcelFileManagerService excelFileManagerService;
 
     // Fields from FXML
     @FXML private TextField cinField;
@@ -633,6 +636,14 @@ public class AjouterPaiementController {
         // Optional: log final paiement ID
         System.out.println("PAIEMENT ENREGISTRÉ : idPaiement=" + savedPaiement.getIdPaiement());
 
+        // Ajout automatique dans le fichier Excel actif
+        try {
+            excelFileManagerService.appendPaiement(savedPaiement);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Paiement enregistré en base, mais erreur lors de l'écriture dans Excel : " + e.getMessage());
+        }
+
         // Show success
         Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
         successAlert.setTitle("Paiement enregistré");
@@ -849,10 +860,9 @@ public class AjouterPaiementController {
                 professeurToSave.setEchelle(echelleField.getText().trim().isEmpty() ? null : Integer.valueOf(echelleField.getText().trim()));
                 professeurToSave.setAffectation(affectationField.getText().trim());
                 professeurToSave.setRibBanque(banqueField.getText());
-                currentProfesseur.setRibVille(villeField.getText());
-                currentProfesseur.setRibNumeroCompte(numeroCompteField.getText());
-                currentProfesseur.setRibCle(cleField.getText());
-                professeurToSave = currentProfesseur;
+                professeurToSave.setRibVille(villeField.getText());
+                professeurToSave.setRibNumeroCompte(numeroCompteField.getText());
+                professeurToSave.setRibCle(cleField.getText());
             }
 
             // Log RIB before saving professor
@@ -903,6 +913,14 @@ public class AjouterPaiementController {
 
             // Optional: log final paiement ID
             System.out.println("PAIEMENT ENREGISTRÉ (PDF) : idPaiement=" + savedPaiement.getIdPaiement());
+
+            // Ajout automatique dans le fichier Excel actif
+            try {
+                excelFileManagerService.appendPaiement(savedPaiement);
+            } catch (Exception e) {
+                e.printStackTrace();
+                showError("Paiement enregistré en base, mais erreur lors de l'écriture dans Excel : " + e.getMessage());
+            }
 
             // Generate PDF
             ByteArrayInputStream pdfInputStream = pdfGenerationService.genererPdfEstadoSums(savedPaiement.getIdPaiement());
