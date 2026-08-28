@@ -14,6 +14,8 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.TitledPane?>
 
+<?import javafx.scene.control.TextArea?>
+
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.gestionpaiements.app.controller.AjouterPaiementController"
@@ -165,6 +167,27 @@
         </GridPane>
     </TitledPane>
 
+    <!-- Section: Déplacement (visible uniquement pour ce type) -->
+    <TitledPane fx:id="deplacementSection" text="Détails du déplacement" visible="false" managed="false">
+        <GridPane hgap="10" vgap="8">
+            <columnConstraints>
+                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="140"/>
+                <ColumnConstraints hgrow="ALWAYS"/>
+                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="140"/>
+                <ColumnConstraints hgrow="ALWAYS"/>
+            </columnConstraints>
+            <Label text="Motif de déplacement :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <TextField fx:id="motifDeplacementField" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="0"/>
+            <Label text="Indication précise du parcours :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <TextArea fx:id="parcoursField" prefRowCount="2" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1"/>
+            <Label text="Heure de départ (HH:mm) :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+            <TextField fx:id="heureDepartField" promptText="08:00" maxWidth="100" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            <Label text="Heure de retour (HH:mm) :" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+            <TextField fx:id="heureRetourField" promptText="18:00" maxWidth="100" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+        </GridPane>
+    </TitledPane>
+
+    <!-- Section: Calcul du paiement -->
     <!-- Section: Calcul du paiement -->
     <TitledPane text="Calcul du paiement">
         <GridPane hgap="10" vgap="8">
@@ -174,17 +197,17 @@
                 <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="120"/>
                 <ColumnConstraints hgrow="ALWAYS" maxWidth="150"/>
             </columnConstraints>
-            <Label text="Nombre d'heures :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <Label fx:id="nombreHeuresTitleLabel" text="Nombre d'heures :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
             <TextField fx:id="nombreHeuresField" promptText="0.0" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-            <Label text="Taux :" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+            <Label fx:id="tauxTitleLabel" text="Taux :" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
             <TextField fx:id="tauxField" promptText="0.00" editable="false" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
-            <Label text="IR % :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <Label fx:id="irTitleLabel" text="IR % :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
             <ComboBox fx:id="irCombo" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-            <Label text="Montant brut  :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+            <Label fx:id="montantBrutTitleLabel" text="Montant brut  :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
             <Label fx:id="montantBrutLabel" text="0,00 " style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-            <Label text="Retenue IR  :" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+            <Label fx:id="retenueIrTitleLabel" text="Retenue IR  :" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
             <Label fx:id="retenueIrLabel" text="0,00 " style="-fx-font-weight: bold;" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
-            <Label text="Montant net  :" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+            <Label fx:id="montantNetTitleLabel" text="Montant net  :" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
             <Label fx:id="montantNetLabel" text="0,00 " style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
         </GridPane>
     </TitledPane>

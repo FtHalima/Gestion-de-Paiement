@@ -13,6 +13,8 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import java.time.LocalTime;
+
 @Entity
 @Table(name = "paiement")
 public class Paiement {
@@ -92,6 +94,20 @@ public class Paiement {
 
     @Column(name = "lig")
     private String lig;
+
+
+    @Column(name = "motif_deplacement")
+    private String motifDeplacement;
+
+    @Column(name = "parcours")
+    private String parcours;
+
+    @Column(name = "heure_depart")
+    private LocalTime heureDepart;
+
+    @Column(name = "heure_retour")
+    private LocalTime heureRetour;
+
 
     // Default constructor
     public Paiement() {
@@ -307,5 +323,37 @@ public class Paiement {
 
     public void setLig(String lig) {
         this.lig = lig;
+    }
+
+    public String getMotifDeplacement() {
+    return motifDeplacement;
+}
+
+    public void setMotifDeplacement(String motifDeplacement) {
+        this.motifDeplacement = motifDeplacement;
+    }
+
+    public String getParcours() {
+        return parcours;
+    }
+
+    public void setParcours(String parcours) {
+        this.parcours = parcours;
+    }
+
+    public LocalTime getHeureDepart() {
+        return heureDepart;
+    }
+
+    public void setHeureDepart(LocalTime heureDepart) {
+        this.heureDepart = heureDepart;
+    }
+
+    public LocalTime getHeureRetour() {
+        return heureRetour;
+    }
+
+    public void setHeureRetour(LocalTime heureRetour) {
+        this.heureRetour = heureRetour;
     }
 }

@@ -1,48 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.gestionpaiements.app.controller.MainViewController">
-   <top>
-      <VBox spacing="5" alignment="CENTER">
-         <Label text="Gestion des Paiements" style="-fx-font-size: 18px; -fx-font-weight: bold;">
-            <padding>
-               <Insets bottom="5"/>
-            </padding>
-         </Label>
-         <Label fx:id="statusLabel" text="-" />
-      </VBox>
-   </top>
-   <center>
-      <VBox spacing="20" alignment="CENTER">
-         <Button text="Vacataire" fx:id="vacataireButton" onAction="#handleVacataire" minWidth="150"/>
-         <Button text="Heure supplémentaire" fx:id="heureSupButton" onAction="#handleHeureSup" minWidth="150"/>
-         <Button text="Déplacement" fx:id="deplacementButton" onAction="#handleDeplacement" minWidth="150"/>
-      </VBox>
-   </center>
-   <bottom>
-      <VBox alignment="CENTER" spacing="10">
-         <Button text="Ajouter un paiement" fx:id="addPaiementButton" onAction="#handleAddPaiement"/>
-            <HBox spacing="10" alignment="CENTER">
-              <Button text="Exporter" fx:id="exportButton" onAction="#handleExport"/>
-             <Button text="Archives" fx:id="archivesButton" onAction="#handleArchives"/>
-            </HBox>
-         <padding>
-            <Insets top="10" right="10" bottom="10" left="10"/>
-         </padding>
-      </VBox>
-      
-   </bottom>
-   <padding>
-      <Insets top="20" right="20" bottom="20" left="20"/>
-   </padding>
+            fx:controller="com.gestionpaiements.app.controller.MainViewController"
+            stylesheets="@dashboard.css"
+            styleClass="root-pane">
+
+    <left>
+        <VBox styleClass="sidebar" prefWidth="230" spacing="0">
+            <Label text="Gestion des Paiements" styleClass="sidebar-title" wrapText="true">
+                <padding><Insets top="25" right="15" bottom="25" left="20"/></padding>
+            </Label>
+
+            <Button fx:id="navDashboard" text="🏠  Tableau de bord" onAction="#showDashboard" styleClass="nav-button, nav-button-active" maxWidth="Infinity"/>
+            <Button fx:id="navAjouter" text="➕  Ajouter un paiement" onAction="#showAjouterPaiement" styleClass="nav-button" maxWidth="Infinity"/>
+            <Button fx:id="navVacataire" text="👤  Vacataire" onAction="#showVacataire" styleClass="nav-button" maxWidth="Infinity"/>
+            <Button fx:id="navHeureSup" text="🕒  Heure Sup" onAction="#showHeureSup" styleClass="nav-button" maxWidth="Infinity"/>
+            <Button fx:id="navDeplacement" text="🚗  Déplacement" onAction="#showDeplacement" styleClass="nav-button" maxWidth="Infinity"/>
+            <Button fx:id="navArchives" text="🗂  Anciens fichiers" onAction="#showAnciensFichiers" styleClass="nav-button" maxWidth="Infinity"/>
+            
+
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <Button text="⎋  Déconnexion" onAction="#handleLogout" styleClass="nav-button, nav-button-logout" maxWidth="Infinity">
+                <VBox.margin><Insets bottom="20"/></VBox.margin>
+            </Button>
+        </VBox>
+    </left>
+
+    <top>
+        <HBox styleClass="topbar" alignment="CENTER_RIGHT" spacing="10">
+            <padding><Insets top="12" right="25" bottom="12" left="25"/></padding>
+            <Label fx:id="userLabel" text="👤 Admin" styleClass="user-label"/>
+        </HBox>
+    </top>
+
+    <center>
+        <StackPane fx:id="contentArea" styleClass="content-area"/>
+    </center>
+
 </BorderPane>

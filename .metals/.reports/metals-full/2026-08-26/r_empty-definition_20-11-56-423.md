@@ -1,3 +1,14 @@
+error id: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/service/ExcelFileManagerService.java:java/lang/String#
+file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/service/ExcelFileManagerService.java
+empty definition using pc, found symbol in pc: java/lang/String#
+empty definition using semanticdb
+empty definition using fallback
+non-local guesses:
+
+offset: 7489
+uri: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/service/ExcelFileManagerService.java
+text:
+```scala
 package com.gestionpaiements.app.service;
 
 import com.gestionpaiements.app.model.Paiement;
@@ -191,8 +202,14 @@ public class ExcelFileManagerService {
 
             int col = 0;
 
+            @@String gradeEchelle = "";
+            if (prof != null) {
+                String grade = prof.getGrade() != null ? prof.getGrade() : "";
+                String echelle = prof.getEchelle() != null ? prof.getEchelle().toString() : "";
+                gradeEchelle = grade + (echelle.isEmpty() ? "" : " / " + echelle);
+            }
             Cell c1 = row.createCell(col++);
-            c1.setCellValue(prof != null && prof.getEchelle() != null ? prof.getEchelle().toString() : "");
+            c1.setCellValue(gradeEchelle);
             c1.setCellStyle(dataStyle);
 
             Cell c2 = row.createCell(col++);
@@ -330,11 +347,10 @@ public class ExcelFileManagerService {
         }
         return result;
     }
-
-        /**
-     * Exporte une copie d'un fichier archivé donné vers la destination choisie.
-     */
-    public void exportFile(File source, File destination) throws IOException {
-        Files.copy(source.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
-    }
 }
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: java/lang/String#

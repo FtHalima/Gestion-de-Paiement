@@ -43,6 +43,7 @@ import com.itextpdf.layout.properties.HorizontalAlignment;
 import java.time.format.DateTimeFormatter;
 import com.itextpdf.layout.properties.BorderRadius;
 
+import com.itextpdf.layout.properties.VerticalAlignment;
 /**
  * Service for generating PDF État des sommes dues for payments.
  */
@@ -90,35 +91,25 @@ public class PdfGenerationService {
                 ? paiement.getProfesseur().getAffectation()
                 : null;
         addHeader(document, affectation);
-
-        // b. Main Title
         addMainTitle(document, paiement.getTypePaiement());
-
-        // c. Budget Block (Exercice, CGNC, etc.)
         addBudgetBlock(document, paiement);
-
-        // d. Juridical Text (Visas)
         addAdministrativeText(document, paiement.getTypePaiement());
-
-        // e. Beneficiary Information Block
         addBeneficiaryBlock(document, paiement.getProfesseur());
-
-        // f. RIB Block
         addRibBlock(document, paiement.getProfesseur());
 
-        // g. Operations Table
-        addOperationsTable(document, paiement);
-
-        // h. Arrêté de Somme (First Recall)
+        if (paiement.getTypePaiement() == TypePaiement.DEPLACEMENT) {
+        addMotifDeplacement(document, paiement);
+        addDeplacementOperationsTable(document, paiement);
         addArreteDeSomme(document, paiement.getMontantNet());
-
-        // i. Intermediate Signatures (2 columns)
         addIntermediateSignatures(document);
-
-        // j. Final Net à Payer Block (centered)
+        // Pas de bloc Montant brut / Retenue IR / Net à payer pour le Déplacement
+        } else {
+        addOperationsTable(document, paiement);
+        addArreteDeSomme(document, paiement.getMontantNet());
+        addIntermediateSignatures(document);
         addNetAPayerBlock(document, paiement);
+        }
 
-        // k. Footer / Validation Final
         addFooterValidation(document, paiement.getMontantNet());
 
         document.close();
@@ -261,170 +252,87 @@ public class PdfGenerationService {
 
     private void addBeneficiaryBlock(Document document, Professeur professeur) {
         if (professeur == null) {
-            document.add(new Paragraph("INFORMATIONS DU PROFESSEUR: Non disponible")
-                    .setItalic()
-                    .setMarginBottom(4));
-            return;
+                document.add(new Paragraph("INFORMATIONS DU PROFESSEUR: Non disponible")
+                        .setItalic()
+                        .setMarginBottom(4));
+                return;
         }
 
         Table table = new Table(new float[]{1f, 2f, 0.8f, 1.5f, 0.8f, 1.5f});
         table.setWidth(UnitValue.createPercentValue(100));
         table.setBackgroundColor(LIGHT_GRAY_BG);
-        table.setMarginBottom(4);
-        table.setBorderRadius(new BorderRadius(10));
+        table.setMarginBottom(8);
 
-
-
-        // Line 1: Mr Mme
+        // Ligne 1 : Mr Mme / PPR / CIN
         Cell label1 = new Cell().add(new Paragraph("Mr Mme:")
-                .setBold()
-                .setFontColor(PRIMARY_BLUE)
-                .setFontSize(9))
-                .setBorder(Border.NO_BORDER)
-                .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f)) 
-                .setPadding(4);
+                .setBold().setFontColor(PRIMARY_BLUE).setFontSize(9))
+                .setBorder(Border.NO_BORDER).setPadding(4);
         Cell value1 = new Cell().add(new Paragraph(getFieldValue(professeur.getNom()) + " " + getFieldValue(professeur.getPrenom()))
-                .setBold()
-                .setFontColor(BLACK)
-                .setFontSize(9))
+                .setBold().setFontColor(BLACK).setFontSize(9))
                 .setBorder(Border.NO_BORDER)
-                .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f)) 
-                .setPaddingTop(4)
-                .setPaddingBottom(2)
-                .setPaddingRight(4)
-                .setPaddingLeft(3);
-
+                .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f))
+                .setPaddingLeft(3).setPaddingTop(4).setPaddingBottom(2).setPaddingRight(4);
         table.addCell(label1);
         table.addCell(value1);
 
-        // PPR
         Cell label2 = new Cell().add(new Paragraph("PPR:")
-                .setBold()
-                .setFontColor(PRIMARY_BLUE)
-                .setFontSize(9))
-                .setBorder(Border.NO_BORDER)
-                .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f))
-                .setPadding(4);
+                .setBold().setFontColor(PRIMARY_BLUE).setFontSize(9))
+                .setBorder(Border.NO_BORDER).setPadding(4);
         Cell value2 = new Cell().add(new Paragraph(getFieldValue(professeur.getPpr()))
-                .setBold()
-                .setFontColor(BLACK)
-                .setFontSize(9))
+                .setBold().setFontColor(BLACK).setFontSize(9))
                 .setBorder(Border.NO_BORDER)
                 .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f))
-                .setPaddingTop(4)
-                .setPaddingBottom(2)
-                .setPaddingRight(4)
-                .setPaddingLeft(3);
+                .setPaddingLeft(3).setPaddingTop(4).setPaddingBottom(2).setPaddingRight(4);
         table.addCell(label2);
         table.addCell(value2);
 
-        // CIN
         Cell label3 = new Cell().add(new Paragraph("C.I.N:")
-                .setBold()
-                .setFontColor(PRIMARY_BLUE)
-                .setFontSize(9))
-                .setBorder(Border.NO_BORDER)
-                .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f))
-                .setPadding(4);
+                .setBold().setFontColor(PRIMARY_BLUE).setFontSize(9))
+                .setBorder(Border.NO_BORDER).setPadding(4);
         Cell value3 = new Cell().add(new Paragraph(getFieldValue(professeur.getCin()))
-                .setBold()
-                .setFontColor(BLACK)
-                .setFontSize(9))
+                .setBold().setFontColor(BLACK).setFontSize(9))
                 .setBorder(Border.NO_BORDER)
                 .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f))
-                .setPaddingLeft(4)
-                .setPaddingTop(4)
-                .setPaddingBottom(2)
-                .setPaddingRight(4);
+                .setPaddingLeft(3).setPaddingTop(4).setPaddingBottom(2).setPaddingRight(4);
         table.addCell(label3);
         table.addCell(value3);
 
-        // Line 2: GRADE
+        // Ligne 2 : GRADE / ÉCHELLE / AFFECTATION
         Cell label4 = new Cell().add(new Paragraph("GRADE:")
-                .setBold()
-                .setFontColor(PRIMARY_BLUE)
-                .setFontSize(9))
-                .setBorder(Border.NO_BORDER)
-                .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f))
-                .setPadding(4);
+                .setBold().setFontColor(PRIMARY_BLUE).setFontSize(9))
+                .setBorder(Border.NO_BORDER).setPadding(4);
         Cell value4 = new Cell().add(new Paragraph(getFieldValue(professeur.getGrade()))
-                .setBold()
-                .setFontColor(BLACK)
-                .setFontSize(9))
+                .setBold().setFontColor(BLACK).setFontSize(9))
                 .setBorder(Border.NO_BORDER)
                 .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f))
-                .setPaddingTop(4)
-                .setPaddingBottom(2)
-                .setPaddingRight(4)
-                .setPaddingLeft(3);
+                .setPaddingLeft(3).setPaddingTop(4).setPaddingBottom(2).setPaddingRight(4);
         table.addCell(label4);
         table.addCell(value4);
 
-        // ÉCHELLE
         Cell label5 = new Cell().add(new Paragraph("ÉCHELLE:")
-                .setBold()
-                .setFontColor(PRIMARY_BLUE)
-                .setFontSize(9))
-                .setBorder(Border.NO_BORDER)
-                .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f))
-                .setPadding(4);
+                .setBold().setFontColor(PRIMARY_BLUE).setFontSize(9))
+                .setBorder(Border.NO_BORDER).setPadding(4);
         Cell value5 = new Cell().add(new Paragraph(getFieldValue(professeur.getEchelle() != null ? professeur.getEchelle().toString() : ""))
-                .setBold()
-                .setFontColor(BLACK)
-                .setFontSize(9))
+                .setBold().setFontColor(BLACK).setFontSize(9))
                 .setBorder(Border.NO_BORDER)
                 .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f))
-                .setPaddingLeft(4)
-                .setPaddingTop(4)
-                .setPaddingBottom(2)
-                .setPaddingRight(4);
+                .setPaddingLeft(3).setPaddingTop(4).setPaddingBottom(2).setPaddingRight(4);
         table.addCell(label5);
         table.addCell(value5);
 
-        // DDR
-        Cell label6 = new Cell().add(new Paragraph("DDR:")
-                .setBold()
-                .setFontColor(PRIMARY_BLUE)
-                .setFontSize(9))
+        Cell label6 = new Cell().add(new Paragraph("Affectation:")
+                .setBold().setFontColor(PRIMARY_BLUE).setFontSize(9))
+                .setBorder(Border.NO_BORDER).setPadding(4);
+        Cell value6 = new Cell().add(new Paragraph(getFieldValue(professeur.getAffectation()))
+                .setBold().setFontColor(BLACK).setFontSize(9))
                 .setBorder(Border.NO_BORDER)
                 .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f))
-                .setPadding(4);
-        Cell value6 = new Cell().add(new Paragraph(getFieldValue(professeur.getDdr() != null ? professeur.getDdr().toString() : ""))
-                .setBold()
-                .setFontColor(BLACK)
-                .setFontSize(9))
-                .setBorder(Border.NO_BORDER)
-                .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f))
-                .setPaddingLeft(4)
-                .setPaddingTop(4)
-                .setPaddingBottom(2)
-                .setPaddingRight(4);
+                .setPaddingLeft(3).setPaddingTop(4).setPaddingBottom(2).setPaddingRight(4);
         table.addCell(label6);
         table.addCell(value6);
 
-        // Line 3: Affectation (full width)
-        Cell affectationLabel = new Cell().add(new Paragraph("Affectation:")
-                .setBold()
-                .setFontColor(PRIMARY_BLUE)
-                .setFontSize(9))
-                .setBorder(Border.NO_BORDER)
-                .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f))
-                .setPadding(4);
-        Cell affectationValue = new Cell(1, 5).add(new Paragraph(getFieldValue(professeur.getAffectation()))
-                .setBold()
-                .setFontColor(BLACK)
-                .setFontSize(9))
-                .setBorder(Border.NO_BORDER)
-                .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f))
-                .setPaddingLeft(4)
-                .setPaddingTop(4)
-                .setPaddingBottom(2)
-                .setPaddingRight(4);
-        table.addCell(affectationLabel);
-        table.addCell(affectationValue);
-
         document.add(table);
-    }
+        }
 
     private void addRibBlock(Document document, Professeur professeur) {
         if (professeur == null) return;
@@ -509,6 +417,62 @@ public class PdfGenerationService {
         document.add(table);
 
 }
+
+        private void addMotifDeplacement(Document document, Paiement paiement) {
+        Paragraph motifPara = new Paragraph()
+                .add(new Paragraph("Motif de déplacement : ")
+                        .setBold().setFontColor(PRIMARY_BLUE).setFontSize(9))
+                .add(new Paragraph(getFieldValue(paiement.getMotifDeplacement()))
+                        .setFontColor(BLACK).setFontSize(9))
+                .setMarginTop(6)
+                .setMarginBottom(6);
+        document.add(motifPara);
+        }
+
+        private void addDeplacementOperationsTable(Document document, Paiement paiement) {
+        Table table = new Table(new float[]{1.2f, 1.2f, 2.3f, 1f, 1f, 1.3f, 1.3f, 1.3f});
+        table.setWidth(UnitValue.createPercentValue(100));
+        table.setMarginBottom(4);
+
+        // Ligne d'en-tête 1 (groupes)
+        addTableHeaderCellSpan(table, "DATE DE DÉPLACEMENT", 1, 2);
+        addTableHeaderCellSpan(table, "INDICATION PRÉCISE DU PARCOURS", 2, 1);
+        addTableHeaderCellSpan(table, "HEURE", 1, 2);
+        addTableHeaderCellSpan(table, "NBR DE TAUX DE BASE", 2, 1);
+        addTableHeaderCellSpan(table, "TAUX DE BASE APPLIQUÉ", 2, 1);
+        addTableHeaderCellSpan(table, "MONTANT", 2, 1);
+
+        // Ligne d'en-tête 2 (sous-colonnes : uniquement les groupes qui en ont)
+        addTableHeaderCell(table, "DÉPART", PRIMARY_BLUE, WHITE);
+        addTableHeaderCell(table, "ARRIVÉE", PRIMARY_BLUE, WHITE);
+        addTableHeaderCell(table, "DÉPART", PRIMARY_BLUE, WHITE);
+        addTableHeaderCell(table, "RETOUR", PRIMARY_BLUE, WHITE);
+
+        // Ligne de données
+        addOperationsDataCell(table, paiement.getDateDebut() != null ? paiement.getDateDebut().toString() : "", null);
+        addOperationsDataCell(table, paiement.getDateFin() != null ? paiement.getDateFin().toString() : "", null);
+        addOperationsDataCell(table, getFieldValue(paiement.getParcours()), null);
+        addOperationsDataCell(table, paiement.getHeureDepart() != null ? paiement.getHeureDepart().toString() : "", null);
+        addOperationsDataCell(table, paiement.getHeureRetour() != null ? paiement.getHeureRetour().toString() : "", null);
+        addOperationsDataCell(table, getFieldValue(paiement.getNombreHeures() != null ? paiement.getNombreHeures().stripTrailingZeros().toPlainString() : ""), null);
+        addOperationsDataCell(table, getFieldValue(paiement.getTaux() != null ? paiement.getTaux().stripTrailingZeros().toPlainString() : ""), null);
+        String montantStr = getFieldValue(paiement.getMontantNet() != null ?
+                paiement.getMontantNet().stripTrailingZeros().toPlainString().replace(".", ",") : "") + " DH";
+        addOperationsDataCell(table, montantStr, null);
+
+        document.add(table);
+        }
+
+        private void addTableHeaderCellSpan(Table table, String text, int rowSpan, int colSpan) {
+        Cell cell = new Cell(rowSpan, colSpan).add(new Paragraph(text).setFontSize(8))
+                .setBold()
+                .setBackgroundColor(PRIMARY_BLUE)
+                .setFontColor(WHITE)
+                .setTextAlignment(TextAlignment.CENTER)
+                .setVerticalAlignment(VerticalAlignment.MIDDLE)
+                .setPadding(5);
+        table.addCell(cell);
+        }
 
     private void addArreteDeSomme(Document document, BigDecimal montantNet) {
         // Create a paragraph with a left blue bar: we can use a table with two columns: first column width 3pt with background PRIMARY_BLUE, second column the text.

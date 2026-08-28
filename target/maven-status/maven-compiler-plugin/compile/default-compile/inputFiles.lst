@@ -1,4 +1,5 @@
 C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\dao\UtilisateurRepository.java
+C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\controller\DashboardController.java
 C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\controller\PdfGenerationController.java
 C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\dao\ProfesseurRepository.java
 C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\dao\PaiementRepository.java
@@ -12,6 +13,7 @@ C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiement
 C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\model\ConfigurationApp.java
 C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\controller\PaiementListController.java
 C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\model\Professeur.java
+C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\controller\ArchivesController.java
 C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\model\TypePaiement.java
 C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\service\SessionUtilisateur.java
 C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\service\ExcelFileManagerService.java

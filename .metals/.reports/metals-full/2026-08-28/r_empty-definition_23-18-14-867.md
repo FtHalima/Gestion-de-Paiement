@@ -1,3 +1,14 @@
+error id: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/AjouterPaiementController.java:_empty_/`<any>`#getSelectionModel#
+file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/AjouterPaiementController.java
+empty definition using pc, found symbol in pc: _empty_/`<any>`#getSelectionModel#
+empty definition using semanticdb
+empty definition using fallback
+non-local guesses:
+
+offset: 51822
+uri: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/AjouterPaiementController.java
+text:
+```scala
 package com.gestionpaiements.app.controller;
 
 import com.gestionpaiements.app.model.Professeur;
@@ -1162,7 +1173,7 @@ public class AjouterPaiementController {
             errors.append("- Taux IR obligatoire\n");
         }
         
-        if (typePaiementCombo.getSelectionModel().getSelectedItem() == TypePaiement.DEPLACEMENT) {
+        if (typePaiementCombo.getSelectionMo@@del().getSelectedItem() == TypePaiement.DEPLACEMENT) {
             if (motifDeplacementField.getText().trim().isEmpty()) {
                 errors.append("- Motif de déplacement obligatoire\n");
             }
@@ -1231,3 +1242,9 @@ public class AjouterPaiementController {
         }
     }
 }
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: _empty_/`<any>`#getSelectionModel#

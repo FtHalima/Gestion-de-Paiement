@@ -66,20 +66,24 @@ public class PaiementService {
      * @return résultat contenant les trois montants
      */
     public TauxIRResult calculerMontants(TypePaiement type, BigDecimal nombreHeures, BigDecimal taux, BigDecimal tauxIr) {
-        if (nombreHeures == null || taux == null || tauxIr == null) {
+        if (nombreHeures == null || taux == null) {
             return new TauxIRResult(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
         }
-        // Calcul du montant brut : nombreHeures × taux
-        BigDecimal montantBrut = nombreHeures.multiply(taux);
-        montantBrut = montantBrut.setScale(2, RoundingMode.HALF_UP);
 
-        // Calcul de la retenue IR : montantBrut × (tauxIr / 100)
-        BigDecimal retenuIr = montantBrut.multiply(tauxIr.divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP));
-        retenuIr = retenuIr.setScale(2, RoundingMode.HALF_UP);
+        BigDecimal montantBrut = nombreHeures.multiply(taux).setScale(2, RoundingMode.HALF_UP);
 
-        // Calcul du montant net : montantBrut - retenueIr
-        BigDecimal montantNet = montantBrut.subtract(retenuIr);
-        montantNet = montantNet.setScale(2, RoundingMode.HALF_UP);
+        // Déplacement : pas de retenue IR, le montant brut est directement le montant final
+        if (type == TypePaiement.DEPLACEMENT) {
+            return new TauxIRResult(montantBrut, BigDecimal.ZERO, montantBrut);
+        }
+
+        if (tauxIr == null) {
+            return new TauxIRResult(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        }
+
+        BigDecimal retenuIr = montantBrut.multiply(tauxIr.divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP))
+                .setScale(2, RoundingMode.HALF_UP);
+        BigDecimal montantNet = montantBrut.subtract(retenuIr).setScale(2, RoundingMode.HALF_UP);
 
         return new TauxIRResult(montantBrut, retenuIr, montantNet);
     }
@@ -247,7 +251,7 @@ public class PaiementService {
         return saved;
     }
 
-    /**
+      /**
      * Retourne le paiement le plus récent associé à un professeur donné.
      *
      * @param professeur le professeur
@@ -255,5 +259,28 @@ public class PaiementService {
      */
     public Optional<Paiement> trouverDernierPaiementParProfesseur(Professeur professeur) {
         return paiementRepository.findFirstByProfesseurOrderByIdPaiementDesc(professeur);
+    }
+
+    /**
+     * Retourne les N paiements les plus récents (utile pour le tableau de bord).
+     *
+     * @param limit nombre maximum de paiements à retourner
+     * @return liste des paiements les plus récents, triés du plus récent au plus ancien
+     */
+    public List<Paiement> trouverDerniers(int limit) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+                0, limit, org.springframework.data.domain.Sort.by(
+                        org.springframework.data.domain.Sort.Direction.DESC, "idPaiement"));
+        return paiementRepository.findAll(pageable).getContent();
+    }
+
+        /**
+     * Supprime une liste de paiements.
+     *
+     * @param paiements les paiements à supprimer
+     */
+    @Transactional
+    public void supprimerPaiements(List<Paiement> paiements) {
+        paiementRepository.deleteAll(paiements);
     }
 }

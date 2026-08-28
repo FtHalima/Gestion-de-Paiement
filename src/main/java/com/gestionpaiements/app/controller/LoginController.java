@@ -64,7 +64,7 @@ public class LoginController {
                                 // Load main view
                                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/gestionpaiements/app/fxml/MainView.fxml"));
                                 loader.setControllerFactory(MainApp.staticApplicationContext::getBean);  // ✅ ligne ajoutée
-                                Parent root = loader.load();
+Parent root = loader.load();
                                 Stage mainStage = new Stage();
                                 mainStage.setTitle("Gestion Paiements");
                                 mainStage.setScene(new Scene(root));

@@ -1,3 +1,14 @@
+error id: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/PaiementListController.java:java/lang/Exception#
+file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/PaiementListController.java
+empty definition using pc, found symbol in pc: java/lang/Exception#
+empty definition using semanticdb
+empty definition using fallback
+non-local guesses:
+
+offset: 12566
+uri: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/PaiementListController.java
+text:
+```scala
 package com.gestionpaiements.app.controller;
 
 import com.gestionpaiements.app.model.Paiement;
@@ -19,7 +30,6 @@ import java.util.List;
 import com.gestionpaiements.app.service.ExcelFileManagerService;
 import java.io.File;
 
-import javafx.scene.control.SelectionMode;
 
 @Component
 public class PaiementListController {
@@ -90,9 +100,6 @@ public class PaiementListController {
     private ObservableList<Paiement> masterData = FXCollections.observableArrayList();
     private FilteredList<Paiement> filteredData;
 
-
-    @FXML
-    private Button deleteButton;
     // Called after FXML is loaded
     @FXML
     private void initialize() {
@@ -161,8 +168,6 @@ public class PaiementListController {
         // For numeric columns, we may want to format; but leave as String (they are BigDecimal, will call toString)
         // For date columns, they are LocalDate; toString will produce ISO format; we can later format.
 
-        //nv 
-        paiementTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         // Search
         filteredData = new FilteredList<>(masterData, p -> true);
         paiementTable.setItems(filteredData);
@@ -218,9 +223,9 @@ public class PaiementListController {
                 Professeur prof = paiement.getProfesseur();
                 if (prof == null) return false;
                 return (prof.getCin() != null && prof.getCin().toLowerCase().contains(lower))
-                        || (prof.getPpr() != null && prof.getPpr().toLowerCase().contains(lower))
-                        || (prof.getNom() != null && prof.getNom().toLowerCase().contains(lower))
-                        || (prof.getPrenom() != null && prof.getPrenom().toLowerCase().contains(lower));
+ (prof.getPpr() != null && prof.getPpr().toLowerCase().contains(lower))
+ (prof.getNom() != null && prof.getNom().toLowerCase().contains(lower))
+ (prof.getPrenom() != null && prof.getPrenom().toLowerCase().contains(lower));
             });
         }
         // Update empty label visibility
@@ -232,33 +237,6 @@ public class PaiementListController {
     @FXML
     private void handleRefresh() {
         loadData();
-    }
-
-    @FXML
-    private void handleDeleteSelected() {
-        List<Paiement> selected = new java.util.ArrayList<>(paiementTable.getSelectionModel().getSelectedItems());
-        if (selected.isEmpty()) {
-            showAlert("Aucune sélection", "Veuillez sélectionner au moins un paiement à supprimer.");
-            return;
-        }
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Confirmation de suppression");
-        confirm.setHeaderText(null);
-        confirm.setContentText("Voulez-vous vraiment supprimer " + selected.size()
-                + " paiement(s) sélectionné(s) ? Cette action est irréversible.");
-        confirm.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
-        confirm.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.YES) {
-                try {
-                    paiementService.supprimerPaiements(selected);
-                    loadData();
-                    showAlert("Suppression réussie", selected.size() + " paiement(s) supprimé(s).");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    showAlert("Erreur", "Impossible de supprimer : " + e.getMessage());
-                }
-            }
-        });
     }
 
     @FXML
@@ -276,66 +254,66 @@ public class PaiementListController {
     }
 
     @FXML
-    private void handleExportExcel() {
-        if (currentType == null) return;
-        try {
-            javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
-            fileChooser.setTitle("Exporter le fichier Excel actif");
-            fileChooser.setInitialFileName(currentType.name() + "_export.xlsx");
-            fileChooser.getExtensionFilters().add(
-                    new javafx.stage.FileChooser.ExtensionFilter("Fichiers Excel", "*.xlsx"));
-            File destination = fileChooser.showSaveDialog(retourButton.getScene().getWindow());
-            if (destination != null) {
-                excelFileManagerService.exportActiveFile(currentType, destination);
-                showAlert("Export réussi", "Le fichier a été exporté avec succès.");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible d'exporter le fichier : " + e.getMessage());
+private void handleExportExcel() {
+    if (currentType == null) return;
+    try {
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Exporter le fichier Excel actif");
+        fileChooser.setInitialFileName(currentType.name() + "_export.xlsx");
+        fileChooser.getExtensionFilters().add(
+                new javafx.stage.FileChooser.ExtensionFilter("Fichiers Excel", "*.xlsx"));
+        File destination = fileChooser.showSaveDialog(retourButton.getScene().getWindow());
+        if (destination != null) {
+            excelFileManagerService.exportActiveFile(currentType, destination);
+            showAlert("Export réussi", "Le fichier a été exporté avec succès.");
         }
+    } catch (Exception e) {
+        e.printStackTrace();
+        showAlert("Erreur", "Impossible d'exporter le fichier : " + e.getMessage());
     }
+}
 
-    @FXML
-    private void handleCloseExcel() {
-        if (currentType == null) return;
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Confirmation");
-        confirm.setHeaderText(null);
-        confirm.setContentText("Voulez-vous vraiment clôturer le fichier Excel actif de ce type ? "
-                + "Il sera archivé et un nouveau fichier sera créé pour les prochains paiements.");
-        confirm.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
-        confirm.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.YES) {
-                try {
-                    excelFileManagerService.closeActiveFile(currentType);
-                    showAlert("Fichier clôturé", "Le fichier a été archivé et un nouveau fichier actif a été créé.");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    showAlert("Erreur", "Impossible de clôturer le fichier : " + e.getMessage());
-                }
+@FXML
+private void handleCloseExcel() {
+    if (currentType == null) return;
+    Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+    confirm.setTitle("Confirmation");
+    confirm.setHeaderText(null);
+    confirm.setContentText("Voulez-vous vraiment clôturer le fichier Excel actif de ce type ? "
+            + "Il sera archivé et un nouveau fichier sera créé pour les prochains paiements.");
+    confirm.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
+    confirm.showAndWait().ifPresent(response -> {
+        if (response == ButtonType.YES) {
+            try {
+                excelFileManagerService.closeActiveFile(currentType);
+                showAlert("Fichier clôturé", "Le fichier a été archivé et un nouveau fichier actif a été créé.");
+            } catch (Exception e) {
+                e.printStackTrace();
+                showAlert("Erreur", "Impossible de clôturer le fichier : " + e.getMessage());
             }
-        });
-    }
-
-    @FXML
-    private void handleArchivesExcel() {
-        if (currentType == null) return;
-        try {
-            List<File> archives = excelFileManagerService.getArchiveFiles(currentType);
-            StringBuilder sb = new StringBuilder();
-            if (archives.isEmpty()) {
-                sb.append("Aucun fichier archivé pour ce type pour le moment.");
-            } else {
-                for (File f : archives) {
-                    sb.append(f.getName()).append("\n");
-                }
-            }
-            showAlert("Fichiers archivés", sb.toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible de lister les archives : " + e.getMessage());
         }
+    });
+}
+
+@FXML
+private void handleArchivesExcel() {
+    if (currentType == null) return;
+    try {
+        List<File> archives = excelFileManagerService.getArchiveFiles(currentType);
+        StringBuilder sb = new StringBuilder();
+        if (archives.isEmpty()) {
+            sb.append("Aucun fichier archivé pour ce type pour le moment.");
+        } else {
+            for (File f : archives) {
+                sb.append(f.getName()).append("\n");
+            }
+        }
+        showAlert("Fichiers archivés", sb.toString());
+    } catch (Excep@@tion e) {
+        e.printStackTrace();
+        showAlert("Erreur", "Impossible de lister les archives : " + e.getMessage());
     }
+}
 
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -345,3 +323,9 @@ public class PaiementListController {
         alert.showAndWait();
     }
 }
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: java/lang/Exception#

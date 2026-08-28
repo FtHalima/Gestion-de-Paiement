@@ -11,6 +11,8 @@
 <?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Region?>
+
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.gestionpaiements.app.controller.PaiementListController">
@@ -53,11 +55,17 @@
       </StackPane>
    </center>
    <bottom>
-      <Button text="Retour" fx:id="retourButton" onAction="#handleRetour" alignment="BASELINE_RIGHT">
+      <HBox alignment="CENTER_LEFT" spacing="10">
          <padding>
             <Insets top="10" right="10" bottom="10" left="10"/>
          </padding>
-      </Button>
+         <Button text="Retour" fx:id="retourButton" onAction="#handleRetour"/>
+         <Button text="Supprimer la sélection" fx:id="deleteButton" onAction="#handleDeleteSelected" style="-fx-text-fill: #c0392b;"/>
+         <Region HBox.hgrow="ALWAYS"/>
+         <Button text="Exporter" fx:id="exportExcelButton" onAction="#handleExportExcel"/>
+         <Button text="Archives" fx:id="archivesExcelButton" onAction="#handleArchivesExcel"/>
+         <Button text="Clôturer le fichier" fx:id="closeExcelButton" onAction="#handleCloseExcel" style="-fx-text-fill: #b34700;"/>
+      </HBox>
    </bottom>
    <padding>
       <Insets top="10" right="10" bottom="10" left="10"/>

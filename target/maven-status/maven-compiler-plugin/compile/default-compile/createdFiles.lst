@@ -6,11 +6,15 @@ com\gestionpaiements\app\model\TypePaiement.class
 com\gestionpaiements\app\dao\ProfesseurRepository.class
 com\gestionpaiements\app\model\ConfigurationApp.class
 com\gestionpaiements\app\model\Lot.class
+com\gestionpaiements\app\service\ExcelFileManagerService$1.class
 com\gestionpaiements\app\service\PdfGenerationService.class
+com\gestionpaiements\app\controller\ArchivesController$1.class
+com\gestionpaiements\app\controller\ArchivesController.class
 com\gestionpaiements\app\dao\PaiementRepository.class
 com\gestionpaiements\app\service\ProfesseurService$TauxIR.class
 com\gestionpaiements\app\service\PaiementService$TauxIRResult.class
 com\gestionpaiements\app\service\ExcelFileManagerService.class
+com\gestionpaiements\app\controller\DashboardController.class
 com\gestionpaiements\app\service\ProfesseurService.class
 com\gestionpaiements\app\controller\PdfGenerationController.class
 com\gestionpaiements\app\controller\AjouterPaiementController.class

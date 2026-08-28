@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.gestionpaiements.app.controller.ArchivesController"
+      spacing="15" styleClass="dashboard-root">
+
+    <padding><Insets top="25" right="30" bottom="25" left="30"/></padding>
+
+    <Label text="Anciens fichiers Excel" styleClass="page-title"/>
+
+    <ListView fx:id="archivesListView" VBox.vgrow="ALWAYS"/>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Button text="Retour" fx:id="backButton" onAction="#handleBack"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Exporter le fichier sélectionné" fx:id="exportButton" onAction="#handleExport"/>
+    </HBox>
+
+</VBox>

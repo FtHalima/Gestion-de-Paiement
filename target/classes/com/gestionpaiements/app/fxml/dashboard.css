@@ -1,0 +1,96 @@
+.root-pane {
+    -fx-background-color: #f4f6fa;
+}
+
+/* Sidebar */
+.sidebar {
+    -fx-background-color: #1c2333;
+}
+.sidebar-title {
+    -fx-text-fill: white;
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+}
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c7cbe0;
+    -fx-font-size: 13px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 12 20 12 20;
+    -fx-background-radius: 0;
+    -fx-cursor: hand;
+}
+.nav-button:hover {
+    -fx-background-color: #2a3346;
+    -fx-text-fill: white;
+}
+.nav-button-active {
+    -fx-background-color: #4763e4;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-padding: 12 15 12 15;
+}
+.nav-button-logout {
+    -fx-text-fill: #ff6b6b;
+}
+
+/* Top bar */
+.topbar {
+    -fx-background-color: white;
+    -fx-border-color: #e6e8f0;
+    -fx-border-width: 0 0 1 0;
+}
+.user-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #333;
+}
+
+/* Content */
+.content-area {
+    -fx-background-color: #f4f6fa;
+}
+.dashboard-root {
+    -fx-background-color: #f4f6fa;
+}
+.page-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1c2333;
+}
+.section-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1c2333;
+}
+
+/* Stat cards */
+.stat-card {
+    -fx-padding: 20;
+    -fx-background-radius: 12;
+    -fx-spacing: 6;
+}
+.stat-card-green   { -fx-background-color: #e8f8ee; }
+.stat-card-blue    { -fx-background-color: #e8f1fb; }
+.stat-card-orange  { -fx-background-color: #fdf1e4; }
+.stat-card-purple  { -fx-background-color: #f1eafc; }
+
+.stat-label-green  { -fx-text-fill: #2e9e5b; -fx-font-size: 12px; -fx-font-weight: bold; }
+.stat-label-blue   { -fx-text-fill: #3576d6; -fx-font-size: 12px; -fx-font-weight: bold; }
+.stat-label-orange { -fx-text-fill: #d6822f; -fx-font-size: 12px; -fx-font-weight: bold; }
+.stat-label-purple { -fx-text-fill: #8455d1; -fx-font-size: 12px; -fx-font-weight: bold; }
+
+.stat-number-green  { -fx-text-fill: #2e9e5b; -fx-font-size: 30px; -fx-font-weight: bold; }
+.stat-number-blue   { -fx-text-fill: #3576d6; -fx-font-size: 30px; -fx-font-weight: bold; }
+.stat-number-orange { -fx-text-fill: #d6822f; -fx-font-size: 30px; -fx-font-weight: bold; }
+.stat-number-purple { -fx-text-fill: #8455d1; -fx-font-size: 30px; -fx-font-weight: bold; }
+
+.stat-sub {
+    -fx-text-fill: #8a8fa3;
+    -fx-font-size: 11px;
+}
+
+/* Table */
+.recents-table {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+}
