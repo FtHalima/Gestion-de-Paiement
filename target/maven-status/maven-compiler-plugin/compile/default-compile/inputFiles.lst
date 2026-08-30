@@ -6,6 +6,9 @@ C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiement
 C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\model\Paiement.java
 C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\service\LotService.java
 C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\service\ProfesseurService.java
+C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\model\LigneDeplacement.java
+C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\controller\LigneDeplacementUI.java
+C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\service\DeplacementPdfGenerationService.java
 C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\service\PaiementService.java
 C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\Launcher.java
 C:\Users\PC\gest-paiement\gestion-paiements-v2\src\main\java\com\gestionpaiements\app\model\StatutLot.java

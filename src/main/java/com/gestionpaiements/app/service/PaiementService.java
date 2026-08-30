@@ -9,6 +9,7 @@ import com.gestionpaiements.app.model.Utilisateur;
 import com.gestionpaiements.app.service.ProfesseurService;
 import com.gestionpaiements.app.service.LotService;
 import com.gestionpaiements.app.service.SessionUtilisateur;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -223,10 +224,14 @@ public class PaiementService {
         paiement.setTypeReferenceReglement("RIB");
 
         // Calcul systématique des montants (utilise la méthode unique)
-        TauxIRResult result = calculerMontants(paiement.getTypePaiement(), paiement.getNombreHeures(), paiement.getTaux(), paiement.getTauxIr());
-        paiement.setMontantBrut(result.getMontantBrut());
-        paiement.setRetenueIr(result.getRetenueIr());
-        paiement.setMontantNet(result.getMontantNet());
+        // Calcul systématique des montants, SAUF pour Déplacement où le contrôleur
+        // a déjà calculé le total à partir des lignes de trajets
+        if (paiement.getTypePaiement() != TypePaiement.DEPLACEMENT) {
+            TauxIRResult result = calculerMontants(paiement.getTypePaiement(), paiement.getNombreHeures(), paiement.getTaux(), paiement.getTauxIr());
+            paiement.setMontantBrut(result.getMontantBrut());
+            paiement.setRetenueIr(result.getRetenueIr());
+            paiement.setMontantNet(result.getMontantNet());
+}
 
         // Log APRÈS CALCUL
         System.out.println("APRÈS CALCUL : montantBrut=" + paiement.getMontantBrut()
@@ -241,6 +246,9 @@ public class PaiementService {
 
         // Sauvegarde du paiement
         Paiement saved = paiementRepository.save(paiement);
+
+        // Force initialization of lazy-loaded lignesDeplacement collection
+        Hibernate.initialize(saved.getLignesDeplacement());
 
         // Log APRÈS REPOSITORY
         System.out.println("APRÈS REPOSITORY : taux=" + saved.getTaux() + ", tauxIr=" + saved.getTauxIr()
@@ -257,8 +265,13 @@ public class PaiementService {
      * @param professeur le professeur
      * @return le paiement le plus récent, ou vide si aucun paiement n'existe
      */
+    
+    @Transactional(readOnly = true)
     public Optional<Paiement> trouverDernierPaiementParProfesseur(Professeur professeur) {
-        return paiementRepository.findFirstByProfesseurOrderByIdPaiementDesc(professeur);
+        Optional<Paiement> opt = paiementRepository.findFirstByProfesseurOrderByIdPaiementDesc(professeur);
+        // Force le chargement de la collection lazy pendant que la session est encore ouverte
+        opt.ifPresent(p -> p.getLignesDeplacement().size());
+        return opt;
     }
 
     /**

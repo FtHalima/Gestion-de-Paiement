@@ -6,6 +6,7 @@ import com.gestionpaiements.app.model.Paiement;
 import com.gestionpaiements.app.service.ProfesseurService;
 import com.gestionpaiements.app.service.PaiementService;
 import com.gestionpaiements.app.service.PdfGenerationService;
+import com.gestionpaiements.app.service.DeplacementPdfGenerationService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -31,9 +32,20 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.gestionpaiements.app.service.DeplacementPdfGenerationService;
 import com.gestionpaiements.app.service.ExcelFileManagerService;
 
 import java.time.LocalTime;
+
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.collections.ObservableList;
+import com.gestionpaiements.app.model.LigneDeplacement;
+
+import javafx.collections.FXCollections;
+
+import java.math.RoundingMode;
+
+import com.gestionpaiements.app.service.DeplacementPdfGenerationService;
 
 @Component
 public class AjouterPaiementController {
@@ -49,6 +61,9 @@ public class AjouterPaiementController {
 
     @Autowired
     private ExcelFileManagerService excelFileManagerService;
+
+    @Autowired
+    private DeplacementPdfGenerationService deplacementPdfGenerationService;
 
     // Fields from FXML
     @FXML private TextField cinField;
@@ -115,15 +130,27 @@ public class AjouterPaiementController {
         //deplacement 
     @FXML private TitledPane deplacementSection;
     @FXML private TextField motifDeplacementField;
-    @FXML private TextArea parcoursField;
-    @FXML private TextField heureDepartField;
-    @FXML private TextField heureRetourField;
+
     @FXML private Label nombreHeuresTitleLabel;
     @FXML private Label tauxTitleLabel;
     @FXML private Label irTitleLabel;
     @FXML private Label montantBrutTitleLabel;
     @FXML private Label retenueIrTitleLabel;
     @FXML private Label montantNetTitleLabel;
+
+    @FXML private TitledPane calculSection;
+    @FXML private TableView<LigneDeplacementUI> trajetsTable;
+    @FXML private TableColumn<LigneDeplacementUI, String> colDateDepart;
+    @FXML private TableColumn<LigneDeplacementUI, String> colDateArrivee;
+    @FXML private TableColumn<LigneDeplacementUI, String> colParcours;
+    @FXML private TableColumn<LigneDeplacementUI, String> colHeureDepart;
+    @FXML private TableColumn<LigneDeplacementUI, String> colHeureRetour;
+    @FXML private TableColumn<LigneDeplacementUI, String> colNombreTaux;
+    @FXML private TableColumn<LigneDeplacementUI, String> colTauxApplique;
+    @FXML private TableColumn<LigneDeplacementUI, String> colMontantLigne;
+    @FXML private Button addTrajetButton;
+    @FXML private Button removeTrajetButton;
+    @FXML private Label totalDeplacementLabel;
 
     // State
     private Professeur currentProfesseur; // null if not yet searched or not found
@@ -138,6 +165,9 @@ public class AjouterPaiementController {
     private final Map<String, List<Integer>> gradeEchelleMap = new HashMap<>();
     // Parallel list: echelle for each index in gradeField items
     private final List<Integer> echelleForIndex = new ArrayList<>();
+
+    //deplacement
+    private final ObservableList<LigneDeplacementUI> trajetsData = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
@@ -202,7 +232,8 @@ public class AjouterPaiementController {
         // Listener for date validation
         dateDebutField.valueProperty().addListener((obs, oldVal, newVal) -> validateDates());
         dateFinField.valueProperty().addListener((obs, oldVal, newVal) -> validateDates());
-
+        //deplacement
+        setupTrajetsTable();
         // Initial calculation to display correct amounts based on default values
         calculate();
     }
@@ -250,9 +281,23 @@ public class AjouterPaiementController {
                 irCombo.getSelectionModel().select(irStr);
                 // Set new payment fields
                 motifDeplacementField.setText(p.getMotifDeplacement() != null ? p.getMotifDeplacement() : "");
-                parcoursField.setText(p.getParcours() != null ? p.getParcours() : "");
-                heureDepartField.setText(p.getHeureDepart() != null ? p.getHeureDepart().format(timeFormatter) : "");
-                heureRetourField.setText(p.getHeureRetour() != null ? p.getHeureRetour().format(timeFormatter) : "");
+                trajetsData.clear();
+                if (p.getTypePaiement() == TypePaiement.DEPLACEMENT) {
+                    for (LigneDeplacement l : p.getLignesDeplacement()) {
+                        LigneDeplacementUI row = new LigneDeplacementUI();
+                        row.setDateDepart(l.getDateDepart() != null ? l.getDateDepart().format(dateFormatter) : "");
+                        row.setDateArrivee(l.getDateArrivee() != null ? l.getDateArrivee().format(dateFormatter) : "");
+                        row.setParcours(l.getParcours() != null ? l.getParcours() : "");
+                        row.setHeureDepart(l.getHeureDepart() != null ? l.getHeureDepart().format(timeFormatter) : "");
+                        row.setHeureRetour(l.getHeureRetour() != null ? l.getHeureRetour().format(timeFormatter) : "");
+                        row.setNombreTauxBase(l.getNombreTauxBase() != null ? l.getNombreTauxBase().stripTrailingZeros().toPlainString() : "");
+                        row.setTauxBaseApplique(l.getTauxBaseApplique() != null ? l.getTauxBaseApplique().stripTrailingZeros().toPlainString() : "");
+                        row.setMontant(l.getMontant() != null ? formatBigDecimal(l.getMontant()) : "0,00");
+                        trajetsData.add(row);
+                    }
+                }
+                recalcTotalDeplacement();
+
                 exerciceField.setText(p.getExercice() != null ? p.getExercice() : "");
                 codeCgncField.setText(p.getCodeCgnc() != null ? p.getCodeCgnc() : "");
                 articleField.setText(p.getArticle() != null ? p.getArticle() : "");
@@ -271,9 +316,9 @@ public class AjouterPaiementController {
                 irCombo.getSelectionModel().clearSelection();
                 // Clear new fields
                 motifDeplacementField.clear();
-                parcoursField.clear();
-                heureDepartField.clear();
-                heureRetourField.clear();
+                trajetsData.clear();
+                recalcTotalDeplacement();
+
                 exerciceField.clear();
                 codeCgncField.clear();
                 articleField.clear();
@@ -323,10 +368,11 @@ public class AjouterPaiementController {
         numeroCompteField.clear();
         cleField.clear();
         // Clear new fields
+
         motifDeplacementField.clear();
-        parcoursField.clear();
-        heureDepartField.clear();
-        heureRetourField.clear();
+        trajetsData.clear();
+        recalcTotalDeplacement();
+        
         exerciceField.clear();
         codeCgncField.clear();
         articleField.clear();
@@ -469,6 +515,139 @@ public class AjouterPaiementController {
         }
     }
 
+        private void setupTrajetsTable() {
+        colDateDepart.setCellValueFactory(d -> d.getValue().dateDepartProperty());
+        colDateArrivee.setCellValueFactory(d -> d.getValue().dateArriveeProperty());
+        colParcours.setCellValueFactory(d -> d.getValue().parcoursProperty());
+        colHeureDepart.setCellValueFactory(d -> d.getValue().heureDepartProperty());
+        colHeureRetour.setCellValueFactory(d -> d.getValue().heureRetourProperty());
+        colNombreTaux.setCellValueFactory(d -> d.getValue().nombreTauxBaseProperty());
+        colTauxApplique.setCellValueFactory(d -> d.getValue().tauxBaseAppliqueProperty());
+        colMontantLigne.setCellValueFactory(d -> d.getValue().montantProperty());
+
+        colDateDepart.setCellFactory(createEditableCell());
+        colDateArrivee.setCellFactory(createEditableCell());
+        colParcours.setCellFactory(createEditableCell());
+        colHeureDepart.setCellFactory(createEditableCell());
+        colHeureRetour.setCellFactory(createEditableCell());
+        colNombreTaux.setCellFactory(createEditableCell());
+        colTauxApplique.setCellFactory(createEditableCell());
+        // colMontantLigne reste en lecture seule (pas de setCellFactory éditable)
+
+        colDateDepart.setOnEditCommit(e -> e.getRowValue().setDateDepart(e.getNewValue()));
+        colDateArrivee.setOnEditCommit(e -> e.getRowValue().setDateArrivee(e.getNewValue()));
+        colParcours.setOnEditCommit(e -> e.getRowValue().setParcours(e.getNewValue()));
+        colHeureDepart.setOnEditCommit(e -> e.getRowValue().setHeureDepart(e.getNewValue()));
+        colHeureRetour.setOnEditCommit(e -> e.getRowValue().setHeureRetour(e.getNewValue()));
+        colNombreTaux.setOnEditCommit(e -> {
+            e.getRowValue().setNombreTauxBase(e.getNewValue());
+            recalcLigneMontant(e.getRowValue());
+        });
+        colTauxApplique.setOnEditCommit(e -> {
+            e.getRowValue().setTauxBaseApplique(e.getNewValue());
+            recalcLigneMontant(e.getRowValue());
+        });
+
+        trajetsTable.setItems(trajetsData);
+    }
+    //
+    private javafx.util.Callback<TableColumn<LigneDeplacementUI, String>, TableCell<LigneDeplacementUI, String>> createEditableCell() {
+        return column -> new TableCell<LigneDeplacementUI, String>() {
+            private final TextField textField = new TextField();
+
+            {
+                textField.setOnAction(e -> commitEdit(textField.getText()));
+                textField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+                    if (!isNowFocused) {
+                        commitEdit(textField.getText());
+                    }
+                });
+            }
+
+            @Override
+            public void startEdit() {
+                super.startEdit();
+                textField.setText(getItem() == null ? "" : getItem());
+                setGraphic(textField);
+                setText(null);
+                textField.requestFocus();
+                textField.selectAll();
+            }
+
+            @Override
+            public void cancelEdit() {
+                super.cancelEdit();
+                setText(getItem());
+                setGraphic(null);
+            }
+
+            @Override
+            public void commitEdit(String newValue) {
+                super.commitEdit(newValue);
+                setText(newValue);
+                setGraphic(null);
+            }
+
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else if (isEditing()) {
+                    textField.setText(item);
+                    setGraphic(textField);
+                    setText(null);
+                } else {
+                    setText(item);
+                    setGraphic(null);
+                }
+            }
+        };
+    }
+
+    private void recalcLigneMontant(LigneDeplacementUI row) {
+        BigDecimal nombre = parseBigDecimal(row.getNombreTauxBase());
+        BigDecimal taux = parseBigDecimal(row.getTauxBaseApplique());
+        BigDecimal montant = (nombre != null && taux != null)
+                ? nombre.multiply(taux).setScale(2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+        row.setMontant(formatBigDecimal(montant));
+        recalcTotalDeplacement();
+    }
+
+    private void recalcTotalDeplacement() {
+        BigDecimal total = BigDecimal.ZERO;
+        for (LigneDeplacementUI row : trajetsData) {
+            BigDecimal m = parseBigDecimal(row.getMontant());
+            if (m != null) total = total.add(m);
+        }
+        totalDeplacementLabel.setText("Total : " + formatBigDecimal(total) + " DH");
+    }
+
+    @FXML
+    private void handleAddTrajet() {
+        trajetsData.add(new LigneDeplacementUI());
+    }
+
+    @FXML
+    private void handleRemoveTrajet() {
+        LigneDeplacementUI selected = trajetsTable.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            trajetsData.remove(selected);
+            recalcTotalDeplacement();
+        }
+    }
+
+    private LocalDate parseLocalDate(String text) {
+        if (text == null || text.trim().isEmpty()) return null;
+        try {
+            return LocalDate.parse(text.trim(), dateFormatter);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     // Grade change -> set echelle based on occurrence and compute taux/IR
     private void handleGradeChange() {
         String grade = gradeField.getValue();
@@ -554,6 +733,9 @@ public class AjouterPaiementController {
         deplacementSection.setVisible(isDeplacement);
         deplacementSection.setManaged(isDeplacement);
 
+        calculSection.setVisible(!isDeplacement);
+        calculSection.setManaged(!isDeplacement);
+
         irTitleLabel.setVisible(!isDeplacement);
         irTitleLabel.setManaged(!isDeplacement);
         irCombo.setVisible(!isDeplacement);
@@ -615,8 +797,18 @@ public class AjouterPaiementController {
         if (text == null || text.trim().isEmpty()) {
             return null;
         }
+        String cleaned = text.trim().replace("h", ":").replace("H", ":");
+        // Ajoute les deux-points si l'utilisateur a tapé "0800" ou "800"
+        if (cleaned.matches("\\d{3,4}")) {
+            if (cleaned.length() == 3) cleaned = "0" + cleaned;
+            cleaned = cleaned.substring(0, 2) + ":" + cleaned.substring(2);
+        }
+        // Ajoute le zéro si l'utilisateur a tapé "8:00" au lieu de "08:00"
+        if (cleaned.matches("\\d:\\d{2}")) {
+            cleaned = "0" + cleaned;
+        }
         try {
-            return LocalTime.parse(text.trim(), timeFormatter);
+            return LocalTime.parse(cleaned, timeFormatter);
         } catch (Exception e) {
             return null;
         }
@@ -709,10 +901,35 @@ public class AjouterPaiementController {
         paiement.setArticle(articleField.getText().trim());
         paiement.setPar(parField.getText().trim());
         paiement.setLig(ligField.getText().trim());
+
         paiement.setMotifDeplacement(motifDeplacementField.getText().trim());
-        paiement.setParcours(parcoursField.getText().trim());
-        paiement.setHeureDepart(parseLocalTime(heureDepartField.getText()));
-        paiement.setHeureRetour(parseLocalTime(heureRetourField.getText()));
+
+        if (paiement.getTypePaiement() == TypePaiement.DEPLACEMENT) {
+            paiement.getLignesDeplacement().clear();
+            BigDecimal total = BigDecimal.ZERO;
+            for (LigneDeplacementUI row : trajetsData) {
+                LigneDeplacement ligne = new LigneDeplacement();
+                ligne.setPaiement(paiement);
+                ligne.setDateDepart(parseLocalDate(row.getDateDepart()));
+                ligne.setDateArrivee(parseLocalDate(row.getDateArrivee()));
+                ligne.setParcours(row.getParcours());
+                ligne.setHeureDepart(parseLocalTime(row.getHeureDepart()));
+                ligne.setHeureRetour(parseLocalTime(row.getHeureRetour()));
+                BigDecimal nombre = parseBigDecimal(row.getNombreTauxBase());
+                BigDecimal tauxLigne = parseBigDecimal(row.getTauxBaseApplique());
+                BigDecimal montantLigne = (nombre != null && tauxLigne != null)
+                        ? nombre.multiply(tauxLigne).setScale(2, RoundingMode.HALF_UP)
+                        : BigDecimal.ZERO;
+                ligne.setNombreTauxBase(nombre);
+                ligne.setTauxBaseApplique(tauxLigne);
+                ligne.setMontant(montantLigne);
+                paiement.getLignesDeplacement().add(ligne);
+                total = total.add(montantLigne);
+            }
+            paiement.setMontantBrut(total);
+            paiement.setRetenueIr(BigDecimal.ZERO);
+            paiement.setMontantNet(total);
+        }
 
         // Log AVANT CONTROLLER
         System.out.println("AVANT CONTROLLER : taux=" + paiement.getTaux() + ", tauxIr=" + paiement.getTauxIr());
@@ -819,9 +1036,8 @@ public class AjouterPaiementController {
         datePaiementField.setValue(null);
         // Reset new fields
         motifDeplacementField.clear();
-        parcoursField.clear();
-        heureDepartField.clear();
-        heureRetourField.clear();
+        trajetsData.clear();
+        recalcTotalDeplacement();
         exerciceField.clear();
         codeCgncField.clear();
         articleField.clear();
@@ -888,44 +1104,62 @@ public class AjouterPaiementController {
                 showError("Veuillez sélectionner un type de paiement");
                 return;
             }
-
-            if (dateDebutField.getValue() == null) {
-                showError("Veuillez saisir une date de début");
-                return;
-            }
-
-            if (dateFinField.getValue() == null) {
-                showError("Veuillez saisir une date de fin");
-                return;
-            }
-
-            if (dateFinField.getValue().isBefore(dateDebutField.getValue())) {
-                showError("La date de fin doit être postérieure ou égale à la date de début");
-                return;
-            }
-
-            try {
-                BigDecimal nombreHeures = parseBigDecimal(nombreHeuresField.getText());
-                if (nombreHeures == null || nombreHeures.compareTo(BigDecimal.ZERO) <= 0) {
-                    showError("Veuillez saisir un nombre d'heures valide (supérieur à zéro)");
+//
+            boolean isDeplacementType = typePaiementCombo.getSelectionModel().getSelectedItem() == TypePaiement.DEPLACEMENT;
+            
+            if (!isDeplacementType) {
+                if (dateDebutField.getValue() == null) {
+                    showError("Veuillez saisir une date de début");
                     return;
                 }
-            } catch (NumberFormatException e) {
-                showError("Veuillez saisir un nombre d'heures valide");
-                return;
-            }
 
-            try {
-                BigDecimal taux = parseBigDecimal(tauxField.getText());
-                if (taux == null || taux.compareTo(BigDecimal.ZERO) < 0) {
-                    showError("Veuillez saisir un taux valide (supérieur ou égal à zéro)");
+                if (dateFinField.getValue() == null) {
+                    showError("Veuillez saisir une date de fin");
                     return;
                 }
-            } catch (NumberFormatException e) {
-                showError("Veuillez saisir un taux valide");
-                return;
-            }
 
+                if (dateFinField.getValue().isBefore(dateDebutField.getValue())) {
+                    showError("La date de fin doit être postérieure ou égale à la date de début");
+                    return;
+                }
+            }
+            //
+
+            
+
+            if (!isDeplacementType) {
+                try {
+                    BigDecimal nombreHeures = parseBigDecimal(nombreHeuresField.getText());
+                    if (nombreHeures == null || nombreHeures.compareTo(BigDecimal.ZERO) <= 0) {
+                        showError("Veuillez saisir un nombre d'heures valide (supérieur à zéro)");
+                        return;
+                    }
+                } catch (NumberFormatException e) {
+                    showError("Veuillez saisir un nombre d'heures valide");
+                    return;
+                }
+
+                try {
+                    BigDecimal taux = parseBigDecimal(tauxField.getText());
+                    if (taux == null || taux.compareTo(BigDecimal.ZERO) < 0) {
+                        showError("Veuillez saisir un taux valide (supérieur ou égal à zéro)");
+                        return;
+                    }
+                } catch (NumberFormatException e) {
+                    showError("Veuillez saisir un taux valide");
+                    return;
+                }
+            } else {
+                if (motifDeplacementField.getText().trim().isEmpty()) {
+                    showError("Veuillez saisir le motif de déplacement");
+                    return;
+                }
+                if (trajetsData.isEmpty()) {
+                    showError("Veuillez ajouter au moins un trajet");
+                    return;
+                }
+            }
+//
             // Save professor (insert if new, update if existing)
             Professeur professeurToSave;
             if (currentProfesseur != null && !isNewProfessorMode) {
@@ -999,10 +1233,35 @@ public class AjouterPaiementController {
             paiement.setArticle(articleField.getText().trim());
             paiement.setPar(parField.getText().trim());
             paiement.setLig(ligField.getText().trim());
+
             paiement.setMotifDeplacement(motifDeplacementField.getText().trim());
-            paiement.setParcours(parcoursField.getText().trim());
-            paiement.setHeureDepart(parseLocalTime(heureDepartField.getText()));
-            paiement.setHeureRetour(parseLocalTime(heureRetourField.getText()));
+
+            if (paiement.getTypePaiement() == TypePaiement.DEPLACEMENT) {
+                paiement.getLignesDeplacement().clear();
+                BigDecimal total = BigDecimal.ZERO;
+                for (LigneDeplacementUI row : trajetsData) {
+                    LigneDeplacement ligne = new LigneDeplacement();
+                    ligne.setPaiement(paiement);
+                    ligne.setDateDepart(parseLocalDate(row.getDateDepart()));
+                    ligne.setDateArrivee(parseLocalDate(row.getDateArrivee()));
+                    ligne.setParcours(row.getParcours());
+                    ligne.setHeureDepart(parseLocalTime(row.getHeureDepart()));
+                    ligne.setHeureRetour(parseLocalTime(row.getHeureRetour()));
+                    BigDecimal nombre = parseBigDecimal(row.getNombreTauxBase());
+                    BigDecimal tauxLigne = parseBigDecimal(row.getTauxBaseApplique());
+                    BigDecimal montantLigne = (nombre != null && tauxLigne != null)
+                            ? nombre.multiply(tauxLigne).setScale(2, RoundingMode.HALF_UP)
+                            : BigDecimal.ZERO;
+                    ligne.setNombreTauxBase(nombre);
+                    ligne.setTauxBaseApplique(tauxLigne);
+                    ligne.setMontant(montantLigne);
+                    paiement.getLignesDeplacement().add(ligne);
+                    total = total.add(montantLigne);
+                }
+                paiement.setMontantBrut(total);
+                paiement.setRetenueIr(BigDecimal.ZERO);
+                paiement.setMontantNet(total);
+            }
 
             // Log AVANT CONTROLLER
             System.out.println("AVANT CONTROLLER (PDF) : taux=" + paiement.getTaux() + ", tauxIr=" + paiement.getTauxIr());
@@ -1023,7 +1282,10 @@ public class AjouterPaiementController {
             }
 
             // Generate PDF
-            ByteArrayInputStream pdfInputStream = pdfGenerationService.genererPdfEstadoSums(savedPaiement.getIdPaiement());
+            // Generate PDF (format dédié pour Déplacement, format standard pour les autres types)
+            ByteArrayInputStream pdfInputStream = (savedPaiement.getTypePaiement() == TypePaiement.DEPLACEMENT)
+                    ? deplacementPdfGenerationService.genererPdfDeplacement(savedPaiement.getIdPaiement())
+                    : pdfGenerationService.genererPdfEstadoSums(savedPaiement.getIdPaiement());
 
             // Save PDF to file using FileChooser
             FileChooser fileChooser = new FileChooser();
@@ -1142,38 +1404,48 @@ public class AjouterPaiementController {
                 errors.append("- La date de fin doit être postérieure ou égale à la date de début\n");
             }
         }
-        if (nombreHeuresField.getText().trim().isEmpty()) {
-            errors.append("- Nombre d'heures obligatoire\n");
-        } else {
-            BigDecimal nh = parseBigDecimal(nombreHeuresField.getText());
-            if (nh == null || nh.compareTo(BigDecimal.ZERO) < 0) {
-                errors.append("- Nombre d'heures doit être positif ou nul\n");
+        //
+        boolean isDeplacementType = typePaiementCombo.getSelectionModel().getSelectedItem() == TypePaiement.DEPLACEMENT;
+
+        if (!isDeplacementType) {
+            if (nombreHeuresField.getText().trim().isEmpty()) {
+                errors.append("- Nombre d'heures obligatoire\n");
+            } else {
+                BigDecimal nh = parseBigDecimal(nombreHeuresField.getText());
+                if (nh == null || nh.compareTo(BigDecimal.ZERO) < 0) {
+                    errors.append("- Nombre d'heures doit être positif ou nul\n");
+                }
             }
-        }
-        if (tauxField.getText().trim().isEmpty()) {
-            errors.append("- Taux obligatoire\n");
-        } else {
-            BigDecimal t = parseBigDecimal(tauxField.getText());
-            if (t == null || t.compareTo(BigDecimal.ZERO) < 0) {
-                errors.append("- Taux doit être positif ou nul\n");
+            if (tauxField.getText().trim().isEmpty()) {
+                errors.append("- Taux obligatoire\n");
+            } else {
+                BigDecimal t = parseBigDecimal(tauxField.getText());
+                if (t == null || t.compareTo(BigDecimal.ZERO) < 0) {
+                    errors.append("- Taux doit être positif ou nul\n");
+                }
             }
-        }
-        if (irCombo.getSelectionModel().getSelectedItem() == null) {
-            errors.append("- Taux IR obligatoire\n");
+            if (irCombo.getSelectionModel().getSelectedItem() == null) {
+                errors.append("- Taux IR obligatoire\n");
+            }
         }
         
         if (typePaiementCombo.getSelectionModel().getSelectedItem() == TypePaiement.DEPLACEMENT) {
             if (motifDeplacementField.getText().trim().isEmpty()) {
                 errors.append("- Motif de déplacement obligatoire\n");
             }
-            if (parcoursField.getText().trim().isEmpty()) {
-                errors.append("- Indication du parcours obligatoire\n");
-            }
-            if (parseLocalTime(heureDepartField.getText()) == null) {
-                errors.append("- Heure de départ invalide (format HH:mm)\n");
-            }
-            if (parseLocalTime(heureRetourField.getText()) == null) {
-                errors.append("- Heure de retour invalide (format HH:mm)\n");
+            if (trajetsData.isEmpty()) {
+                errors.append("- Au moins un trajet doit être ajouté\n");
+            } else {
+                int rowNum = 1;
+                for (LigneDeplacementUI row : trajetsData) {
+                    if (!row.getHeureDepart().isEmpty() && parseLocalTime(row.getHeureDepart()) == null) {
+                        errors.append("- Trajet " + rowNum + " : heure de départ invalide (ex: 08:00)\n");
+                    }
+                    if (!row.getHeureRetour().isEmpty() && parseLocalTime(row.getHeureRetour()) == null) {
+                        errors.append("- Trajet " + rowNum + " : heure de retour invalide (ex: 18:00)\n");
+                    }
+                    rowNum++;
+                }
             }
         }
 

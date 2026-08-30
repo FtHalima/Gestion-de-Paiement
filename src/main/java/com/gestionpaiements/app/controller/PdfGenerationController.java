@@ -1,6 +1,8 @@
 package com.gestionpaiements.app.controller;
 
 import com.gestionpaiements.app.service.PdfGenerationService;
+import com.gestionpaiements.app.dao.PaiementRepository;
+import com.gestionpaiements.app.model.Paiement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -20,6 +22,9 @@ public class PdfGenerationController {
 
     @Autowired
     private PdfGenerationService pdfGenerationService;
+
+    @Autowired
+    private PaiementRepository paiementRepository;
 
     /**
      * Generates and downloads the PDF État des sommes dues for a payment.

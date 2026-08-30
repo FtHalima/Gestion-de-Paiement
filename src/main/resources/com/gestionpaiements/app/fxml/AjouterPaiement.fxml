@@ -16,6 +16,9 @@
 
 <?import javafx.scene.control.TextArea?>
 
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
+
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.gestionpaiements.app.controller.AjouterPaiementController"
@@ -169,27 +172,35 @@
 
     <!-- Section: Déplacement (visible uniquement pour ce type) -->
     <TitledPane fx:id="deplacementSection" text="Détails du déplacement" visible="false" managed="false">
-        <GridPane hgap="10" vgap="8">
-            <columnConstraints>
-                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="140"/>
-                <ColumnConstraints hgrow="ALWAYS"/>
-                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="140"/>
-                <ColumnConstraints hgrow="ALWAYS"/>
-            </columnConstraints>
-            <Label text="Motif de déplacement :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-            <TextField fx:id="motifDeplacementField" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="0"/>
-            <Label text="Indication précise du parcours :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-            <TextArea fx:id="parcoursField" prefRowCount="2" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1"/>
-            <Label text="Heure de départ (HH:mm) :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-            <TextField fx:id="heureDepartField" promptText="08:00" maxWidth="100" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-            <Label text="Heure de retour (HH:mm) :" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-            <TextField fx:id="heureRetourField" promptText="18:00" maxWidth="100" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
-        </GridPane>
+        <VBox spacing="8">
+            <Label text="Motif de déplacement :"/>
+            <TextField fx:id="motifDeplacementField"/>
+
+            <TableView fx:id="trajetsTable" prefHeight="220" editable="true">
+                <columns>
+                    <TableColumn text="Date départ" fx:id="colDateDepart" prefWidth="90"/>
+                    <TableColumn text="Date arrivée" fx:id="colDateArrivee" prefWidth="90"/>
+                    <TableColumn text="Parcours" fx:id="colParcours" prefWidth="180"/>
+                    <TableColumn text="Heure départ" fx:id="colHeureDepart" prefWidth="90"/>
+                    <TableColumn text="Heure retour" fx:id="colHeureRetour" prefWidth="90"/>
+                    <TableColumn text="Nbr taux base" fx:id="colNombreTaux" prefWidth="90"/>
+                    <TableColumn text="Taux appliqué" fx:id="colTauxApplique" prefWidth="90"/>
+                    <TableColumn text="Montant" fx:id="colMontantLigne" prefWidth="90"/>
+                </columns>
+            </TableView>
+
+            <HBox spacing="10">
+                <Button text="+ Ajouter un trajet" fx:id="addTrajetButton" onAction="#handleAddTrajet"/>
+                <Button text="Supprimer le trajet sélectionné" fx:id="removeTrajetButton" onAction="#handleRemoveTrajet"/>
+            </HBox>
+
+            <Label fx:id="totalDeplacementLabel" text="Total : 0,00 DH" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
+        </VBox>
     </TitledPane>
 
     <!-- Section: Calcul du paiement -->
     <!-- Section: Calcul du paiement -->
-    <TitledPane text="Calcul du paiement">
+    <TitledPane fx:id="calculSection" text="Calcul du paiement">
         <GridPane hgap="10" vgap="8">
             <columnConstraints>
                 <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="120"/>

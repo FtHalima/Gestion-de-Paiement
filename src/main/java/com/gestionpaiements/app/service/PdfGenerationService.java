@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.hibernate.Hibernate;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -69,9 +70,9 @@ public class PdfGenerationService {
     private PaiementRepository paiementRepository;
 
     /**
-     * Generates a PDF État des sommesdues for the given payment ID.
+     * Generates a PDF État des sommesdues for the given payment.
      *
-     * @param paiementId the ID of the payment
+     * @param paiement the payment
      * @return the PDF as a ByteArrayInputStream
      * @throws Exception if payment not found or error during generation
      */
@@ -98,11 +99,9 @@ public class PdfGenerationService {
         addRibBlock(document, paiement.getProfesseur());
 
         if (paiement.getTypePaiement() == TypePaiement.DEPLACEMENT) {
-        addMotifDeplacement(document, paiement);
-        addDeplacementOperationsTable(document, paiement);
+        // TODO : remplacé par une classe PDF dédiée (DeplacementPdfGenerationService) à venir
         addArreteDeSomme(document, paiement.getMontantNet());
         addIntermediateSignatures(document);
-        // Pas de bloc Montant brut / Retenue IR / Net à payer pour le Déplacement
         } else {
         addOperationsTable(document, paiement);
         addArreteDeSomme(document, paiement.getMontantNet());
@@ -417,7 +416,7 @@ public class PdfGenerationService {
         document.add(table);
 
 }
-
+/* 
         private void addMotifDeplacement(Document document, Paiement paiement) {
         Paragraph motifPara = new Paragraph()
                 .add(new Paragraph("Motif de déplacement : ")
@@ -428,7 +427,9 @@ public class PdfGenerationService {
                 .setMarginBottom(6);
         document.add(motifPara);
         }
+*/
 
+/* 
         private void addDeplacementOperationsTable(Document document, Paiement paiement) {
         Table table = new Table(new float[]{1.2f, 1.2f, 2.3f, 1f, 1f, 1.3f, 1.3f, 1.3f});
         table.setWidth(UnitValue.createPercentValue(100));
@@ -462,7 +463,7 @@ public class PdfGenerationService {
 
         document.add(table);
         }
-
+*/
         private void addTableHeaderCellSpan(Table table, String text, int rowSpan, int colSpan) {
         Cell cell = new Cell(rowSpan, colSpan).add(new Paragraph(text).setFontSize(8))
                 .setBold()

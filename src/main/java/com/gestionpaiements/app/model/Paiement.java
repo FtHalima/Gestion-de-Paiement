@@ -9,11 +9,17 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import java.time.LocalTime;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 
 @Entity
 @Table(name = "paiement")
@@ -99,14 +105,7 @@ public class Paiement {
     @Column(name = "motif_deplacement")
     private String motifDeplacement;
 
-    @Column(name = "parcours")
-    private String parcours;
-
-    @Column(name = "heure_depart")
-    private LocalTime heureDepart;
-
-    @Column(name = "heure_retour")
-    private LocalTime heureRetour;
+    
 
 
     // Default constructor
@@ -333,27 +332,15 @@ public class Paiement {
         this.motifDeplacement = motifDeplacement;
     }
 
-    public String getParcours() {
-        return parcours;
+    @OneToMany(mappedBy = "paiement", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LigneDeplacement> lignesDeplacement = new ArrayList<>();
+
+    public List<LigneDeplacement> getLignesDeplacement() {
+        return lignesDeplacement;
     }
 
-    public void setParcours(String parcours) {
-        this.parcours = parcours;
+    public void setLignesDeplacement(List<LigneDeplacement> lignesDeplacement) {
+        this.lignesDeplacement = lignesDeplacement;
     }
 
-    public LocalTime getHeureDepart() {
-        return heureDepart;
-    }
-
-    public void setHeureDepart(LocalTime heureDepart) {
-        this.heureDepart = heureDepart;
-    }
-
-    public LocalTime getHeureRetour() {
-        return heureRetour;
-    }
-
-    public void setHeureRetour(LocalTime heureRetour) {
-        this.heureRetour = heureRetour;
-    }
 }

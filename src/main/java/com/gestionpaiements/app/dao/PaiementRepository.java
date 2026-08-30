@@ -22,4 +22,7 @@ public interface PaiementRepository extends JpaRepository<Paiement, Long> {
     List<Paiement> findByTypePaiementWithProfesseur(TypePaiement type);
 
     Optional<Paiement> findFirstByProfesseurOrderByIdPaiementDesc(Professeur professeur);
+
+    @Query("select p from Paiement p join fetch p.lignesDeplacement where p.id = :id")
+    Optional<Paiement> findPaiementWithLignesDeplacementById(@Param("id") Long id);
 }
