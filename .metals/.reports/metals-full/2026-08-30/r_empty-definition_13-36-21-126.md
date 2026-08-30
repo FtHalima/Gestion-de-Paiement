@@ -1,3 +1,14 @@
+error id: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/service/DeplacementPdfGenerationService.java:com/gestionpaiements/app/service/DeplacementPdfGenerationService#addArreteLine#
+file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/service/DeplacementPdfGenerationService.java
+empty definition using pc, found symbol in pc: com/gestionpaiements/app/service/DeplacementPdfGenerationService#addArreteLine#
+found definition using semanticdb; symbol com/gestionpaiements/app/service/DeplacementPdfGenerationService#addArreteLine().
+empty definition using fallback
+non-local guesses:
+
+offset: 5442
+uri: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/service/DeplacementPdfGenerationService.java
+text:
+```scala
 package com.gestionpaiements.app.service;
 
 import com.gestionpaiements.app.dao.PaiementRepository;
@@ -64,7 +75,7 @@ public class DeplacementPdfGenerationService {
     private static final String CALIBRI_BOLD_ITALIC_PATH = "C:/Windows/Fonts/calibriz.ttf";
     private static final String TIMES_PATH = "C:/Windows/Fonts/times.ttf";
 
-    private static final int NB_LIGNES_TABLEAU = 8; // nombre total de lignes affichées (remplies + vides)
+    private static final int NB_LIGNES_TABLEAU = 10; // nombre total de lignes affichées (remplies + vides)
 
     private PdfFont calibriRegular;
     private PdfFont calibriBold;
@@ -115,7 +126,7 @@ public class DeplacementPdfGenerationService {
         addMotifLigne(document, paiement);
         BigDecimal total = addTrajetsTable(document, paiement);
         // Add "Arrêté le présent état à la somme de: [amount in words in bold]" after the table
-        addArreteLine(document, "Arrêté le présent état à la somme de:", total);
+        @@addArreteLine(document, "Arrêté le présent état à la somme de:", total, false);
         addTexteAdministratifBas(document);
         addSignatureEtDeclaration(document, total);
 
@@ -295,8 +306,8 @@ public class DeplacementPdfGenerationService {
 
     private void addMotifLigne(Document document, Paiement paiement) {
         Paragraph p = new Paragraph()
-                .add(new com.itextpdf.layout.element.Text("Motif de déplacement: ").setFont(calibriBold).setFontSize(10.5f))
-                .add(new com.itextpdf.layout.element.Text(getFieldValue(paiement.getMotifDeplacement())).setFont(calibriRegular).setFontSize(10.5f))
+                .add(new com.itextpdf.layout.element.Text("Motif de déplacement: ").setFont(calibriBold).setFontSize(9))
+                .add(new com.itextpdf.layout.element.Text(getFieldValue(paiement.getMotifDeplacement())).setFont(calibriRegular).setFontSize(9))
                 .setMarginBottom(8);
         document.add(p);
     }
@@ -310,8 +321,8 @@ public class DeplacementPdfGenerationService {
         addHeaderCell(table, "Date de déplacement", 1, 2);
         addHeaderCell(table, "Indication Précise du parcours", 2, 1);
         addHeaderCell(table, "Heures", 1, 2);
-        addHeaderCell(table, "Nb.De Taux Taux de Base", 2, 1);
-        addHeaderCell(table, "Taux de Base Appliqué", 2, 1);
+        addHeaderCell(table, "Taux de base", 2, 1);
+        addHeaderCell(table, "Taux appliqué", 2, 1);
         addHeaderCell(table, "Montant", 2, 1);
 
         // Ligne d'en-tête 2 (sous-colonnes)
@@ -379,7 +390,7 @@ public class DeplacementPdfGenerationService {
                 .setVerticalAlignment(VerticalAlignment.MIDDLE)
                 .setBackgroundColor(LIGHT_BLUE)
                 .setBorder(new SolidBorder(BLACK, 1.2f))
-                .setPadding(2);
+                .setPadding(4);
         table.addCell(cell);
     }
 
@@ -387,7 +398,7 @@ public class DeplacementPdfGenerationService {
         Cell cell = new Cell().add(new Paragraph(value).setFont(calibriRegular).setFontSize(8.28f))
                 .setTextAlignment(TextAlignment.CENTER)
                 .setBorder(new SolidBorder(BLACK, 1.2f))
-                .setPadding(2);
+                .setPadding(3);
         table.addCell(cell);
     }
 
@@ -395,7 +406,7 @@ public class DeplacementPdfGenerationService {
         Cell cell = new Cell().add(new Paragraph(value).setFont(timesRegular).setFontSize(9))
                 .setTextAlignment(TextAlignment.CENTER)
                 .setBorder(new SolidBorder(BLACK, 1.2f))
-                .setPadding(2);
+                .setPadding(3);
         table.addCell(cell);
     }
 
@@ -414,22 +425,28 @@ public class DeplacementPdfGenerationService {
     }
 
     private void addArreteLine(Document document, String label, BigDecimal total) {
-        String words = MontantEnLettresConverter.convertir(total != null ? total : BigDecimal.ZERO).toUpperCase();
-        Paragraph p = new Paragraph()
-                .add(new com.itextpdf.layout.element.Text(label + "                                   ").setFont(calibriBold).setFontSize(9))
-                .add(new com.itextpdf.layout.element.Text("### " + words + " ###").setFont(calibriBold).setFontSize(11))
+        Paragraph labelPara = new Paragraph(label)
+                .setFont(calibriBold)
+                .setFontSize(9)
                 .setTextAlignment(TextAlignment.LEFT)
-                .setMarginTop(4)
-                .setMarginBottom(10);
-        document.add(p);
+                .setMarginBottom(2);
+        document.add(labelPara);
+
+        String words = MontantEnLettresConverter.convertir(total != null ? total : BigDecimal.ZERO).toUpperCase();
+        Paragraph resultPara = new Paragraph("### " + words + " ###")
+                .setFont(calibriBold)
+                .setFontSize(11)
+                .setTextAlignment(TextAlignment.CENTER)
+                .setMarginTop(10)
+                .setMarginBottom(8);
+        document.add(resultPara);
         }
 
     private void addTexteAdministratifBas(Document document) {
         Paragraph certifiePara = new Paragraph("Cértifié exact:")
                 .setFont(calibriBold)
                 .setFontSize(7.56f)
-                .setTextAlignment(TextAlignment.LEFT)
-                .setMarginLeft(180) // aligné approximativement au-dessus de "des raisons de"
+                .setTextAlignment(TextAlignment.CENTER)
                 .setMarginBottom(6);
         document.add(certifiePara);
 
@@ -437,25 +454,25 @@ public class DeplacementPdfGenerationService {
         table.setWidth(UnitValue.createPercentValue(100));
         table.setMarginBottom(6);
 
+        // Colonne gauche : phrase unique
         Cell leftCell = new Cell().add(new Paragraph("Les déplacements mentionnés ont eu lieu pour des raisons de service.")
-                        .setFont(calibriRegular).setFontSize(8.28f).setTextAlignment(TextAlignment.LEFT))
+                        .setFont(calibriRegular)
+                        .setFontSize(8.28f)
+                        .setTextAlignment(TextAlignment.LEFT))
                 .setBorder(Border.NO_BORDER)
                 .setVerticalAlignment(VerticalAlignment.TOP)
                 .setPadding(2);
 
+        // Colonne droite : 4 lignes distinctes de l'attestation
         Cell rightCell = new Cell()
                 .add(new Paragraph("Par le (la) sousigné(e), qui atteste la veracité")
-                        .setFont(calibriRegular).setFontSize(8.28f).setTextAlignment(TextAlignment.LEFT).setMarginBottom(0))
+                        .setFont(calibriRegular).setFontSize(8.28f).setTextAlignment(TextAlignment.RIGHT).setMarginBottom(0))
                 .add(new Paragraph("des informations, et atteste n'avoir béneficié")
-                        .setFont(calibriRegular).setFontSize(8.28f).setTextAlignment(TextAlignment.LEFT).setMarginBottom(0))
+                        .setFont(calibriRegular).setFontSize(8.28f).setTextAlignment(TextAlignment.RIGHT).setMarginBottom(0))
                 .add(new Paragraph("d'aucune réduction de tarif à titre personnel")
-                        .setFont(calibriRegular).setFontSize(8.28f).setTextAlignment(TextAlignment.LEFT).setMarginBottom(0))
+                        .setFont(calibriRegular).setFontSize(8.28f).setTextAlignment(TextAlignment.RIGHT).setMarginBottom(0))
                 .add(new Paragraph("et d'aucun hébergement et réstauration.")
-                        .setFont(calibriRegular).setFontSize(8.28f).setTextAlignment(TextAlignment.LEFT).setMarginBottom(4))
-                .add(new Paragraph("Fait à Oujda le:")
-                        .setFont(calibriRegular).setFontSize(7.56f).setTextAlignment(TextAlignment.LEFT).setMarginBottom(6))
-                .add(new Paragraph("l'interessé:")
-                        .setFont(calibriBold).setFontSize(7.56f).setTextAlignment(TextAlignment.LEFT).setMarginLeft(60))
+                        .setFont(calibriRegular).setFontSize(8.28f).setTextAlignment(TextAlignment.RIGHT).setMarginBottom(0))
                 .setBorder(Border.NO_BORDER)
                 .setVerticalAlignment(VerticalAlignment.TOP)
                 .setPadding(2);
@@ -466,26 +483,24 @@ public class DeplacementPdfGenerationService {
         }
 
     private void addSignatureEtDeclaration(Document document, BigDecimal total) {
-        String words = MontantEnLettresConverter.convertir(total != null ? total : BigDecimal.ZERO).toUpperCase();
-
-        Paragraph labelPara = new Paragraph("Arrêté par nous sous-ordonateur à la somme de:")
-                .setFont(calibriBold)
-                .setFontSize(9)
-                .setTextAlignment(TextAlignment.LEFT)
-                .setMarginLeft(60)
-                .setMarginTop(6)
+        Paragraph faitOujdaPara = new Paragraph("Fait à Oujda le:")
+                .setFont(calibriRegular)
+                .setFontSize(7.56f)
+                .setTextAlignment(TextAlignment.CENTER)
+                .setMarginTop(8)
                 .setMarginBottom(4);
-        document.add(labelPara);
+        document.add(faitOujdaPara);
 
-        Paragraph resultPara = new Paragraph("### " + words + " ###")
+        Paragraph interessetoPara = new Paragraph("l'interessé:")
                 .setFont(calibriBold)
-                .setFontSize(11)
-                .setTextAlignment(TextAlignment.LEFT)
-                .setMarginLeft(210)
+                .setFontSize(7.56f)
+                .setTextAlignment(TextAlignment.CENTER)
+                .setMarginTop(4)
                 .setMarginBottom(8);
-        document.add(resultPara);
-        }
+        document.add(interessetoPara);
 
+        addArreteLine(document, "Arrêté par nous sous-ordonateur à la somme de:", total, true);
+        }
     private void addPhraseFinale(Document document, BigDecimal total) {
         Paragraph p1 = new Paragraph("Arrêté par nous sous-ordonateur à la somme de:")
                 .setFont(calibriBold).setFontSize(9).setMarginBottom(4);
@@ -503,3 +518,9 @@ public class DeplacementPdfGenerationService {
         return montant.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString().replace(".", ",");
     }
 }
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: com/gestionpaiements/app/service/DeplacementPdfGenerationService#addArreteLine#

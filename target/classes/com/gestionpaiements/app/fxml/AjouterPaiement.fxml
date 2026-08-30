@@ -60,6 +60,8 @@
                     </columnConstraints>
                     <Label text="Exercice :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
                     <TextField fx:id="exerciceField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                    <Label text="Créance d'origine :" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                    <TextField fx:id="creanceDOrigineField" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
                     <Label text="Code CGNC :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
                     <TextField fx:id="codeCgncField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
                     <Label text="Article :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>

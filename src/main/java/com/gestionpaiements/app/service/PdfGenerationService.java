@@ -61,9 +61,9 @@ public class PdfGenerationService {
     private static final Color BLACK = ColorConstants.BLACK;
 
 
-    private static final String LOGO_CLASSPATH = "images/royaume-du-maroc-kingdom-of-morocco-seeklogo.png";
-    private static final String MINISTERE = "Ministère de l'Éducation Nationale, du Préscolaire et des Sports";
-    private static final String DIRECTION = "Direction Provinciale de Nador";
+    private static final String LOGO_CLASSPATH = "images/Logo1.png";
+    //private static final String MINISTERE = "Ministère de l'Éducation Nationale, du Préscolaire et des Sports";
+    //private static final String DIRECTION = "Direction Provinciale de Nador";
     private static final String TITRE_BASE = "ETAT DES SOMMES DUES POUR FRAIS DE ";
 
     @Autowired
@@ -104,9 +104,9 @@ public class PdfGenerationService {
         addIntermediateSignatures(document);
         } else {
         addOperationsTable(document, paiement);
+        addNetAPayerBlock(document, paiement);
         addArreteDeSomme(document, paiement.getMontantNet());
         addIntermediateSignatures(document);
-        addNetAPayerBlock(document, paiement);
         }
 
         addFooterValidation(document, paiement.getMontantNet());
@@ -119,7 +119,7 @@ public class PdfGenerationService {
     //
     private void addHeader(Document document, String affectation) {
         // ROYAUME DU MAROC
-        Paragraph royaume = new Paragraph("ROYAUME DU MAROC")
+        Paragraph royaume = new Paragraph("")
                 .setTextAlignment(TextAlignment.CENTER)
                 .setBold()
                 .setFontSize(14)
@@ -132,8 +132,8 @@ public class PdfGenerationService {
                 if (logoResource.exists()) {
                         byte[] logoBytes = logoResource.getInputStream().readAllBytes();
                         Image logo = new Image(ImageDataFactory.create(logoBytes))
-                                .setWidth(60)
-                                .setHeight(60)
+                                .setWidth(500)
+                                .setAutoScaleHeight(true)
                                 .setHorizontalAlignment(HorizontalAlignment.CENTER);
                         document.add(logo);
                 } else {
@@ -145,6 +145,7 @@ public class PdfGenerationService {
 
 
         // Ministry and Direction
+        /* 
         Paragraph ministere = new Paragraph(MINISTERE)
                 .setTextAlignment(TextAlignment.CENTER)
                 .setFontSize(10)
@@ -158,9 +159,9 @@ public class PdfGenerationService {
                 .setFontSize(10)
                 .setFontColor(BLACK);
         document.add(direction);
-
+*/
         // Thin horizontal line (primary blue) across content width
-        addHorizontalLine(document, PRIMARY_BLUE, 2f, 8f);
+        //addHorizontalLine(document, PRIMARY_BLUE, 2f, 8f);
     }
 
     private void addMainTitle(Document document, TypePaiement type) {
@@ -186,23 +187,13 @@ public class PdfGenerationService {
         }
 
    private void addBudgetBlock(Document document, Paiement paiement) {
-        // 9 colonnes : 5 groupes de contenu + 4 espaceurs entre eux
-        Table table = new Table(new float[]{2.2f, 0.4f, 2f, 0.4f, 1.8f, 0.4f, 1.5f, 0.4f, 1.8f});
-        table.setWidth(UnitValue.createPercentValue(100));
-        table.setMarginBottom(4);
-        table.setBorderRadius(new BorderRadius(30)); // ✅ coins arrondis
-
-        Cell wrapper = new Cell(1, 9)
-                .setBorder(new SolidBorder(LIGHT_BORDER, 0.5f))
-                .setBorderRadius(new BorderRadius(30))
-                .setBackgroundColor(LIGHT_GRAY_BG)
-                .setPadding(0);
-        // Astuce : on construit d'abord une table interne sans bordure, puis on l'enveloppe
-
-        Table inner = new Table(new float[]{2.2f, 0.4f, 2f, 0.4f, 1.8f, 0.4f, 1.5f, 0.4f, 1.8f});
+        // 11 colonnes : 6 groupes de contenu + 5 espaceurs entre eux
+        Table inner = new Table(new float[]{1.6f, 0.1f, 1.7f, 0.1f, 1.3f, 0.1f, 1.1f, 0.1f, 0.9f, 0.1f, 1.1f});
         inner.setWidth(UnitValue.createPercentValue(100));
 
         inner.addCell(budgetGroupCell("Exercice : ", getFieldValue(paiement.getExercice())));
+        inner.addCell(spacerCell());
+        inner.addCell(budgetGroupCell("Créance d'origine : ", getFieldValue(paiement.getCreanceDOrigine())));
         inner.addCell(spacerCell());
         inner.addCell(budgetGroupCell("Code CGNC : ", getFieldValue(paiement.getCodeCgnc())));
         inner.addCell(spacerCell());
@@ -216,7 +207,7 @@ public class PdfGenerationService {
                 .setBorder(new SolidBorder(LIGHT_BORDER, 0.5f))
                 .setBorderRadius(new BorderRadius(6))
                 .setBackgroundColor(LIGHT_GRAY_BG)
-                .setPadding(6);
+                .setPadding(5);
 
         Table outer = new Table(1);
         outer.setWidth(UnitValue.createPercentValue(100));
@@ -229,8 +220,8 @@ public class PdfGenerationService {
         // Helper : une cellule "Label : Valeur"
         private Cell budgetGroupCell(String label, String value) {
         Paragraph p = new Paragraph()
-                .add(new Paragraph(label).setBold().setFontColor(PRIMARY_BLUE).setFontSize(9))
-                .add(new Paragraph(value).setBold().setFontColor(BLACK).setFontSize(9).setUnderline());
+                .add(new Paragraph(label).setBold().setFontColor(PRIMARY_BLUE).setFontSize(8))
+                .add(new Paragraph(value).setBold().setFontColor(BLACK).setFontSize(8).setUnderline());
         return new Cell().add(p).setBorder(Border.NO_BORDER).setPadding(0);
         }
 
@@ -512,7 +503,7 @@ public class PdfGenerationService {
     private void addIntermediateSignatures(Document document) {
         Table signaturesTable = new Table(new float[]{1, 1});
         signaturesTable.setWidth(UnitValue.createPercentValue(100));
-        signaturesTable.setMarginBottom(6);
+        signaturesTable.setMarginBottom(30);
 
         signaturesTable.addCell(new Cell().add(new Paragraph("Fait à Oujda, le __________"))
                 .setFontSize(9)

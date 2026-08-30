@@ -89,6 +89,9 @@ public class Paiement {
     @Column(name = "exercice")
     private String exercice;
 
+    @Column(name = "créance d'origine")
+    private String creanceDOrigine;
+
     @Column(name = "code_cgnc")
     private String codeCgnc;
 
@@ -330,6 +333,15 @@ public class Paiement {
 
     public void setMotifDeplacement(String motifDeplacement) {
         this.motifDeplacement = motifDeplacement;
+    }
+
+    // Getter and setter for creance d'origine
+    public String getCreanceDOrigine() {
+        return creanceDOrigine;
+    }
+
+    public void setCreanceDOrigine(String creanceDOrigine) {
+        this.creanceDOrigine = creanceDOrigine;
     }
 
     @OneToMany(mappedBy = "paiement", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -1,5 +1,6 @@
 package com.gestionpaiements.app.service;
 
+import com.gestionpaiements.app.model.LigneDeplacement;
 import com.gestionpaiements.app.model.Paiement;
 import com.gestionpaiements.app.model.Professeur;
 import com.gestionpaiements.app.model.TypePaiement;
@@ -8,12 +9,15 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.nio.file.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.gestionpaiements.app.model.LigneDeplacement;
 
 @Service
 public class ExcelFileManagerService {
@@ -195,21 +199,57 @@ public class ExcelFileManagerService {
             c1.setCellValue(prof != null && prof.getEchelle() != null ? prof.getEchelle().toString() : "");
             c1.setCellStyle(dataStyle);
 
+            String dateDebutExcel = "";
+            String dateFinExcel = "";
+            double nombreExcel = 0;
+            double tauxExcel = 0;
+
+            if (paiement.getTypePaiement() == TypePaiement.DEPLACEMENT
+                    && paiement.getLignesDeplacement() != null
+                    && !paiement.getLignesDeplacement().isEmpty()) {
+
+                LigneDeplacement premierTrajet = paiement.getLignesDeplacement().get(0);
+                LigneDeplacement dernierTrajet = paiement.getLignesDeplacement()
+                        .get(paiement.getLignesDeplacement().size() - 1);
+
+                dateDebutExcel = premierTrajet.getDateDepart() != null
+                        ? premierTrajet.getDateDepart().format(DATE_FORMAT) : "";
+                dateFinExcel = dernierTrajet.getDateArrivee() != null
+                        ? dernierTrajet.getDateArrivee().format(DATE_FORMAT) : "";
+
+                BigDecimal sommeNombreTaux = BigDecimal.ZERO;
+                for (LigneDeplacement l : paiement.getLignesDeplacement()) {
+                    if (l.getNombreTauxBase() != null) {
+                        sommeNombreTaux = sommeNombreTaux.add(l.getNombreTauxBase());
+                    }
+                }
+                nombreExcel = sommeNombreTaux.doubleValue();
+                tauxExcel = dernierTrajet.getTauxBaseApplique() != null ? dernierTrajet.getTauxBaseApplique().doubleValue() : 0;
+
+            } else {
+                dateDebutExcel = paiement.getDateDebut() != null ? paiement.getDateDebut().format(DATE_FORMAT) : "";
+                dateFinExcel = paiement.getDateFin() != null ? paiement.getDateFin().format(DATE_FORMAT) : "";
+                nombreExcel = paiement.getNombreHeures() != null ? paiement.getNombreHeures().doubleValue() : 0;
+                tauxExcel = paiement.getTaux() != null ? paiement.getTaux().doubleValue() : 0;
+            }
+
             Cell c2 = row.createCell(col++);
-            c2.setCellValue(paiement.getDateDebut() != null ? paiement.getDateDebut().format(DATE_FORMAT) : "");
+            c2.setCellValue(dateDebutExcel);
             c2.setCellStyle(dataStyle);
 
             Cell c3 = row.createCell(col++);
-            c3.setCellValue(paiement.getDateFin() != null ? paiement.getDateFin().format(DATE_FORMAT) : "");
+            c3.setCellValue(dateFinExcel);
             c3.setCellStyle(dataStyle);
 
             Cell c4 = row.createCell(col++);
-            c4.setCellValue(paiement.getNombreHeures() != null ? paiement.getNombreHeures().doubleValue() : 0);
+            c4.setCellValue(nombreExcel);
             c4.setCellStyle(dataStyle);
 
             Cell c5 = row.createCell(col++);
-            c5.setCellValue(paiement.getTaux() != null ? paiement.getTaux().doubleValue() : 0);
+            c5.setCellValue(tauxExcel);
             c5.setCellStyle(dataStyle);
+
+
 
             Cell c6 = row.createCell(col++);
             c6.setCellValue(paiement.getMontantBrut() != null ? paiement.getMontantBrut().doubleValue() : 0);

@@ -1,3 +1,14 @@
+error id: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/AjouterPaiementController.java:_empty_/Paiement#getCreanceDOrigine#
+file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/AjouterPaiementController.java
+empty definition using pc, found symbol in pc: _empty_/Paiement#getCreanceDOrigine#
+empty definition using semanticdb
+empty definition using fallback
+non-local guesses:
+
+offset: 13802
+uri: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/AjouterPaiementController.java
+text:
+```scala
 package com.gestionpaiements.app.controller;
 
 import com.gestionpaiements.app.model.Professeur;
@@ -301,7 +312,7 @@ public class AjouterPaiementController {
                 recalcTotalDeplacement();
 
                 exerciceField.setText(p.getExercice() != null ? p.getExercice() : "");
-                creanceDOrigineField.setText(p.getCreanceDOrigine() != null ? p.getCreanceDOrigine() : "");
+                creanceDOrigineField.setText(p.getCreanceDOrigine() != null ? p.@@getCreanceDOrigine() : "");
                 codeCgncField.setText(p.getCodeCgnc() != null ? p.getCodeCgnc() : "");
                 articleField.setText(p.getArticle() != null ? p.getArticle() : "");
                 parField.setText(p.getPar() != null ? p.getPar() : "");
@@ -1521,3 +1532,9 @@ public class AjouterPaiementController {
         }
     }
 }
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: _empty_/Paiement#getCreanceDOrigine#

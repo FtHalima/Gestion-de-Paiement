@@ -1,3 +1,14 @@
+error id: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/service/DeplacementPdfGenerationService.java:_empty_/Appliqué#
+file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/service/DeplacementPdfGenerationService.java
+empty definition using pc, found symbol in pc: _empty_/Appliqué#
+empty definition using semanticdb
+empty definition using fallback
+non-local guesses:
+
+offset: 14915
+uri: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/service/DeplacementPdfGenerationService.java
+text:
+```scala
 package com.gestionpaiements.app.service;
 
 import com.gestionpaiements.app.dao.PaiementRepository;
@@ -310,8 +321,10 @@ public class DeplacementPdfGenerationService {
         addHeaderCell(table, "Date de déplacement", 1, 2);
         addHeaderCell(table, "Indication Précise du parcours", 2, 1);
         addHeaderCell(table, "Heures", 1, 2);
-        addHeaderCell(table, "Nb.De Taux Taux de Base", 2, 1);
-        addHeaderCell(table, "Taux de Base Appliqué", 2, 1);
+// 
+depart arrivé Départ Retour de base @@Appliqué
+        addHeaderCell(table, "Nb. De Taux Taux de Base", 2, 1);
+        addHeaderCell(table, "Taux de Base", 2, 1);
         addHeaderCell(table, "Montant", 2, 1);
 
         // Ligne d'en-tête 2 (sous-colonnes)
@@ -503,3 +516,9 @@ public class DeplacementPdfGenerationService {
         return montant.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString().replace(".", ",");
     }
 }
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: _empty_/Appliqué#
