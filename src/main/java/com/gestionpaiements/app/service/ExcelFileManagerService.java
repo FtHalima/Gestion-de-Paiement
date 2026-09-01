@@ -38,6 +38,7 @@ public class ExcelFileManagerService {
     };
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final int COL_ID_INTERNAL = 20; // colonne U (0-indexée), usage interne uniquement
 
     private String getTypePrefix(TypePaiement type) {
         switch (type) {
@@ -68,6 +69,25 @@ public class ExcelFileManagerService {
         }
         return null;
     }
+//
+    private int findExistingRowIndex(Sheet sheet, Long paiementId) {
+        if (paiementId == null) return -1;
+        int lastRow = sheet.getLastRowNum();
+        for (int r = 4; r <= lastRow; r++) {
+            Row row = sheet.getRow(r);
+            if (row == null) continue;
+            Cell idCell = row.getCell(COL_ID_INTERNAL);
+            if (idCell != null && idCell.getCellType() == CellType.NUMERIC) {
+                long existingId = (long) idCell.getNumericCellValue();
+                if (existingId == paiementId) {
+                    return r;
+                }
+            }
+        }
+        return -1;
+    }
+//
+
 
     /**
      * Calcule le prochain numéro de séquence pour ce type, en regardant
@@ -134,6 +154,7 @@ public class ExcelFileManagerService {
             for (int i = 0; i < LIGNE4_HEADERS.length; i++) {
                 sheet.autoSizeColumn(i);
             }
+            sheet.setColumnHidden(COL_ID_INTERNAL, true);
 
             try (FileOutputStream fos = new FileOutputStream(file)) {
                 workbook.write(fos);
@@ -185,8 +206,10 @@ public class ExcelFileManagerService {
              XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
 
             Sheet sheet = workbook.getSheetAt(0);
-            int targetRowIndex = Math.max(4, sheet.getLastRowNum() + 1);
-            Row row = sheet.createRow(targetRowIndex);
+            int existingRowIndex = findExistingRowIndex(sheet, paiement.getIdPaiement());
+            Row row = (existingRowIndex >= 0)
+                    ? sheet.getRow(existingRowIndex)
+                    : sheet.createRow(Math.max(4, sheet.getLastRowNum() + 1));
 
             Professeur prof = paiement.getProfesseur();
 
@@ -276,7 +299,7 @@ public class ExcelFileManagerService {
             c11.setCellStyle(dataStyle);
 
             Cell c12 = row.createCell(col++);
-            c12.setCellValue(prof != null && prof.getDdr() != null ? prof.getDdr().format(DATE_FORMAT) : "");
+            c12.setCellValue(prof != null && prof.getPpr() != null ? prof.getPpr() : "");
             c12.setCellStyle(dataStyle);
 
             // Mode de paiement : VIREMENT -> VIR pour Excel uniquement
@@ -314,6 +337,9 @@ public class ExcelFileManagerService {
             c20.setCellValue("");
             c20.setCellStyle(dataStyle);
 
+            Cell idCell = row.createCell(COL_ID_INTERNAL);
+            idCell.setCellValue(paiement.getIdPaiement());
+
             try (FileOutputStream fos = new FileOutputStream(file)) {
                 workbook.write(fos);
             }
@@ -336,6 +362,41 @@ public class ExcelFileManagerService {
         Path target = Paths.get(ARCHIVE_DIR, active.getName());
         Files.move(active.toPath(), target, StandardCopyOption.REPLACE_EXISTING);
         createNewActiveFile(type);
+    }
+
+    /**
+     * Réactive un fichier archivé : archive le fichier actif actuel du même type
+     * (s'il existe), puis déplace le fichier archivé choisi vers le dossier actif.
+     *
+     * @param archivedFile le fichier archivé à réactiver (doit être dans excel/archive/)
+     * @param type le type de paiement concerné (déduit du préfixe du nom de fichier)
+     */
+    public void reactiverFichierArchive(File archivedFile, TypePaiement type) throws IOException {
+        ensureDirectoriesExist();
+
+        // Archive le fichier actif actuel s'il existe
+        File currentActive = findActiveFile(type);
+        if (currentActive != null) {
+            String timestamp = java.time.LocalDateTime.now()
+                    .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            String archivedName = currentActive.getName().replace(".xlsx", "") + "_archive_" + timestamp + ".xlsx";
+            Path target = Paths.get(ARCHIVE_DIR, archivedName);
+            Files.move(currentActive.toPath(), target, StandardCopyOption.REPLACE_EXISTING);
+        }
+
+        // Déplace le fichier archivé choisi vers le dossier actif
+        Path destination = Paths.get(BASE_DIR, archivedFile.getName());
+        Files.move(archivedFile.toPath(), destination, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    /**
+     * Déduit le type de paiement à partir du nom d'un fichier (préfixe avant "_S").
+     */
+    public TypePaiement deduireTypeDepuisNomFichier(String fileName) {
+        if (fileName.startsWith("Vacation_S")) return TypePaiement.VACATAIRE;
+        if (fileName.startsWith("HeureSup_S")) return TypePaiement.HEURE_SUP;
+        if (fileName.startsWith("Deplacement_S")) return TypePaiement.DEPLACEMENT;
+        return null;
     }
 
     /**

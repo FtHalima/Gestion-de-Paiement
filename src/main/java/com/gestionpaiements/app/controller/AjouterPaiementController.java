@@ -47,6 +47,8 @@ import java.math.RoundingMode;
 
 import com.gestionpaiements.app.service.DeplacementPdfGenerationService;
 
+import java.awt.Desktop;
+
 @Component
 public class AjouterPaiementController {
 
@@ -75,7 +77,6 @@ public class AjouterPaiementController {
     // Display labels (professor info)
     @FXML private Label nomLabel;
     @FXML private Label prenomLabel;
-    @FXML private Label ddrLabel;
     @FXML private Label gradeLabel;
     @FXML private Label echelleLabel;
     @FXML private Label affectationLabel;
@@ -87,7 +88,6 @@ public class AjouterPaiementController {
     // Edit fields (for new professor)
     @FXML private TextField nomField;
     @FXML private TextField prenomField;
-    @FXML private DatePicker ddrPicker;
     @FXML private ComboBox<String> gradeField; // Changed to ComboBox
     @FXML private TextField echelleField;
     @FXML private TextField affectationField;
@@ -279,8 +279,12 @@ public class AjouterPaiementController {
                 dateFinField.setValue(p.getDateFin());
                 nombreHeuresField.setText(formatBigDecimal(p.getNombreHeures()));
                 tauxField.setText(formatBigDecimal(p.getTaux()));
-                String irStr = p.getTauxIr().stripTrailingZeros().toPlainString();
-                irCombo.getSelectionModel().select(irStr);
+                if (p.getTauxIr() != null) {
+                    String irStr = p.getTauxIr().stripTrailingZeros().toPlainString();
+                    irCombo.getSelectionModel().select(irStr);
+                } else {
+                    irCombo.getSelectionModel().clearSelection();
+                }
                 // Set new payment fields
                 motifDeplacementField.setText(p.getMotifDeplacement() != null ? p.getMotifDeplacement() : "");
                 trajetsData.clear();
@@ -355,7 +359,6 @@ public class AjouterPaiementController {
         // Clear edit fields (except CIN/PPR which are already set)
         nomField.clear();
         prenomField.clear();
-        ddrPicker.setValue(null);
         gradeField.getSelectionModel().clearSelection();
         echelleField.clear();
         affectationField.clear();
@@ -393,7 +396,6 @@ public class AjouterPaiementController {
     private void showProfesseurInfo(Professeur prof) {
         nomLabel.setText(prof.getNom());
         prenomLabel.setText(prof.getPrenom());
-        ddrLabel.setText(prof.getDdr() != null ? prof.getDdr().format(dateFormatter) : "-");
         gradeLabel.setText(prof.getGrade());
         echelleLabel.setText(prof.getEchelle() != null ? prof.getEchelle().toString() : "-");
         affectationLabel.setText(prof.getAffectation());
@@ -406,7 +408,6 @@ public class AjouterPaiementController {
         pprField.setText(prof.getPpr());
         nomField.setText(prof.getNom());
         prenomField.setText(prof.getPrenom());
-        ddrPicker.setValue(prof.getDdr());
         gradeField.setValue(prof.getGrade());
         echelleField.setText(prof.getEchelle() != null ? prof.getEchelle().toString() : "");
         affectationField.setText(prof.getAffectation());
@@ -849,7 +850,6 @@ public class AjouterPaiementController {
             currentProfesseur.setPpr(pprField.getText().trim());
             currentProfesseur.setNom(nomField.getText().trim());
             currentProfesseur.setPrenom(prenomField.getText().trim());
-            currentProfesseur.setDdr(ddrPicker.getValue());
             currentProfesseur.setGrade(gradeField.getValue());
             currentProfesseur.setEchelle(echelleField.getText().trim().isEmpty() ? null : Integer.valueOf(echelleField.getText().trim()));
             currentProfesseur.setAffectation(affectationField.getText().trim());
@@ -864,7 +864,6 @@ public class AjouterPaiementController {
             professeurToSave.setPpr(pprField.getText().trim());
             professeurToSave.setNom(nomField.getText().trim());
             professeurToSave.setPrenom(prenomField.getText().trim());
-            professeurToSave.setDdr(ddrPicker.getValue());
             professeurToSave.setGrade(gradeField.getValue());
             professeurToSave.setEchelle(echelleField.getText().trim().isEmpty() ? null : Integer.valueOf(echelleField.getText().trim()));
             professeurToSave.setAffectation(affectationField.getText().trim());
@@ -891,12 +890,13 @@ public class AjouterPaiementController {
                 + ", ribNumeroCompte=" + savedProf.getRibNumeroCompte()
                 + ", ribCle=" + savedProf.getRibCle());
 
-        // Create paiement with saved professor
-        // Create or update paiement with saved professor
-        Paiement paiement = (currentPaiement != null) ? currentPaiement : new Paiement();
+        // Réutilise currentPaiement UNIQUEMENT si le type sélectionné correspond au type déjà enregistré
+        // (sinon, changer de type créerait une confusion : on veut un enregistrement distinct par type)
+        TypePaiement typeSelectionne = typePaiementCombo.getSelectionModel().getSelectedItem();
+        boolean reutiliser = currentPaiement != null && currentPaiement.getTypePaiement() == typeSelectionne;
+        Paiement paiement = reutiliser ? currentPaiement : new Paiement();
         paiement.setProfesseur(savedProf);
-        paiement.setTypePaiement(typePaiementCombo.getSelectionModel().getSelectedItem());
-        // Objet et référence règlement : convert "-" to null for cleaner DB
+        paiement.setTypePaiement(typeSelectionne);
         String objetReglement = objetReglementLabel.getText();
         paiement.setObjetReglement("-".equals(objetReglement) || objetReglement.isEmpty() ? null : objetReglement);
         String referenceReglement = referenceReglementLabel.getText();
@@ -1012,7 +1012,6 @@ public class AjouterPaiementController {
         pprField.clear();
         nomLabel.setText("-");
         prenomLabel.setText("-");
-        ddrLabel.setText("-");
         gradeLabel.setText("-");
         echelleLabel.setText("-");
         affectationLabel.setText("-");
@@ -1082,9 +1081,6 @@ public class AjouterPaiementController {
                 }
                 if (prenomField.getText().trim().isEmpty()) {
                     errors.append("- Prénom du professeur obligatoire\n");
-                }
-                if (ddrPicker.getValue() == null) {
-                    errors.append("- Date de recrutement (DDR) obligatoire\n");
                 }
                 if (gradeField.getValue() == null) {
                     errors.append("- Grade obligatoire\n");
@@ -1182,7 +1178,6 @@ public class AjouterPaiementController {
                 // Update existing professor
                 currentProfesseur.setNom(nomField.getText().trim());
                 currentProfesseur.setPrenom(prenomField.getText().trim());
-                currentProfesseur.setDdr(ddrPicker.getValue());
                 currentProfesseur.setGrade(gradeField.getValue());
                 currentProfesseur.setEchelle(echelleField.getText().trim().isEmpty() ? null : Integer.valueOf(echelleField.getText().trim()));
                 currentProfesseur.setAffectation(affectationField.getText().trim());
@@ -1198,7 +1193,6 @@ public class AjouterPaiementController {
                 professeurToSave.setPpr(pprField.getText().trim());
                 professeurToSave.setNom(nomField.getText().trim());
                 professeurToSave.setPrenom(prenomField.getText().trim());
-                professeurToSave.setDdr(ddrPicker.getValue());
                 professeurToSave.setGrade(gradeField.getValue());
                 professeurToSave.setEchelle(echelleField.getText().trim().isEmpty() ? null : Integer.valueOf(echelleField.getText().trim()));
                 professeurToSave.setAffectation(affectationField.getText().trim());
@@ -1224,11 +1218,13 @@ public class AjouterPaiementController {
                     + ", ribNumeroCompte=" + savedProf.getRibNumeroCompte()
                     + ", ribCle=" + savedProf.getRibCle());
 
-            // Create paiement with saved professor
-            // Create or update paiement with saved professor
-            Paiement paiement = (currentPaiement != null) ? currentPaiement : new Paiement();
+            // Réutilise currentPaiement UNIQUEMENT si le type sélectionné correspond au type déjà enregistré
+            // (sinon, changer de type créerait une confusion : on veut un enregistrement distinct par type)
+            TypePaiement typeSelectionne = typePaiementCombo.getSelectionModel().getSelectedItem();
+            boolean reutiliser = currentPaiement != null && currentPaiement.getTypePaiement() == typeSelectionne;
+            Paiement paiement = reutiliser ? currentPaiement : new Paiement();
             paiement.setProfesseur(savedProf);
-            paiement.setTypePaiement(typePaiementCombo.getSelectionModel().getSelectedItem());
+            paiement.setTypePaiement(typeSelectionne);
             // Objet et référence règlement : convert "-" to null for cleaner DB
             String objetReglement = objetReglementLabel.getText();
             paiement.setObjetReglement("-".equals(objetReglement) || objetReglement.isEmpty() ? null : objetReglement);
@@ -1298,40 +1294,34 @@ public class AjouterPaiementController {
                 e.printStackTrace();
                 showError("Paiement enregistré en base, mais erreur lors de l'écriture dans Excel : " + e.getMessage());
             }
-
-            // Generate PDF
             // Generate PDF (format dédié pour Déplacement, format standard pour les autres types)
             ByteArrayInputStream pdfInputStream = (savedPaiement.getTypePaiement() == TypePaiement.DEPLACEMENT)
                     ? deplacementPdfGenerationService.genererPdfDeplacement(savedPaiement.getIdPaiement())
                     : pdfGenerationService.genererPdfEstadoSums(savedPaiement.getIdPaiement());
 
-            // Save PDF to file using FileChooser
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Enregistrer le PDF");
-            fileChooser.getExtensionFilters().addAll(
-                    new FileChooser.ExtensionFilter("PDF Files", "*.pdf")
-            );
-            fileChooser.setInitialFileName("etat_sommes_dues_" + savedPaiement.getIdPaiement() + ".pdf");
+            // Écriture dans un fichier temporaire (invisible pour l'utilisateur, auto-supprimé)
+            // Écriture dans un fichier temporaire (invisible pour l'utilisateur, auto-supprimé)
+            File tempFile = File.createTempFile("paiement_" + savedPaiement.getIdPaiement() + "_", ".pdf");
+            tempFile.deleteOnExit();
 
-            File file = fileChooser.showSaveDialog(
-                    ((Button) event.getSource()).getScene().getWindow());
-
-            if (file != null) {
-                try (FileOutputStream fos = new FileOutputStream(file)) {
-                    byte[] buffer = new byte[1024];
-                    int bytesRead;
-                    while ((bytesRead = pdfInputStream.read(buffer)) != -1) {
-                        fos.write(buffer, 0, bytesRead);
-                    }
-
-                    showInfo("PDF généré avec succès et enregistré dans : " + file.getAbsolutePath());
-                } catch (IOException ex) {
-                    showError("Erreur lors de l'écriture du fichier PDF : " + ex.getMessage());
+            try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = pdfInputStream.read(buffer)) != -1) {
+                    fos.write(buffer, 0, bytesRead);
                 }
-            } else {
-                showInfo("Génération du PDF annulée par l'utilisateur");
             }
 
+            try {
+                ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "start", "\"\"", tempFile.getAbsolutePath());
+                pb.start();
+                showInfo("Le PDF a été ouvert. Utilisez Ctrl+P pour l'imprimer.");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                showError("Impossible d'ouvrir le PDF automatiquement : " + ex.getMessage());
+            }
+
+            
         } catch (Exception e) {
             e.printStackTrace();
             showError("Erreur lors de la génération du PDF : " + e.getMessage());
@@ -1363,9 +1353,7 @@ public class AjouterPaiementController {
             if (prenomField.getText().trim().isEmpty()) {
                 errors.append("- Prénom du professeur obligatoire\n");
             }
-            if (ddrPicker.getValue() == null) {
-                errors.append("- Date de naissance (DDR) obligatoire\n");
-            }
+
             if (gradeField.getValue() == null) {
                 errors.append("- Grade obligatoire\n");
             }

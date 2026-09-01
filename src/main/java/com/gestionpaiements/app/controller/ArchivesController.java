@@ -1,10 +1,12 @@
 package com.gestionpaiements.app.controller;
 
+import com.gestionpaiements.app.model.TypePaiement;
 import com.gestionpaiements.app.service.ExcelFileManagerService;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListView;
 import javafx.stage.FileChooser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.List;
+
+import com.gestionpaiements.app.model.TypePaiement;
 
 @Component
 public class ArchivesController {
@@ -22,6 +26,7 @@ public class ArchivesController {
     @FXML private ListView<File> archivesListView;
     @FXML private Button exportButton;
     @FXML private Button backButton;
+    @FXML private Button reactivateButton;
 
     private Runnable onBack;
 
@@ -73,6 +78,42 @@ public class ArchivesController {
             e.printStackTrace();
             showAlert("Erreur", "Impossible d'exporter le fichier : " + e.getMessage());
         }
+    }
+
+
+    @FXML
+    private void handleReactivate() {
+        File selected = archivesListView.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert("Aucune sélection", "Veuillez sélectionner un fichier archivé à réactiver.");
+            return;
+        }
+
+        TypePaiement type = excelFileManagerService.deduireTypeDepuisNomFichier(selected.getName());
+        if (type == null) {
+            showAlert("Erreur", "Impossible de déterminer le type de paiement pour ce fichier.");
+            return;
+        }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirmation");
+        confirm.setHeaderText(null);
+        confirm.setContentText("Voulez-vous réactiver « " + selected.getName() + " » ?\n\n"
+                + "Le fichier actif actuel de ce type (s'il existe) sera automatiquement archivé.");
+        confirm.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.YES) {
+                try {
+                    excelFileManagerService.reactiverFichierArchive(selected, type);
+                    loadArchives();
+                    showAlert("Fichier réactivé", "« " + selected.getName() + " » est maintenant le fichier actif pour ce type. "
+                            + "Les nouveaux paiements de ce type s'ajouteront désormais dedans.");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    showAlert("Erreur", "Impossible de réactiver le fichier : " + e.getMessage());
+                }
+            }
+        });
     }
 
     @FXML

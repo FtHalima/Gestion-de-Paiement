@@ -61,10 +61,12 @@
          </padding>
          <Button text="Retour" fx:id="retourButton" onAction="#handleRetour"/>
          <Button text="Supprimer la sélection" fx:id="deleteButton" onAction="#handleDeleteSelected" style="-fx-text-fill: #c0392b;"/>
+         <Button text="Importer" fx:id="importButton" onAction="#handleImportExcel"/>
          <Region HBox.hgrow="ALWAYS"/>
          <Button text="Exporter" fx:id="exportExcelButton" onAction="#handleExportExcel"/>
          <Button text="Archives" fx:id="archivesExcelButton" onAction="#handleArchivesExcel"/>
          <Button text="Clôturer le fichier" fx:id="closeExcelButton" onAction="#handleCloseExcel" style="-fx-text-fill: #b34700;"/>
+         
       </HBox>
    </bottom>
    <padding>

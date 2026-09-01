@@ -23,6 +23,7 @@
         <Button text="Retour" fx:id="backButton" onAction="#handleBack"/>
         <Region HBox.hgrow="ALWAYS"/>
         <Button text="Exporter le fichier sélectionné" fx:id="exportButton" onAction="#handleExport"/>
+        <Button text="Réactiver ce fichier" fx:id="reactivateButton" onAction="#handleReactivate" style="-fx-text-fill: #1a7a3c;"/>
     </HBox>
 
 </VBox>

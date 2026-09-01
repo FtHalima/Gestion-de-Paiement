@@ -1,3 +1,14 @@
+error id: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/service/DeplacementPdfGenerationService.java:java/lang/String#
+file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/service/DeplacementPdfGenerationService.java
+empty definition using pc, found symbol in pc: java/lang/String#
+empty definition using semanticdb
+empty definition using fallback
+non-local guesses:
+
+offset: 10611
+uri: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/service/DeplacementPdfGenerationService.java
+text:
+```scala
 package com.gestionpaiements.app.service;
 
 import com.gestionpaiements.app.dao.PaiementRepository;
@@ -235,8 +246,7 @@ public class DeplacementPdfGenerationService {
         String cadre = prof != null ? getFieldValue(prof.getGrade()) : "";
         String grade = prof != null && prof.getEchelle() != null ? prof.getEchelle().toString() : "";
         String lieuTravail = prof != null ? getFieldValue(prof.getAffectation()) : "";
-        String compteN = prof != null ? (getFieldValue(prof.getRibBanque()) + " " + getFieldValue(prof.getRibVille()) + " "
-                + getFieldValue(prof.getRibNumeroCompte()) + " " + getFieldValue(prof.getRibCle())).trim() : "";
+        @@String compteN = prof != null ? getFieldValue(prof.getRibComplet()) : "";
 
         Table table = new Table(new float[]{1f, 1f});
         table.setWidth(UnitValue.createPercentValue(100));
@@ -355,23 +365,25 @@ public class DeplacementPdfGenerationService {
                 }
         }
 
+        // Ligne Total Général : label sur 7 colonnes, résultat dans la colonne Montant uniquement
+        // Somme du "Nombre de taux de base" sur tous les trajets
+BigDecimal sommeNombre = BigDecimal.ZERO;
+for (LigneDeplacement l : paiement.getLignesDeplacement()) {
+    if (l.getNombreTauxBase() != null) {
+        sommeNombre = sommeNombre.add(l.getNombreTauxBase());
+    }
+}
 
 // Ligne Total Général : label sur 5 colonnes (Dates + Parcours + Heures),
-        // Somme du "Nombre de taux de base" sur tous les trajets
-        BigDecimal sommeNombre = BigDecimal.ZERO;
-        for (LigneDeplacement l : paiement.getLignesDeplacement()) {
-        if (l.getNombreTauxBase() != null) {
-                sommeNombre = sommeNombre.add(l.getNombreTauxBase());
-        }
-        }
-
-        // Colonnes Dates + Parcours + Heures : vides sur cette ligne
-        Cell emptyDatesParcoursHeures = new Cell(1, 5).add(new Paragraph(""))
+        // somme du nombre dans la colonne "Nombre de taux de base", vide pour "Taux appliqué",
+        // montant total dans la colonne "Montant"
+        Cell totalLabel = new Cell(1, 5).add(new Paragraph("Total Général")
+                        .setFont(calibriRegular).setFontSize(9).setBold())
+                .setTextAlignment(TextAlignment.RIGHT)
                 .setBorder(new SolidBorder(BLACK, 1.2f))
                 .setPadding(4);
-        table.addCell(emptyDatesParcoursHeures);
+        table.addCell(totalLabel);
 
-        // Somme du nombre de taux de base, sous sa propre colonne
         Cell sommeNombreCell = new Cell().add(new Paragraph(sommeNombre.stripTrailingZeros().toPlainString())
                         .setFont(calibriBold).setFontSize(9))
                 .setTextAlignment(TextAlignment.CENTER)
@@ -379,22 +391,17 @@ public class DeplacementPdfGenerationService {
                 .setPadding(4);
         table.addCell(sommeNombreCell);
 
-        // Label "Total Général" dans la colonne "Taux appliqué"
-        Cell totalLabel = new Cell().add(new Paragraph("Total Général")
-                        .setFont(calibriRegular).setFontSize(9).setBold())
-                .setTextAlignment(TextAlignment.CENTER)
+        Cell emptyTauxCell = new Cell().add(new Paragraph(""))
                 .setBorder(new SolidBorder(BLACK, 1.2f))
                 .setPadding(4);
-        table.addCell(totalLabel);
+        table.addCell(emptyTauxCell);
 
-        // Montant : total général dans la colonne "Montant"
         Cell totalValue = new Cell().add(new Paragraph(formatMontant(total))
                         .setFont(calibriBold).setFontSize(9.72f))
                 .setTextAlignment(TextAlignment.CENTER)
                 .setBorder(new SolidBorder(BLACK, 1.2f))
                 .setPadding(4);
         table.addCell(totalValue);
-
 
         document.add(table);
         return total;
@@ -530,3 +537,9 @@ public class DeplacementPdfGenerationService {
         return montant.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString().replace(".", ",");
     }
 }
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: java/lang/String#

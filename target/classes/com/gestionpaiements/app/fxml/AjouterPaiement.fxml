@@ -87,16 +87,12 @@
                             <Label fx:id="nomLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
                             <Label text="Prénom :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
                             <Label fx:id="prenomLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                            <Label text="Date de recrutement (DDR) :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                            <Label fx:id="ddrLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                            <Label text="Grade :" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                            <Label fx:id="gradeLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-                            <Label text="Échelle :" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-                            <Label fx:id="echelleLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-                            <Label text="Affectation :" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
-                            <Label fx:id="affectationLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
-                            <Label text="RIB complet :" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
-                            <Label fx:id="ribCompletLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+                            <Label text="Grade :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                            <Label fx:id="gradeLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                            <Label text="Échelle :" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                            <Label fx:id="echelleLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                            <Label text="Affectation :" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                            <Label fx:id="affectationLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
                             <Label text="&#160;" GridPane.columnIndex="0" GridPane.rowIndex="7"/>
                             <Button text="SUPPRIMER PROFESSEUR" fx:id="deleteProfButton" onAction="#handleDeleteProf" GridPane.columnIndex="1" GridPane.rowIndex="7"/>
                         </GridPane>
@@ -113,14 +109,12 @@
                             <TextField fx:id="nomField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
                             <Label text="Prénom :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
                             <TextField fx:id="prenomField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                            <Label text="Date de recrutement (DDR) :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                            <DatePicker fx:id="ddrPicker" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                            <Label text="Grade :" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                            <ComboBox fx:id="gradeField" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-                            <Label text="Échelle :" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-                            <TextField fx:id="echelleField" promptText="ex: 5" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-                            <Label text="Affectation :" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
-                            <TextField fx:id="affectationField" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                            <Label text="Grade :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                            <ComboBox fx:id="gradeField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                            <Label text="Échelle :" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                            <TextField fx:id="echelleField" promptText="ex: 5" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                            <Label text="Affectation :" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                            <TextField fx:id="affectationField" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
                         </GridPane>
                     </VBox>
                 </VBox>
@@ -249,7 +243,7 @@
     <HBox spacing="10" alignment="BOTTOM_RIGHT">
         <Button text="ANNULER" fx:id="cancelButton" onAction="#cancelAction"/>
         <Button text="RÉINITIALISER" fx:id="resetButton" onAction="#resetAction"/>
-        <Button text="GÉNÉRER PDF" fx:id="pdfButton" onAction="#genererPdfAction"/>
+        <Button text="IMPRIMER" fx:id="pdfButton" onAction="#genererPdfAction"/>
         <Button text="ENREGISTRER" fx:id="saveButton" onAction="#saveAction" defaultButton="true"/>
     </HBox>
 </VBox>

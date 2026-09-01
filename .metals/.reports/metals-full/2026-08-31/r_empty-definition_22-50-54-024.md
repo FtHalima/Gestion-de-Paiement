@@ -1,11 +1,20 @@
+error id: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/PaiementListController.java:java/lang/String#
+file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/PaiementListController.java
+empty definition using pc, found symbol in pc: java/lang/String#
+empty definition using semanticdb
+empty definition using fallback
+non-local guesses:
+
+offset: 15842
+uri: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/PaiementListController.java
+text:
+```scala
 package com.gestionpaiements.app.controller;
 
 import com.gestionpaiements.app.model.Paiement;
 import com.gestionpaiements.app.model.Professeur;
 import com.gestionpaiements.app.model.TypePaiement;
 import com.gestionpaiements.app.service.PaiementService;
-import com.gestionpaiements.app.service.ProfesseurService;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -30,8 +39,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import com.gestionpaiements.app.model.LigneDeplacement;
 
-import com.gestionpaiements.app.service.ProfesseurService;
-
 
 
 @Component
@@ -42,9 +49,6 @@ public class PaiementListController {
 
     @Autowired
     private ExcelFileManagerService excelFileManagerService;
-
-    @Autowired
-    private ProfesseurService professeurService;
 
     private Runnable onBack; // callback fourni par le parent pour "revenir"
 
@@ -236,9 +240,9 @@ public class PaiementListController {
                 Professeur prof = paiement.getProfesseur();
                 if (prof == null) return false;
                 return (prof.getCin() != null && prof.getCin().toLowerCase().contains(lower))
-                        || (prof.getPpr() != null && prof.getPpr().toLowerCase().contains(lower))
-                        || (prof.getNom() != null && prof.getNom().toLowerCase().contains(lower))
-                        || (prof.getPrenom() != null && prof.getPrenom().toLowerCase().contains(lower));
+ (prof.getPpr() != null && prof.getPpr().toLowerCase().contains(lower))
+ (prof.getNom() != null && prof.getNom().toLowerCase().contains(lower))
+ (prof.getPrenom() != null && prof.getPrenom().toLowerCase().contains(lower));
             });
         }
         // Update empty label visibility
@@ -356,16 +360,18 @@ public class PaiementListController {
     }
 
     //
-
     @FXML
     private void handleImportExcel() {
+        if (currentType == null) return;
+
         javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
-        fileChooser.setTitle("Importer un fichier Excel de professeurs");
+        fileChooser.setTitle("Importer un fichier Excel");
         fileChooser.getExtensionFilters().add(
                 new javafx.stage.FileChooser.ExtensionFilter("Fichiers Excel", "*.xlsx"));
         File file = fileChooser.showOpenDialog(retourButton.getScene().getWindow());
         if (file == null) return;
 
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         int imported = 0;
         int skipped = 0;
 
@@ -375,51 +381,87 @@ public class PaiementListController {
             Sheet sheet = workbook.getSheetAt(0);
             int lastRow = sheet.getLastRowNum();
 
-            // Détecte automatiquement la ligne d'en-tête (celle contenant "CIN")
+            // Détecte automatiquement la ligne d'en-tête business (celle contenant "Grade/Echelle")
             int headerRowIndex = -1;
+
             for (int r = 0; r <= lastRow; r++) {
                 Row row = sheet.getRow(r);
                 if (row == null) continue;
-                String firstCell = getCellString(row, 0);
-                if (firstCell.trim().equalsIgnoreCase("CIN")) {
-                    headerRowIndex = r;
-                    break;
-                }
-            }
 
-            if (headerRowIndex == -1) {
-                showAlert("Erreur", "En-tête introuvable : la colonne 'CIN' n'a pas été trouvée dans le fichier.");
-                return;
-            }
-
-            int dataStartRow = headerRowIndex + 1;
-
-            for (int r = dataStartRow; r <= lastRow; r++) {
-                Row row = sheet.getRow(r);
-                if (row == null) continue;
-
-                String cin = getCellString(row, 0);
-                if (cin.isEmpty()) continue;
+                S@@tring cin = getCellString(row, 8);
+                if (cin.isEmpty()) continue; // ligne vide, on saute
 
                 try {
                     Professeur prof = new Professeur();
                     prof.setCin(cin);
-                    prof.setPpr(getCellString(row, 1));
-                    prof.setNom(getCellString(row, 2));
-                    prof.setPrenom(getCellString(row, 3));
-                    prof.setGrade(getCellString(row, 4));
-
-                    String echelleStr = getCellString(row, 5);
+                    prof.setPpr(cin);
+                    prof.setNom(getCellString(row, 9));
+                    prof.setPrenom(getCellString(row, 10));
+                    String ddrStr = getCellString(row, 11);
+                    if (!ddrStr.isEmpty()) {
+                        try { prof.setDdr(LocalDate.parse(ddrStr, dateFormat)); } catch (Exception ignored) {}
+                    }
+                    String echelleStr = getCellString(row, 0);
                     if (!echelleStr.isEmpty()) {
                         try { prof.setEchelle(Integer.parseInt(echelleStr.trim())); } catch (Exception ignored) {}
                     }
+                    prof.setRibBanque(getCellString(row, 14));
+                    prof.setRibVille(getCellString(row, 15));
+                    prof.setRibNumeroCompte(getCellString(row, 16));
+                    prof.setRibCle(getCellString(row, 17));
 
-                    prof.setRibBanque(getCellString(row, 6));
-                    prof.setRibVille(getCellString(row, 7));
-                    prof.setRibNumeroCompte(getCellString(row, 8));
-                    prof.setRibCle(getCellString(row, 9));
+                    Paiement paiement = new Paiement();
+                    paiement.setProfesseur(prof);
+                    paiement.setTypePaiement(currentType);
 
-                    professeurService.creerOuRecuperer(prof);
+                    String dateDebutStr = getCellString(row, 1);
+                    String dateFinStr = getCellString(row, 2);
+                    LocalDate dateDebut = dateDebutStr.isEmpty() ? null : LocalDate.parse(dateDebutStr, dateFormat);
+                    LocalDate dateFin = dateFinStr.isEmpty() ? null : LocalDate.parse(dateFinStr, dateFormat);
+                    paiement.setDateDebut(dateDebut);
+                    paiement.setDateFin(dateFin);
+
+                    BigDecimal nombre = parseCellNumber(row, 3);
+                    BigDecimal taux = parseCellNumber(row, 4);
+                    BigDecimal brut = parseCellNumber(row, 5);
+                    BigDecimal retenues = parseCellNumber(row, 6);
+                    BigDecimal montantNet = parseCellNumber(row, 7);
+
+                    paiement.setNombreHeures(nombre);
+                    paiement.setTaux(taux);
+
+                    String modePaiementExcel = getCellString(row, 12);
+                    paiement.setModePaiement("VIR".equalsIgnoreCase(modePaiementExcel) ? "VIREMENT" : modePaiementExcel);
+                    paiement.setTypeReferenceReglement(getCellString(row, 13));
+                    paiement.setObjetReglement(getCellString(row, 18));
+                    paiement.setReferenceReglement(getCellString(row, 19));
+
+                    if (currentType == TypePaiement.DEPLACEMENT) {
+                        // Reconstruction d'un trajet unique agrégé (voir limitation connue)
+                        paiement.setMotifDeplacement("Importé depuis Excel");
+                        LigneDeplacement ligne = new LigneDeplacement();
+                        ligne.setPaiement(paiement);
+                        ligne.setDateDepart(dateDebut);
+                        ligne.setDateArrivee(dateFin);
+                        ligne.setParcours("");
+                        ligne.setNombreTauxBase(nombre);
+                        ligne.setTauxBaseApplique(taux);
+                        ligne.setMontant(montantNet != null ? montantNet : BigDecimal.ZERO);
+                        paiement.getLignesDeplacement().add(ligne);
+
+                        paiement.setMontantBrut(brut != null ? brut : BigDecimal.ZERO);
+                        paiement.setRetenueIr(BigDecimal.ZERO);
+                        paiement.setMontantNet(montantNet != null ? montantNet : BigDecimal.ZERO);
+                    }
+                    else {
+                        BigDecimal tauxIr = BigDecimal.ZERO;
+                        if (brut != null && brut.compareTo(BigDecimal.ZERO) > 0 && retenues != null) {
+                            tauxIr = retenues.divide(brut, 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100));
+                        }
+                        paiement.setTauxIr(tauxIr);
+                    }
+
+                    paiementService.enregistrerPaiement(paiement);
                     imported++;
 
                 } catch (Exception rowEx) {
@@ -428,7 +470,8 @@ public class PaiementListController {
                 }
             }
 
-            showAlert("Import terminé", imported + " professeur(s) importé(s), " + skipped + " ligne(s) ignorée(s) (erreur ou incomplète).");
+            loadData();
+            showAlert("Import terminé", imported + " paiement(s) importé(s), " + skipped + " ligne(s) ignorée(s) (erreur ou incomplète).");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -436,8 +479,6 @@ public class PaiementListController {
         }
     }
 
-
-    ////////////////////////
     private String getCellString(Row row, int colIndex) {
         org.apache.poi.ss.usermodel.Cell cell = row.getCell(colIndex);
         if (cell == null) return "";
@@ -469,3 +510,9 @@ public class PaiementListController {
         alert.showAndWait();
     }
 }
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: java/lang/String#
