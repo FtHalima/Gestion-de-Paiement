@@ -466,39 +466,20 @@ public class PdfGenerationService {
         table.addCell(cell);
         }
 
-    private void addArreteDeSomme(Document document, BigDecimal montantNet) {
-        // Create a paragraph with a left blue bar: we can use a table with two columns: first column width 3pt with background PRIMARY_BLUE, second column the text.
-        Table table = new Table(new float[]{0.3f, 10}); // 3pt column, rest for text
-        table.setWidth(UnitValue.createPercentValue(100));
-        table.setMarginTop(8); 
-        table.setMarginBottom(6);
-
-        // Blue bar cell
-        Cell blueBar = new Cell()
-                .setBackgroundColor(PRIMARY_BLUE)
-                .setWidth(3)
-                .setHeight(10);
-        table.addCell(blueBar);
-
-        // Text cell
-        String amountInWords = getMontantEnLettres(montantNet);
-        Paragraph textPara = new Paragraph("Arrêté à la somme de: ")
-                .setFontSize(9)
-                .add(new Paragraph(amountInWords)
-                        .setBold()
+        private void addArreteDeSomme(Document document, BigDecimal montantNet) {
+                String amountInWords = getMontantEnLettres(montantNet);
+                Paragraph textPara = new Paragraph("Arrêté à la somme de: ")
                         .setFontSize(9)
-                        .setFontColor(PRIMARY_BLUE)
-                        .setUnderline())
-                .setFontColor(BLACK);
-        Cell textCell = new Cell().add(textPara)
-                .setBorder(Border.NO_BORDER)
-                .setPaddingLeft(5)
-                .setPaddingTop(2)
-                .setPaddingBottom(2);
-        table.addCell(textCell);
-
-        document.add(table);
-    }
+                        .add(new Paragraph(amountInWords)
+                                .setBold()
+                                .setFontSize(9)
+                                .setFontColor(PRIMARY_BLUE)
+                                .setUnderline())
+                        .setFontColor(BLACK)
+                        .setMarginTop(8)
+                        .setMarginBottom(6);
+                document.add(textPara);
+        }
 
     private void addIntermediateSignatures(Document document) {
         Table signaturesTable = new Table(new float[]{1, 1});

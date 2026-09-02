@@ -355,8 +355,7 @@ public class PaiementListController {
         }
     }
 
-    //
-
+    /* 
     @FXML
     private void handleImportExcel() {
         javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
@@ -436,7 +435,7 @@ public class PaiementListController {
         }
     }
 
-
+*/
     ////////////////////////
     private String getCellString(Row row, int colIndex) {
         org.apache.poi.ss.usermodel.Cell cell = row.getCell(colIndex);

@@ -28,11 +28,11 @@ public class LigneDeplacementUI {
 
     public StringProperty heureDepartProperty() { return heureDepart; }
     public String getHeureDepart() { return heureDepart.get(); }
-    public void setHeureDepart(String v) { heureDepart.set(v); }
+    public void setHeureDepart(String v) { heureDepart.set(normalizeHeure(v)); }
 
     public StringProperty heureRetourProperty() { return heureRetour; }
     public String getHeureRetour() { return heureRetour.get(); }
-    public void setHeureRetour(String v) { heureRetour.set(v); }
+    public void setHeureRetour(String v) { heureRetour.set(normalizeHeure(v)); }
 
     public StringProperty nombreTauxBaseProperty() { return nombreTauxBase; }
     public String getNombreTauxBase() { return nombreTauxBase.get(); }
@@ -45,4 +45,14 @@ public class LigneDeplacementUI {
     public StringProperty montantProperty() { return montant; }
     public String getMontant() { return montant.get(); }
     public void setMontant(String v) { montant.set(v); }
+
+    // Si l'utilisateur tape juste des chiffres (ex: "22"), ajoute automatiquement "H"
+    private String normalizeHeure(String v) {
+        if (v == null) return "";
+        String trimmed = v.trim();
+        if (trimmed.matches("\\d{1,2}")) {
+            return trimmed + "H";
+        }
+        return trimmed;
+    }
 }

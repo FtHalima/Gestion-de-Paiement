@@ -1,40 +1,142 @@
-.root-pane {
+/* ===== Base ===== */
+.root {
+    -fx-font-family: "Segoe UI";
     -fx-background-color: #f4f6fa;
 }
-
-/* Sidebar */
-.sidebar {
-    -fx-background-color: #1c2333;
+.label {
+    -fx-text-fill: #1c2333;
 }
+
+/* ===== Buttons (global default look) ===== */
+.button {
+    -fx-background-color: #4763e4;
+    -fx-text-fill: white;
+    -fx-font-size: 12.5px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-padding: 8 18;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(71,99,228,0.25), 6, 0, 0, 1);
+}
+.button:hover {
+    -fx-background-color: #3b52c4;
+}
+.button:pressed {
+    -fx-background-color: #2f42a0;
+}
+.button:disabled {
+    -fx-opacity: 0.5;
+    -fx-effect: none;
+}
+
+/* Rôles de boutons secondaires */
+.btn-secondary {
+    -fx-background-color: white;
+    -fx-text-fill: #4763e4;
+    -fx-border-color: #4763e4;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-effect: none;
+}
+.btn-secondary:hover {
+    -fx-background-color: #eef1fd;
+}
+.btn-danger {
+    -fx-background-color: #e05260;
+}
+.btn-danger:hover {
+    -fx-background-color: #c9414e;
+}
+.btn-warning {
+    -fx-background-color: #d6822f;
+}
+.btn-warning:hover {
+    -fx-background-color: #b56c25;
+}
+.btn-success {
+    -fx-background-color: #2e9e5b;
+}
+.btn-success:hover {
+    -fx-background-color: #247d48;
+}
+
+/* ===== Sidebar ===== */
+.sidebar {
+    -fx-background-color: #0b1b33;
+}
+
+/* Titre */
 .sidebar-title {
     -fx-text-fill: white;
     -fx-font-size: 17px;
     -fx-font-weight: bold;
 }
+
+/* Boutons de navigation */
 .nav-button {
     -fx-background-color: transparent;
-    -fx-text-fill: #c7cbe0;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 12 8 12 8;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-cursor: hand;
+    -fx-effect: none;
+}
+
+/* Effet au survol */
+.nav-button:hover {
+    -fx-background-color: #16345f;
+    -fx-text-fill: white;
+}
+
+/* Bouton actif */
+.nav-button-active {
+    -fx-background-color: #2878e8;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: normal;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 12 4 12 4;
+    -fx-background-insets: 0 20 0 0;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(
+        gaussian,
+        rgba(40,120,232,0.25),
+        5,
+        0,
+        0,
+        1
+    );
+}
+
+/* Active + souris dessus */
+.nav-button-active:hover {
+    -fx-background-color: #347fe8;
+    -fx-text-fill: white;
+}
+
+/* Déconnexion */
+.nav-button-logout {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
     -fx-font-size: 13px;
     -fx-alignment: CENTER_LEFT;
     -fx-padding: 12 20 12 20;
-    -fx-background-radius: 0;
-    -fx-cursor: hand;
-}
-.nav-button:hover {
-    -fx-background-color: #2a3346;
-    -fx-text-fill: white;
-}
-.nav-button-active {
-    -fx-background-color: #4763e4;
-    -fx-text-fill: white;
     -fx-background-radius: 8;
-    -fx-padding: 12 15 12 15;
+    -fx-cursor: hand;
+    -fx-effect: none;
 }
-.nav-button-logout {
-    -fx-text-fill: #ff6b6b;
+.nav-button-logout:hover {
+    -fx-background-color: #16345f;
+    -fx-text-fill: white;
 }
 
-/* Top bar */
+/* ===== Top bar ===== */
 .topbar {
     -fx-background-color: white;
     -fx-border-color: #e6e8f0;
@@ -45,7 +147,7 @@
     -fx-text-fill: #333;
 }
 
-/* Content */
+/* ===== Content area ===== */
 .content-area {
     -fx-background-color: #f4f6fa;
 }
@@ -63,7 +165,7 @@
     -fx-text-fill: #1c2333;
 }
 
-/* Stat cards */
+/* ===== Stat cards ===== */
 .stat-card {
     -fx-padding: 20;
     -fx-background-radius: 12;
@@ -89,8 +191,122 @@
     -fx-font-size: 11px;
 }
 
-/* Table */
+/* ===== TableView ===== */
+.table-view {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: #e6e8f0;
+    -fx-border-radius: 10;
+}
+.table-view .column-header-background {
+    -fx-background-color: #f4f6fa;
+    -fx-background-radius: 10 10 0 0;
+}
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent #e6e8f0 transparent transparent;
+    -fx-size: 34px;
+}
+.table-view .column-header .label {
+    -fx-font-weight: bold;
+    -fx-font-size: 11.5px;
+    -fx-text-fill: #5a5f73;
+}
+.table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #f0f1f6 transparent;
+    -fx-font-size: 12px;
+}
+.table-row-cell:odd {
+    -fx-background-color: #fafbfd;
+}
+.table-row-cell:selected {
+    -fx-background-color: #eef1fd;
+    -fx-text-fill: #1c2333;
+}
+
+/* ===== ListView (archives) ===== */
+.list-view {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: #e6e8f0;
+    -fx-border-radius: 10;
+}
+.list-cell {
+    -fx-padding: 10 14;
+    -fx-font-size: 12.5px;
+    -fx-background-color: white;
+}
+.list-cell:filled:hover {
+    -fx-background-color: #f4f6fa;
+}
+.list-cell:filled:selected {
+    -fx-background-color: #eef1fd;
+    -fx-text-fill: #1c2333;
+}
+
+/* ===== Recents table (dashboard) ===== */
 .recents-table {
     -fx-background-color: white;
     -fx-background-radius: 10;
+}
+
+/* ===== Login screen ===== */
+.login-root {
+    -fx-background-color: linear-gradient(to bottom right, #4763e4, #6c8cf5);
+}
+.login-card {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-padding: 40;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 25, 0, 0, 8);
+}
+.login-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1c2333;
+}
+.login-subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: #8a8fa3;
+}
+.login-field-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #5a5f73;
+}
+
+/* ===== Total chip (formulaire déplacement) ===== */
+.total-label {
+    -fx-background-color: #eef1fd;
+    -fx-text-fill: #1c2333;
+    -fx-padding: 8 14;
+    -fx-background-radius: 8;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+}
+
+/* ===== ComboBox text fix ===== */
+.combo-box .list-cell,
+.combo-box-base .list-cell {
+    -fx-text-fill: #1c2333;
+    -fx-background-color: transparent;
+}
+.combo-box-popup .list-view {
+    -fx-background-color: white;
+}
+.combo-box-popup .list-cell {
+    -fx-text-fill: #1c2333;
+    -fx-background-color: white;
+    -fx-padding: 6 10;
+}
+.combo-box-popup .list-cell:filled:selected,
+.combo-box-popup .list-cell:filled:hover {
+    -fx-background-color: #eef1fd;
+    -fx-text-fill: #1c2333;
+}
+
+/* ===== Table cell text fix (trajets) ===== */
+.table-cell {
+    -fx-text-fill: #1c2333;
 }

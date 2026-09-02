@@ -6,6 +6,7 @@ com\gestionpaiements\app\model\ConfigurationApp.class
 com\gestionpaiements\app\model\Lot.class
 com\gestionpaiements\app\service\ExcelFileManagerService$1.class
 com\gestionpaiements\app\service\PdfGenerationService.class
+com\gestionpaiements\app\controller\ExcelFilesController$3.class
 com\gestionpaiements\app\controller\ArchivesController.class
 com\gestionpaiements\app\dao\PaiementRepository.class
 com\gestionpaiements\app\service\ProfesseurService$TauxIR.class
@@ -15,6 +16,7 @@ com\gestionpaiements\app\dao\UtilisateurRepository.class
 com\gestionpaiements\app\MainApp.class
 com\gestionpaiements\app\controller\PaiementListController.class
 com\gestionpaiements\app\controller\MainViewController.class
+com\gestionpaiements\app\controller\ExcelFilesController$2.class
 com\gestionpaiements\app\service\UtilisateurService.class
 com\gestionpaiements\app\model\Professeur.class
 com\gestionpaiements\app\controller\AjouterPaiementController$2.class
@@ -23,7 +25,9 @@ com\gestionpaiements\app\model\Utilisateur.class
 com\gestionpaiements\app\controller\LigneDeplacementUI.class
 com\gestionpaiements\app\controller\LoginController.class
 com\gestionpaiements\app\dao\ProfesseurRepository.class
+com\gestionpaiements\app\controller\AjouterPaiementController$3.class
 com\gestionpaiements\app\controller\ArchivesController$1.class
+com\gestionpaiements\app\service\ExcelFileManagerService$LigneApercu.class
 com\gestionpaiements\app\service\ExcelFileManagerService.class
 com\gestionpaiements\app\service\DeplacementPdfGenerationService.class
 com\gestionpaiements\app\service\ProfesseurService.class
@@ -32,7 +36,10 @@ com\gestionpaiements\app\controller\AjouterPaiementController.class
 com\gestionpaiements\app\Launcher.class
 com\gestionpaiements\app\model\LigneDeplacement.class
 com\gestionpaiements\app\service\PdfGenerationService$1.class
+com\gestionpaiements\app\controller\ExcelFilesController$1.class
 com\gestionpaiements\app\util\MontantEnLettresConverter.class
+com\gestionpaiements\app\controller\ExcelFilesController.class
 com\gestionpaiements\app\service\LotService.class
 com\gestionpaiements\app\model\Paiement.class
 com\gestionpaiements\app\dao\LotRepository.class
+com\gestionpaiements\app\controller\DashboardController$1.class

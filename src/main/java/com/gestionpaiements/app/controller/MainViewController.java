@@ -15,11 +15,18 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.util.List;
 
+import javafx.stage.Stage;
+import javafx.scene.Scene;
+import com.gestionpaiements.app.service.SessionUtilisateur;
+
 @Component
 public class MainViewController {
 
     @Autowired
     private ExcelFileManagerService excelFileManagerService;
+
+    @Autowired
+    private SessionUtilisateur sessionUtilisateur;
 
     @FXML private StackPane contentArea;
 
@@ -28,7 +35,6 @@ public class MainViewController {
     @FXML private Button navVacataire;
     @FXML private Button navHeureSup;
     @FXML private Button navDeplacement;
-    @FXML private Button navArchives;
 
     @FXML
     public void initialize() {
@@ -48,8 +54,24 @@ public class MainViewController {
         }
     }
 
+    private void loadListeIntoContent(TypePaiement type, Button activeButton) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/gestionpaiements/app/fxml/ExcelFilesView.fxml"));
+            loader.setControllerFactory(MainApp.staticApplicationContext::getBean);
+            Parent view = loader.load();
+            ExcelFilesController controller = loader.getController();
+            controller.setType(type);
+            controller.setMainViewController(this);
+            contentArea.getChildren().setAll(view);
+            setActiveNav(activeButton);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Impossible de charger la liste : " + e.getMessage());
+        }
+    }
+
     private void setActiveNav(Button active) {
-        for (Button b : new Button[]{navDashboard, navAjouter, navVacataire, navHeureSup, navDeplacement, navArchives}) {
+        for (Button b : new Button[]{navDashboard, navAjouter, navVacataire, navHeureSup, navDeplacement}) {
             b.getStyleClass().remove("nav-button-active");
         }
         if (active != null) {
@@ -65,63 +87,38 @@ public class MainViewController {
     @FXML
     public void showAjouterPaiement() {
         loadIntoContent("/com/gestionpaiements/app/fxml/AjouterPaiement.fxml", navAjouter);
-        
     }
 
     @FXML
     public void showVacataire() {
         loadListeIntoContent(TypePaiement.VACATAIRE, navVacataire);
-
     }
 
     @FXML
     public void showHeureSup() {
-       loadListeIntoContent(TypePaiement.HEURE_SUP, navHeureSup);
+        loadListeIntoContent(TypePaiement.HEURE_SUP, navHeureSup);
     }
 
     @FXML
     public void showDeplacement() {
-      loadListeIntoContent(TypePaiement.DEPLACEMENT, navDeplacement);
+        loadListeIntoContent(TypePaiement.DEPLACEMENT, navDeplacement);
     }
-
-
-
-    @FXML
-    public void showAnciensFichiers() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/gestionpaiements/app/fxml/ArchivesView.fxml"));
-            loader.setControllerFactory(MainApp.staticApplicationContext::getBean);
-            Parent view = loader.load();
-            ArchivesController controller = loader.getController();
-            controller.setOnBack(this::showDashboard);
-            contentArea.getChildren().setAll(view);
-            setActiveNav(navArchives);
-        } catch (Exception e) {
-            e.printStackTrace();
-            showError("Impossible de charger les archives : " + e.getMessage());
-        }
-    }
-
-
 
     @FXML
     private void handleLogout() {
-        // À adapter selon ta logique de déconnexion existante
-    }
-
-    private void loadListeIntoContent(TypePaiement type, Button activeButton) {
+        sessionUtilisateur.setUtilisateurConnecte(null);
+        Stage currentStage = (Stage) contentArea.getScene().getWindow();
+        currentStage.close();
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/gestionpaiements/app/fxml/PaiementList.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/gestionpaiements/app/fxml/login.fxml"));
             loader.setControllerFactory(MainApp.staticApplicationContext::getBean);
-            Parent view = loader.load();
-            PaiementListController controller = loader.getController();
-            controller.setType(type);
-            controller.setOnBack(this::showDashboard);  // ← c'est cette ligne dont tu parles
-            contentArea.getChildren().setAll(view);
-            setActiveNav(activeButton);
+            Parent root = loader.load();
+            Stage loginStage = new Stage();
+            loginStage.setTitle("Connexion");
+            loginStage.setScene(new Scene(root));
+            loginStage.show();
         } catch (Exception e) {
             e.printStackTrace();
-            showError("Impossible de charger la liste : " + e.getMessage());
         }
     }
 
@@ -139,5 +136,20 @@ public class MainViewController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    public void showAjouterPaiementAndSearch(String cin) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/gestionpaiements/app/fxml/AjouterPaiement.fxml"));
+            loader.setControllerFactory(MainApp.staticApplicationContext::getBean);
+            Parent view = loader.load();
+            AjouterPaiementController controller = loader.getController();
+            contentArea.getChildren().setAll(view);
+            setActiveNav(navAjouter);
+            controller.prefillAndSearch(cin);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Impossible d'ouvrir le formulaire : " + e.getMessage());
+        }
     }
 }

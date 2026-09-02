@@ -1,3 +1,14 @@
+error id: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/AjouterPaiementController.java:java/lang/String#
+file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/AjouterPaiementController.java
+empty definition using pc, found symbol in pc: java/lang/String#
+empty definition using semanticdb
+empty definition using fallback
+non-local guesses:
+
+offset: 7242
+uri: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/AjouterPaiementController.java
+text:
+```scala
 package com.gestionpaiements.app.controller;
 
 import com.gestionpaiements.app.model.Professeur;
@@ -182,7 +193,7 @@ public class AjouterPaiementController {
         tauxField.setEditable(true);
 
         // Grade ComboBox with duplicates as requested
-        ObservableList<String> grades = FXCollections.observableArrayList(
+        ObservableList<Stri@@ng> grades = FXCollections.observableArrayList(
                 "Professeur d'Enseignement Superieur",
                 "Professeur Encadrant",
                 "Professeur Qualifié",
@@ -1605,3 +1616,9 @@ public class AjouterPaiementController {
         searchProfessor();
     }
 }
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: java/lang/String#

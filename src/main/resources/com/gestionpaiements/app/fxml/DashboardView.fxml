@@ -6,6 +6,10 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.Button?>
+
+
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
@@ -14,7 +18,11 @@
 
     <padding><Insets top="25" right="30" bottom="25" left="30"/></padding>
 
-    <Label text="Tableau de bord" styleClass="page-title"/>
+    <HBox alignment="CENTER_LEFT" spacing="15">
+        <Label text="Tableau de bord" styleClass="page-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Importer des données" fx:id="importButton" onAction="#handleImportExcel" />
+    </HBox>
 
     <HBox spacing="20">
         <VBox styleClass="stat-card, stat-card-green" HBox.hgrow="ALWAYS">
@@ -23,7 +31,7 @@
             <Label text="Enregistrements" styleClass="stat-sub"/>
         </VBox>
         <VBox styleClass="stat-card, stat-card-blue" HBox.hgrow="ALWAYS">
-            <Label text="HEURE SUP" styleClass="stat-label-blue"/>
+            <Label text="HEURE SUPPLEMENTAIRE" styleClass="stat-label-blue"/>
             <Label fx:id="countHeureSup" text="0" styleClass="stat-number-blue"/>
             <Label text="Enregistrements" styleClass="stat-sub"/>
         </VBox>
@@ -41,12 +49,12 @@
 
     <Label text="Derniers enregistrements" styleClass="section-title"/>
 
-    <TableView fx:id="recentsTable" styleClass="recents-table" VBox.vgrow="ALWAYS">
+    <TableView fx:id="recentsTable" styleClass="recents-table">
         <columns>
-            <TableColumn fx:id="colDate" text="DATE" prefWidth="120"/>
             <TableColumn fx:id="colNom" text="NOM COMPLET" prefWidth="220"/>
-            <TableColumn fx:id="colType" text="TYPE" prefWidth="150"/>
+            <TableColumn fx:id="colType" text="TYPE" prefWidth="200"/>
             <TableColumn fx:id="colMontant" text="MONTANT NET" prefWidth="150"/>
+            <TableColumn fx:id="colCin" text="CIN" prefWidth="150"/>
         </columns>
     </TableView>
 </VBox>

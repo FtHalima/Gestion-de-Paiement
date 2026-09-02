@@ -5,6 +5,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.control.Hyperlink?>
@@ -13,20 +14,22 @@
 <?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.TitledPane?>
-
 <?import javafx.scene.control.TextArea?>
-
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TableColumn?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.gestionpaiements.app.controller.AjouterPaiementController"
-      alignment="TOP_LEFT"
-      spacing="10">
+<ScrollPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.gestionpaiements.app.controller.AjouterPaiementController"
+            fitToWidth="true"
+            style="-fx-background-color: transparent;">
+
+<VBox alignment="TOP_LEFT" spacing="14">
     <padding>
-        <Insets top="15" right="15" bottom="15" left="15"/>
+        <Insets top="20" right="25" bottom="25" left="25"/>
     </padding>
+
+    <Label text="Ajouter un paiement" styleClass="page-title"/>
 
     <!-- Section: Recherche du professeur -->
     <TitledPane text="Recherche du professeur">
@@ -42,36 +45,81 @@
                 <TextField fx:id="pprField" promptText="PPR" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
                 <HBox spacing="10" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="2">
                     <Button text="RECHERCHER" fx:id="searchButton" onAction="#searchProfessor"/>
-                    <Button text="CRÉER UN NOUVEAU PROFESSEUR" fx:id="createProfButton" visible="false" onAction="#createNewProfessor"/>
+                    <Button text="CRÉER UN NOUVEAU PROFESSEUR" fx:id="createProfButton" visible="false" onAction="#createNewProfessor" styleClass="btn-secondary"/>
                 </HBox>
                 <Label fx:id="profNotFoundLabel" text="Professeur introuvable." textFill="#d32f2f" visible="false" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="3"/>
             </GridPane>
 
-            <!-- Section: Informations complémentaires -->
-            <TitledPane text="Informations complémentaires">
-                <GridPane hgap="10" vgap="8">
-                    <columnConstraints>
-                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="120"/>
-                        <ColumnConstraints hgrow="ALWAYS"/>
-                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="120"/>
-                        <ColumnConstraints hgrow="ALWAYS"/>
-                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="120"/>
-                        <ColumnConstraints hgrow="ALWAYS"/>
-                    </columnConstraints>
-                    <Label text="Exercice :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                    <TextField fx:id="exerciceField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-                    <Label text="Créance d'origine :" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-                    <TextField fx:id="creanceDOrigineField" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
-                    <Label text="Code CGNC :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                    <TextField fx:id="codeCgncField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                    <Label text="Article :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                    <TextField fx:id="articleField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                    <Label text="Par :" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                    <TextField fx:id="parField" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-                    <Label text="Lig :" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-                    <TextField fx:id="ligField" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-                </GridPane>
-            </TitledPane>
+    <!-- Section: Informations complémentaires -->
+    <TitledPane text="Informations complémentaires">
+        <GridPane hgap="15" vgap="8">
+
+            <columnConstraints>
+                <!-- Gauche -->
+                <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="120"/>
+                <ColumnConstraints hgrow="ALWAYS" minWidth="100"/>
+
+                <!-- Espace central -->
+                <ColumnConstraints minWidth="30"/>
+
+                <!-- Droite -->
+                <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="70"/>
+                <ColumnConstraints hgrow="ALWAYS" minWidth="100"/>
+            </columnConstraints>
+
+            <!-- Ligne 1 -->
+            <Label text="Exercice :"
+                GridPane.columnIndex="0"
+                GridPane.rowIndex="0"/>
+
+            <TextField fx:id="exerciceField"
+                    GridPane.columnIndex="1"
+                    GridPane.rowIndex="0"/>
+
+            <Label text="Article :"
+                GridPane.columnIndex="3"
+                GridPane.rowIndex="0"/>
+
+            <TextField fx:id="articleField"
+                    GridPane.columnIndex="4"
+                    GridPane.rowIndex="0"/>
+
+            <!-- Ligne 2 -->
+            <Label text="Créance d'origine :"
+                GridPane.columnIndex="0"
+                GridPane.rowIndex="1"/>
+
+            <TextField fx:id="creanceDOrigineField"
+                    GridPane.columnIndex="1"
+                    GridPane.rowIndex="1"/>
+
+            <Label text="Par :"
+                GridPane.columnIndex="3"
+                GridPane.rowIndex="1"/>
+
+            <TextField fx:id="parField"
+                    GridPane.columnIndex="4"
+                    GridPane.rowIndex="1"/>
+
+            <!-- Ligne 3 -->
+            <Label text="Code CGNC :"
+                GridPane.columnIndex="0"
+                GridPane.rowIndex="2"/>
+
+            <TextField fx:id="codeCgncField"
+                    GridPane.columnIndex="1"
+                    GridPane.rowIndex="2"/>
+
+            <Label text="Lig :"
+                GridPane.columnIndex="3"
+                GridPane.rowIndex="2"/>
+
+            <TextField fx:id="ligField"
+                    GridPane.columnIndex="4"
+                    GridPane.rowIndex="2"/>
+
+        </GridPane>
+    </TitledPane>
 
             <!-- Informations du professeur (affichage ou saisie) -->
             <TitledPane text="Informations du professeur" animated="false">
@@ -93,8 +141,6 @@
                             <Label fx:id="echelleLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
                             <Label text="Affectation :" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
                             <Label fx:id="affectationLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-                            <Label text="&#160;" GridPane.columnIndex="0" GridPane.rowIndex="7"/>
-                            <Button text="SUPPRIMER PROFESSEUR" fx:id="deleteProfButton" onAction="#handleDeleteProf" GridPane.columnIndex="1" GridPane.rowIndex="7"/>
                         </GridPane>
                     </VBox>
 
@@ -110,7 +156,10 @@
                             <Label text="Prénom :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
                             <TextField fx:id="prenomField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
                             <Label text="Grade :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                            <ComboBox fx:id="gradeField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                            <HBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                <ComboBox fx:id="gradeField" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                                <Button text="+" fx:id="addGradeButton" onAction="#handleAddGrade" styleClass="btn-secondary"/>
+                            </HBox>
                             <Label text="Échelle :" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
                             <TextField fx:id="echelleField" promptText="ex: 5" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
                             <Label text="Affectation :" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
@@ -136,33 +185,77 @@
                 <ColumnConstraints hgrow="ALWAYS" maxWidth="80"/>
             </columnConstraints>
             <Label text="Banque :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-            <TextField fx:id="banqueField" maxWidth="40" promptText="000" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+            <TextField fx:id="banqueField" maxWidth="70" promptText="000" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
             <Label text="Ville :" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-            <TextField fx:id="villeField" maxWidth="40" promptText="000" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+            <TextField fx:id="villeField" maxWidth="70" promptText="000" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
             <Label text="Numéro de compte :" GridPane.columnIndex="4" GridPane.rowIndex="0"/>
-            <TextField fx:id="numeroCompteField" maxWidth="120" promptText="0000000000000000" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.rowIndex="0"/>
+            <TextField fx:id="numeroCompteField" maxWidth="200" promptText="0000000000000000" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.rowIndex="0"/>
             <Label text="Clé :" GridPane.columnIndex="7" GridPane.rowIndex="0"/>
-            <TextField fx:id="cleField" maxWidth="30" promptText="00" GridPane.columnIndex="8" GridPane.rowIndex="0"/>
+            <TextField fx:id="cleField" maxWidth="70" promptText="00" GridPane.columnIndex="8" GridPane.rowIndex="0"/>
         </GridPane>
     </TitledPane>
 
-    <!-- Section: Informations du règlement -->
+    <!-- Section : Informations du règlement -->
     <TitledPane text="Informations du règlement">
-        <GridPane hgap="10" vgap="8">
+        <GridPane hgap="15" vgap="8">
+
             <columnConstraints>
-                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="120"/>
-                <ColumnConstraints hgrow="ALWAYS"/>
-                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="120"/>
-                <ColumnConstraints hgrow="ALWAYS"/>
+                <!-- Gauche -->
+                <ColumnConstraints halignment="RIGHT"
+                                    hgrow="NEVER"
+                                    minWidth="150"/>
+                <ColumnConstraints hgrow="ALWAYS"
+                                    minWidth="120"/>
+
+                <!-- Espace central -->
+                <ColumnConstraints minWidth="30"/>
+
+                <!-- Droite -->
+                <ColumnConstraints halignment="RIGHT"
+                                    hgrow="NEVER"
+                                    minWidth="120"/>
+                <ColumnConstraints hgrow="ALWAYS"
+                                    minWidth="120"/>
             </columnConstraints>
-            <Label text="Type de paiement :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-            <ComboBox fx:id="typePaiementCombo" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-            <Label text="Objet règlement :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-            <Label fx:id="objetReglementLabel" text="-" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.rowIndex="1"/>
-            <Label text="Date début (jj/mm/aaaa) :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-            <DatePicker fx:id="dateDebutField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-            <Label text="Date fin (jj/mm/aaaa) :" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-            <DatePicker fx:id="dateFinField" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+
+            <!-- Ligne 1 -->
+            <Label text="Type de paiement :"
+                GridPane.columnIndex="0"
+                GridPane.rowIndex="0"/>
+
+            <ComboBox fx:id="typePaiementCombo"
+                    GridPane.columnIndex="1"
+                    GridPane.rowIndex="0"
+                    maxWidth="Infinity"/>
+
+            <Label text="Objet règlement :"
+                GridPane.columnIndex="3"
+                GridPane.rowIndex="0"/>
+
+            <Label fx:id="objetReglementLabel"
+                text="-"
+                GridPane.columnIndex="4"
+                GridPane.rowIndex="0"/>
+
+            <!-- Ligne 2 -->
+            <Label text="Date début :"
+                GridPane.columnIndex="0"
+                GridPane.rowIndex="1"/>
+
+            <DatePicker fx:id="dateDebutField"
+                        GridPane.columnIndex="1"
+                        GridPane.rowIndex="1"
+                        maxWidth="Infinity"/>
+
+            <Label text="Date fin :"
+                GridPane.columnIndex="3"
+                GridPane.rowIndex="1"/>
+
+            <DatePicker fx:id="dateFinField"
+                        GridPane.columnIndex="4"
+                        GridPane.rowIndex="1"
+                        maxWidth="Infinity"/>
+
         </GridPane>
     </TitledPane>
 
@@ -186,36 +279,97 @@
             </TableView>
 
             <HBox spacing="10">
-                <Button text="+ Ajouter un trajet" fx:id="addTrajetButton" onAction="#handleAddTrajet"/>
-                <Button text="Supprimer le trajet sélectionné" fx:id="removeTrajetButton" onAction="#handleRemoveTrajet"/>
+                <Button text="+ Ajouter un trajet" fx:id="addTrajetButton" onAction="#handleAddTrajet" styleClass="btn-secondary"/>
+                <Button text="Supprimer le trajet sélectionné" fx:id="removeTrajetButton" onAction="#handleRemoveTrajet" styleClass="btn-danger"/>
             </HBox>
 
-            <Label fx:id="totalDeplacementLabel" text="Total : 0,00 DH" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
+            <Label fx:id="totalDeplacementLabel" text="Total : 0,00 DH" styleClass="total-label"/>
         </VBox>
     </TitledPane>
 
     <!-- Section: Calcul du paiement -->
-    <!-- Section: Calcul du paiement -->
     <TitledPane fx:id="calculSection" text="Calcul du paiement">
-        <GridPane hgap="10" vgap="8">
+        <GridPane hgap="15" vgap="10">
             <columnConstraints>
-                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="120"/>
-                <ColumnConstraints hgrow="ALWAYS" maxWidth="150"/>
-                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="120"/>
-                <ColumnConstraints hgrow="ALWAYS" maxWidth="150"/>
+                <!-- Nombre d'heures -->
+                <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="120"/>
+                <ColumnConstraints hgrow="ALWAYS" minWidth="100"/>
+                <!-- Taux -->
+                <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="70"/>
+                <ColumnConstraints hgrow="ALWAYS" minWidth="100"/>
+                <!-- IR -->
+                <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="50"/>
+                <ColumnConstraints hgrow="ALWAYS"  minWidth="100"/>
             </columnConstraints>
-            <Label fx:id="nombreHeuresTitleLabel" text="Nombre d'heures :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-            <TextField fx:id="nombreHeuresField" promptText="0.0" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-            <Label fx:id="tauxTitleLabel" text="Taux :" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-            <TextField fx:id="tauxField" promptText="0.00" editable="false" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
-            <Label fx:id="irTitleLabel" text="IR % :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-            <ComboBox fx:id="irCombo" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-            <Label fx:id="montantBrutTitleLabel" text="Montant brut  :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-            <Label fx:id="montantBrutLabel" text="0,00 " style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-            <Label fx:id="retenueIrTitleLabel" text="Retenue IR  :" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-            <Label fx:id="retenueIrLabel" text="0,00 " style="-fx-font-weight: bold;" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
-            <Label fx:id="montantNetTitleLabel" text="Montant net  :" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-            <Label fx:id="montantNetLabel" text="0,00 " style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+            <!-- Ligne 1 : paramètres du calcul -->
+            <Label fx:id="nombreHeuresTitleLabel"
+                text="Nombre d'heures :"
+                GridPane.columnIndex="0"
+                GridPane.rowIndex="0"/>
+
+            <TextField fx:id="nombreHeuresField"
+                    promptText="0.0"
+                    GridPane.columnIndex="1"
+                    GridPane.rowIndex="0"/>
+
+            <Label fx:id="tauxTitleLabel"
+                text="Taux :"
+                GridPane.columnIndex="2"
+                GridPane.rowIndex="0"/>
+
+            <TextField fx:id="tauxField"
+                    promptText="0.00"
+                    GridPane.columnIndex="3"
+                    GridPane.rowIndex="0"/>
+
+            <Label fx:id="irTitleLabel"
+                text="IR % :"
+                GridPane.columnIndex="4"
+                GridPane.rowIndex="0"/>
+
+            <ComboBox fx:id="irCombo"
+                    editable="false"
+                    GridPane.columnIndex="5"
+                    GridPane.rowIndex="0"/>
+
+
+            <!-- Ligne 2 : résultats -->
+
+            <Label fx:id="montantBrutTitleLabel"
+                text="Montant brut :"
+                GridPane.columnIndex="0"
+                GridPane.rowIndex="1"/>
+
+            <Label fx:id="montantBrutLabel"
+                text="0,00"
+                style="-fx-font-size: 15px; -fx-font-weight: bold;"
+                GridPane.columnIndex="1"
+                GridPane.rowIndex="1"/>
+
+
+            <Label fx:id="retenueIrTitleLabel"
+                text="Retenue IR :"
+                GridPane.columnIndex="2"
+                GridPane.rowIndex="1"/>
+
+            <Label fx:id="retenueIrLabel"
+                text="0,00"
+                style="-fx-font-size: 15px; -fx-font-weight: bold;"
+                GridPane.columnIndex="3"
+                GridPane.rowIndex="1"/>
+
+
+            <Label fx:id="montantNetTitleLabel"
+                text="Montant net :"
+                GridPane.columnIndex="4"
+                GridPane.rowIndex="1"/>
+
+            <Label fx:id="montantNetLabel"
+                text="0,00"
+                style="-fx-font-size: 15px; -fx-font-weight: bold;"
+                GridPane.columnIndex="5"
+                GridPane.rowIndex="1"/>
+
         </GridPane>
     </TitledPane>
 
@@ -234,16 +388,16 @@
             <Label fx:id="typeReferenceReglementLabel" text="RIB" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
             <Label text="Référence règlement :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
             <Label fx:id="referenceReglementLabel" text="-" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1"/>
-            <Label text="Date de paiement (jj/mm/aaaa) :" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-            <DatePicker fx:id="datePaiementField" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
         </GridPane>
     </TitledPane>
 
     <!-- Boutons d'action -->
     <HBox spacing="10" alignment="BOTTOM_RIGHT">
-        <Button text="ANNULER" fx:id="cancelButton" onAction="#cancelAction"/>
-        <Button text="RÉINITIALISER" fx:id="resetButton" onAction="#resetAction"/>
-        <Button text="IMPRIMER" fx:id="pdfButton" onAction="#genererPdfAction"/>
+        <Button text="SUPPRIMER PROFESSEUR" fx:id="deleteProfButton" onAction="#handleDeleteProf" styleClass="btn-danger" visible="false" managed="false"/>
+        <Button text="ANNULER" fx:id="cancelButton" onAction="#cancelAction" styleClass="btn-secondary"/>
+        <Button text="RÉINITIALISER" fx:id="resetButton" onAction="#resetAction" styleClass="btn-secondary"/>
+        <Button text="IMPRIMER" fx:id="pdfButton" onAction="#genererPdfAction" styleClass="btn-secondary"/>
         <Button text="ENREGISTRER" fx:id="saveButton" onAction="#saveAction" defaultButton="true"/>
     </HBox>
 </VBox>
+</ScrollPane>

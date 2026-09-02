@@ -14,19 +14,16 @@
             fx:controller="com.gestionpaiements.app.controller.MainViewController"
             stylesheets="@dashboard.css"
             styleClass="root-pane">
-
     <left>
-        <VBox styleClass="sidebar" prefWidth="230" spacing="0">
+        <VBox styleClass="sidebar" prefWidth="230" spacing="20">
             <Label text="Gestion des Paiements" styleClass="sidebar-title" wrapText="true">
                 <padding><Insets top="25" right="15" bottom="25" left="20"/></padding>
             </Label>
-
-            <Button fx:id="navDashboard" text="🏠  Tableau de bord" onAction="#showDashboard" styleClass="nav-button, nav-button-active" maxWidth="Infinity"/>
+            <Button fx:id="navDashboard" text="🏠  Tableau de bord" onAction="#showDashboard" styleClass="nav-button" maxWidth="Infinity"/>
             <Button fx:id="navAjouter" text="➕  Ajouter un paiement" onAction="#showAjouterPaiement" styleClass="nav-button" maxWidth="Infinity"/>
             <Button fx:id="navVacataire" text="👤  Vacataire" onAction="#showVacataire" styleClass="nav-button" maxWidth="Infinity"/>
-            <Button fx:id="navHeureSup" text="🕒  Heure Sup" onAction="#showHeureSup" styleClass="nav-button" maxWidth="Infinity"/>
+            <Button fx:id="navHeureSup" text="🕒  Heure Supplementaire" onAction="#showHeureSup" styleClass="nav-button" maxWidth="Infinity"/>
             <Button fx:id="navDeplacement" text="🚗  Déplacement" onAction="#showDeplacement" styleClass="nav-button" maxWidth="Infinity"/>
-            <Button fx:id="navArchives" text="🗂  Anciens fichiers" onAction="#showAnciensFichiers" styleClass="nav-button" maxWidth="Infinity"/>
             
 
             <Region VBox.vgrow="ALWAYS"/>
@@ -36,16 +33,17 @@
             </Button>
         </VBox>
     </left>
-
-    <top>
-        <HBox styleClass="topbar" alignment="CENTER_RIGHT" spacing="10">
-            <padding><Insets top="12" right="25" bottom="12" left="25"/></padding>
-            <Label fx:id="userLabel" text="👤 Admin" styleClass="user-label"/>
-        </HBox>
-    </top>
-
     <center>
-        <StackPane fx:id="contentArea" styleClass="content-area"/>
+        <BorderPane>
+            <top>
+                <HBox styleClass="topbar" alignment="CENTER_RIGHT" spacing="10">
+                    <padding><Insets top="12" right="25" bottom="12" left="25"/></padding>
+                    <Label fx:id="userLabel" text="👤 Admin" styleClass="user-label"/>
+                </HBox>
+            </top>
+            <center>
+                <StackPane fx:id="contentArea" styleClass="content-area"/>
+            </center>
+        </BorderPane>
     </center>
-
 </BorderPane>

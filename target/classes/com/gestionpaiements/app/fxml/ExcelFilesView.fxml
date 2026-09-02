@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.gestionpaiements.app.controller.ExcelFilesController"
+      spacing="15" styleClass="dashboard-root">
+
+    <padding><Insets top="25" right="30" bottom="25" left="30"/></padding>
+
+    <Label fx:id="pageTitleLabel" text="Fichiers" styleClass="page-title"/>
+
+    <VBox fx:id="browseSection" spacing="12" VBox.vgrow="ALWAYS">
+        <TableView fx:id="filesTable">
+            <columns>
+                <TableColumn fx:id="colFileId" text="ID" prefWidth="50"/>
+                <TableColumn fx:id="colFileName" text="NOM DU FICHIER" prefWidth="300"/>
+                <TableColumn fx:id="colFileStatus" text="STATUT" prefWidth="120"/>
+            </columns>
+        </TableView>
+        <HBox spacing="10">
+            <Button text="Visualiser" fx:id="viewButton" onAction="#handleViewSelected"/>
+            <Button text="Exporter" fx:id="exportButtonTop" onAction="#handleExportSelected" styleClass="btn-secondary"/>
+        </HBox>
+    </VBox>
+
+    <VBox fx:id="viewSection" spacing="12" visible="false" managed="false" VBox.vgrow="ALWAYS">
+        <Label fx:id="viewFileNameLabel" text="" styleClass="section-title"/>
+        <TableView fx:id="apercuTable" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colCin" text="CIN" prefWidth="100"/>
+                <TableColumn fx:id="colNom" text="NOM" prefWidth="150"/>
+                <TableColumn fx:id="colPrenom" text="PRÉNOM" prefWidth="150"/>
+                <TableColumn fx:id="colDateDebut" text="DATE DÉBUT" prefWidth="100"/>
+                <TableColumn fx:id="colDateFin" text="DATE FIN" prefWidth="100"/>
+                <TableColumn fx:id="colMontantNet" text="MONTANT NET" prefWidth="120"/>
+            </columns>
+        </TableView>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Button text="Retour à la liste" fx:id="retourListButton" onAction="#handleRetourList" styleClass="btn-secondary"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Modifier" fx:id="modifyButton" onAction="#handleModifySelected" styleClass="btn-secondary"/>
+            <Button text="Renommer" fx:id="renameFileButton" onAction="#handleRenameFile" styleClass="btn-secondary"/>
+            <Button text="Exporter" fx:id="exportFileButton" onAction="#handleExportFromView" styleClass="btn-secondary"/>
+            <Button text="Supprimer" fx:id="deleteFileButton" onAction="#handleDeleteFile" styleClass="btn-danger"/>
+            <Button text="Clôturer" fx:id="closeOrReactivateButton" onAction="#handleCloseOrReactivate" styleClass="btn-warning"/>
+        </HBox>
+    </VBox>
+
+</VBox>

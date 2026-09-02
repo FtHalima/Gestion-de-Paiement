@@ -1,3 +1,14 @@
+error id: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/AjouterPaiementController.java:_empty_/`<any>`#getValue#nombreTauxBaseProperty#
+file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/AjouterPaiementController.java
+empty definition using pc, found symbol in pc: _empty_/`<any>`#getValue#nombreTauxBaseProperty#
+empty definition using semanticdb
+empty definition using fallback
+non-local guesses:
+
+offset: 23294
+uri: file:///C:/Users/PC/gest-paiement/gestion-paiements-v2/src/main/java/com/gestionpaiements/app/controller/AjouterPaiementController.java
+text:
+```scala
 package com.gestionpaiements.app.controller;
 
 import com.gestionpaiements.app.model.Professeur;
@@ -113,7 +124,7 @@ public class AjouterPaiementController {
     @FXML private Label montantNetLabel;
     @FXML private Label modePaiementLabel;
     @FXML private Label typeReferenceReglementLabel;
-
+    @FXML private DatePicker datePaiementField;
 
     // New fields for Exercice, Code CGNC, Article, Par, Lig
     @FXML private TextField exerciceField;
@@ -203,8 +214,8 @@ public class AjouterPaiementController {
         }
 
         // Set default date paiement to empty (no default date)
-
-
+        datePaiementField.setValue(null);
+        datePaiementField.setPromptText("jj/mm/aaaa");
 
         // Set labels defaults
         objetReglementLabel.setText("-");
@@ -267,8 +278,6 @@ public class AjouterPaiementController {
                     + ", ribCle=" + currentProfesseur.getRibCle()
                     + ", ribComplet=" + currentProfesseur.getRibComplet());
             isNewProfessorMode = false;
-            deleteProfButton.setVisible(true);
-            deleteProfButton.setManaged(true);
             // Load professor data into edit fields
             loadProfessorIntoEditFields(currentProfesseur);
             // Load latest paiement for this professor
@@ -346,8 +355,6 @@ public class AjouterPaiementController {
             hideProfessorDisplay();
             hideProfessorEdit();
             showProfessorNotFound();
-            deleteProfButton.setVisible(false);
-            deleteProfButton.setManaged(false);
             // Pre-fill CIN and PPR already in fields; ready for creation
             System.out.println("PROFESSEUR NON TROUVÉ");
         }
@@ -356,8 +363,6 @@ public class AjouterPaiementController {
     @FXML
     private void createNewProfessor() {
         currentPaiement = null; // ✅ nouveau professeur => toujours un nouveau paiement
-        deleteProfButton.setVisible(false);
-        deleteProfButton.setManaged(false);
         // Switch to edit mode for new professor
         hideProfessorNotFound();
         hideProfessorDisplay();
@@ -550,7 +555,7 @@ public class AjouterPaiementController {
         colParcours.setCellValueFactory(d -> d.getValue().parcoursProperty());
         colHeureDepart.setCellValueFactory(d -> d.getValue().heureDepartProperty());
         colHeureRetour.setCellValueFactory(d -> d.getValue().heureRetourProperty());
-        colNombreTaux.setCellValueFactory(d -> d.getValue().nombreTauxBaseProperty());
+        colNombreTaux.setCellValueFactory(d -> d.getValue().nombreTauxBaseProper@@ty());
         colTauxApplique.setCellValueFactory(d -> d.getValue().tauxBaseAppliqueProperty());
         colMontantLigne.setCellValueFactory(d -> d.getValue().montantProperty());
 
@@ -979,9 +984,6 @@ public class AjouterPaiementController {
                 + ", ribNumeroCompte=" + savedProf.getRibNumeroCompte()
                 + ", ribCle=" + savedProf.getRibCle());
 
-        currentProfesseur = savedProf;
-        isNewProfessorMode = false;
-
         // Réutilise currentPaiement UNIQUEMENT si le type sélectionné correspond au type déjà enregistré
         // (sinon, changer de type créerait une confusion : on veut un enregistrement distinct par type)
         TypePaiement typeSelectionne = typePaiementCombo.getSelectionModel().getSelectedItem();
@@ -1000,7 +1002,7 @@ public class AjouterPaiementController {
         paiement.setTauxIr(parseBigDecimal(irCombo.getSelectionModel().getSelectedItem()));
         paiement.setModePaiement(modePaiementLabel.getText());
         paiement.setTypeReferenceReglement(typeReferenceReglementLabel.getText());
-
+        paiement.setDatePaiement(datePaiementField.getValue());
         // Set new fields
         paiement.setExercice(exerciceField.getText().trim());
         paiement.setCreanceDOrigine(creanceDOrigineField.getText().trim());
@@ -1063,7 +1065,8 @@ public class AjouterPaiementController {
         successAlert.setContentText("Paiement enregistré avec succès. ID: " + savedPaiement.getIdPaiement());
         successAlert.showAndWait();
 
-
+        // Optionally reset form
+        resetAction();
     }
 
     @FXML
@@ -1099,8 +1102,6 @@ public class AjouterPaiementController {
     @FXML
     private void resetAction() {
         // Reset form to initial state
-        deleteProfButton.setVisible(false);
-        deleteProfButton.setManaged(false);
         cinField.clear();
         pprField.clear();
         nomLabel.setText("-");
@@ -1140,7 +1141,7 @@ public class AjouterPaiementController {
         montantNetLabel.setText("0,00 ");
         modePaiementLabel.setText("VIREMENT");
         typeReferenceReglementLabel.setText("RIB");
-
+        datePaiementField.setValue(null);
         // Reset new fields
         motifDeplacementField.clear();
         trajetsData.clear();
@@ -1309,8 +1310,6 @@ public class AjouterPaiementController {
                     + ", ribNumeroCompte=" + savedProf.getRibNumeroCompte()
                     + ", ribCle=" + savedProf.getRibCle());
 
-            currentProfesseur = savedProf;
-            isNewProfessorMode = false;
             // Réutilise currentPaiement UNIQUEMENT si le type sélectionné correspond au type déjà enregistré
             // (sinon, changer de type créerait une confusion : on veut un enregistrement distinct par type)
             TypePaiement typeSelectionne = typePaiementCombo.getSelectionModel().getSelectedItem();
@@ -1331,6 +1330,7 @@ public class AjouterPaiementController {
             paiement.setTauxIr(parseBigDecimal(irCombo.getSelectionModel().getSelectedItem()));
             paiement.setModePaiement(modePaiementLabel.getText());
             paiement.setTypeReferenceReglement(typeReferenceReglementLabel.getText());
+            paiement.setDatePaiement(datePaiementField.getValue());
             // Set new fields
             paiement.setExercice(exerciceField.getText().trim());
             paiement.setCreanceDOrigine(creanceDOrigineField.getText().trim());
@@ -1598,10 +1598,10 @@ public class AjouterPaiementController {
                 return 12; // fallback
         }
     }
-
-    public void prefillAndSearch(String cin) {
-        cinField.setText(cin);
-        pprField.clear();
-        searchProfessor();
-    }
 }
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: _empty_/`<any>`#getValue#nombreTauxBaseProperty#

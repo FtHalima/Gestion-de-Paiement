@@ -192,6 +192,11 @@ public class DeplacementPdfGenerationService {
         line.add(new com.itextpdf.layout.element.Text("EXERCICE : ").setFont(calibriBold))
                 .add(new com.itextpdf.layout.element.Text(getFieldValue(paiement.getExercice())).setFont(calibriRegular))
                 .add("      ");
+        
+        //CREANCED'ORIGINE
+        line.add(new com.itextpdf.layout.element.Text("Créance d'origine : ").setFont(calibriBold))
+                .add(new com.itextpdf.layout.element.Text(getFieldValue(paiement.getCreanceDOrigine())).setFont(calibriRegular))
+                .add("      ");
 
         // Code CGNC
         line.add(new com.itextpdf.layout.element.Text("Code CGNC : ").setFont(calibriBold))
@@ -440,15 +445,15 @@ public class DeplacementPdfGenerationService {
         document.add(p);
     }
 
-    private void addArreteLine(Document document, String label, BigDecimal total) {
-        String words = MontantEnLettresConverter.convertir(total != null ? total : BigDecimal.ZERO).toUpperCase();
-        Paragraph p = new Paragraph()
-                .add(new com.itextpdf.layout.element.Text(label + "                                   ").setFont(calibriBold).setFontSize(9))
-                .add(new com.itextpdf.layout.element.Text("### " + words + " ###").setFont(calibriBold).setFontSize(11))
-                .setTextAlignment(TextAlignment.LEFT)
-                .setMarginTop(4)
-                .setMarginBottom(10);
-        document.add(p);
+        private void addArreteLine(Document document, String label, BigDecimal total) {
+                String words = MontantEnLettresConverter.convertir(total != null ? total : BigDecimal.ZERO).toUpperCase();
+                Paragraph p = new Paragraph()
+                        .add(new com.itextpdf.layout.element.Text(label + "                    ").setFont(calibriBold).setFontSize(9))
+                        .add(new com.itextpdf.layout.element.Text(words).setFont(calibriBold).setFontSize(11))
+                        .setTextAlignment(TextAlignment.LEFT)
+                        .setMarginTop(4)
+                        .setMarginBottom(10);
+                document.add(p);
         }
 
     private void addTexteAdministratifBas(Document document) {
@@ -473,7 +478,7 @@ public class DeplacementPdfGenerationService {
         Cell rightCell = new Cell()
                 .add(new Paragraph("Par le (la) sousigné(e), qui atteste la veracité")
                         .setFont(calibriRegular).setFontSize(8.28f).setTextAlignment(TextAlignment.LEFT).setMarginBottom(0))
-                .add(new Paragraph("des informations, et atteste n'avoir béneficié")
+                .add(new Paragraph("des informations, et atteste n'avoir béneficier")
                         .setFont(calibriRegular).setFontSize(8.28f).setTextAlignment(TextAlignment.LEFT).setMarginBottom(0))
                 .add(new Paragraph("d'aucune réduction de tarif à titre personnel")
                         .setFont(calibriRegular).setFontSize(8.28f).setTextAlignment(TextAlignment.LEFT).setMarginBottom(0))
@@ -493,7 +498,13 @@ public class DeplacementPdfGenerationService {
         }
 
     private void addSignatureEtDeclaration(Document document, BigDecimal total) {
-        String words = MontantEnLettresConverter.convertir(total != null ? total : BigDecimal.ZERO).toUpperCase();
+        Paragraph faitOujda2 = new Paragraph("Fait à Oujda le:")
+                .setFont(calibriRegular)
+                .setFontSize(7.56f)
+                .setTextAlignment(TextAlignment.LEFT)
+                .setMarginTop(10)
+                .setMarginBottom(8);
+        document.add(faitOujda2);
 
         Paragraph labelPara = new Paragraph("Arrêté par nous sous-ordonateur à la somme de:")
                 .setFont(calibriBold)
@@ -504,11 +515,12 @@ public class DeplacementPdfGenerationService {
                 .setMarginBottom(4);
         document.add(labelPara);
 
-        Paragraph resultPara = new Paragraph("### " + words + " ###")
+        String words = MontantEnLettresConverter.convertir(total != null ? total : BigDecimal.ZERO).toUpperCase();
+        Paragraph resultPara = new Paragraph(words)
                 .setFont(calibriBold)
                 .setFontSize(11)
                 .setTextAlignment(TextAlignment.LEFT)
-                .setMarginLeft(210)
+                .setMarginLeft(120)
                 .setMarginBottom(8);
         document.add(resultPara);
         }

@@ -20,10 +20,10 @@
     <ListView fx:id="archivesListView" VBox.vgrow="ALWAYS"/>
 
     <HBox spacing="10" alignment="CENTER_LEFT">
-        <Button text="Retour" fx:id="backButton" onAction="#handleBack"/>
+        <Button text="Retour" fx:id="backButton" onAction="#handleBack" styleClass="btn-secondary"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button text="Exporter le fichier sélectionné" fx:id="exportButton" onAction="#handleExport"/>
-        <Button text="Réactiver ce fichier" fx:id="reactivateButton" onAction="#handleReactivate" style="-fx-text-fill: #1a7a3c;"/>
+        <Button text="Exporter le fichier sélectionné" fx:id="exportButton" onAction="#handleExport" styleClass="btn-secondary"/>
+        <Button text="Réactiver ce fichier" fx:id="reactivateButton" onAction="#handleReactivate" styleClass="btn-success"/>
     </HBox>
 
 </VBox>

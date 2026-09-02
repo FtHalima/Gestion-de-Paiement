@@ -61,11 +61,10 @@ public class ExcelFileManagerService {
     private File findActiveFile(TypePaiement type) throws IOException {
         ensureDirectoriesExist();
         String prefix = getTypePrefix(type);
-        Pattern pattern = Pattern.compile("^" + Pattern.quote(prefix) + "_S(\\d+)\\.xlsx$");
         File dir = new File(BASE_DIR);
-        File[] files = dir.listFiles((d, name) -> pattern.matcher(name).matches());
+        File[] files = dir.listFiles((d, name) -> name.startsWith(prefix + "_") && name.endsWith(".xlsx"));
         if (files != null && files.length > 0) {
-            return files[0]; // il ne doit y en avoir qu'un seul actif par type
+            return files[0];
         }
         return null;
     }
@@ -393,9 +392,9 @@ public class ExcelFileManagerService {
      * Déduit le type de paiement à partir du nom d'un fichier (préfixe avant "_S").
      */
     public TypePaiement deduireTypeDepuisNomFichier(String fileName) {
-        if (fileName.startsWith("Vacation_S")) return TypePaiement.VACATAIRE;
-        if (fileName.startsWith("HeureSup_S")) return TypePaiement.HEURE_SUP;
-        if (fileName.startsWith("Deplacement_S")) return TypePaiement.DEPLACEMENT;
+        if (fileName.startsWith("Vacation_")) return TypePaiement.VACATAIRE;
+        if (fileName.startsWith("HeureSup_")) return TypePaiement.HEURE_SUP;
+        if (fileName.startsWith("Deplacement_")) return TypePaiement.DEPLACEMENT;
         return null;
     }
 
@@ -437,5 +436,106 @@ public class ExcelFileManagerService {
      */
     public void exportFile(File source, File destination) throws IOException {
         Files.copy(source.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    //NOUVEAU 
+    public List<File> listAllFilesForType(TypePaiement type) throws IOException {
+    ensureDirectoriesExist();
+    String prefix = getTypePrefix(type);
+    List<File> result = new ArrayList<>();
+    File[] activeFiles = new File(BASE_DIR).listFiles((d, name) -> name.startsWith(prefix + "_") && name.endsWith(".xlsx"));
+    if (activeFiles != null) {
+        for (File f : activeFiles) result.add(f);
+    }
+    File[] archivedFiles = new File(ARCHIVE_DIR).listFiles((d, name) -> name.startsWith(prefix + "_") && name.endsWith(".xlsx"));
+    if (archivedFiles != null) {
+        for (File f : archivedFiles) result.add(f);
+    }
+    return result;
+    }
+
+    public boolean isFileActive(File file) {
+        return file.getParentFile() != null
+                && file.getParentFile().getAbsolutePath().equals(new File(BASE_DIR).getAbsolutePath());
+    }
+
+    private String sanitizeFileNamePart(String input) {
+        if (input == null) return "";
+        return input.trim().replaceAll("[\\\\/:*?\"<>|]", "_");
+    }
+
+    public void closeActiveFileAs(TypePaiement type, String customSuffix) throws IOException {
+        File active = ensureActiveFileExists(type);
+        String prefix = getTypePrefix(type);
+        String safeSuffix = sanitizeFileNamePart(customSuffix);
+        if (safeSuffix.isEmpty()) {
+            safeSuffix = "S" + computeNextSequence(type);
+        }
+        String archivedName = prefix + "_" + safeSuffix + ".xlsx";
+        Path target = Paths.get(ARCHIVE_DIR, archivedName);
+        Files.move(active.toPath(), target, StandardCopyOption.REPLACE_EXISTING);
+        createNewActiveFile(type);
+    }
+
+    public void renameFile(File file, String newSuffix) throws IOException {
+        TypePaiement type = deduireTypeDepuisNomFichier(file.getName());
+        if (type == null) {
+            throw new IOException("Type de fichier inconnu, renommage impossible.");
+        }
+        String prefix = getTypePrefix(type);
+        String safeSuffix = sanitizeFileNamePart(newSuffix);
+        if (safeSuffix.isEmpty()) {
+            throw new IOException("Le nom ne peut pas être vide.");
+        }
+        File newFile = new File(file.getParentFile(), prefix + "_" + safeSuffix + ".xlsx");
+        Files.move(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    public void deleteFile(File file) throws IOException {
+        Files.deleteIfExists(file.toPath());
+    }
+
+    public static class LigneApercu {
+        public String cin;
+        public String nom;
+        public String prenom;
+        public String dateDebut;
+        public String dateFin;
+        public String montantNet;
+    }
+
+    public List<LigneApercu> lireApercuFichier(File file) throws IOException {
+        List<LigneApercu> result = new ArrayList<>();
+        try (FileInputStream fis = new FileInputStream(file);
+            XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
+            Sheet sheet = workbook.getSheetAt(0);
+            int lastRow = sheet.getLastRowNum();
+            for (int r = 4; r <= lastRow; r++) {
+                Row row = sheet.getRow(r);
+                if (row == null) continue;
+                String cin = getCellStringPublic(row, 8);
+                if (cin.isEmpty()) continue;
+                LigneApercu l = new LigneApercu();
+                l.cin = cin;
+                l.nom = getCellStringPublic(row, 9);
+                l.prenom = getCellStringPublic(row, 10);
+                l.dateDebut = getCellStringPublic(row, 1);
+                l.dateFin = getCellStringPublic(row, 2);
+                l.montantNet = getCellStringPublic(row, 7);
+                result.add(l);
+            }
+        }
+        return result;
+    }
+
+    private String getCellStringPublic(Row row, int colIndex) {
+        org.apache.poi.ss.usermodel.Cell cell = row.getCell(colIndex);
+        if (cell == null) return "";
+        if (cell.getCellType() == CellType.NUMERIC) {
+            double val = cell.getNumericCellValue();
+            if (val == Math.floor(val)) return String.valueOf((long) val);
+            return String.valueOf(val);
+        }
+        return cell.getStringCellValue() != null ? cell.getStringCellValue().trim() : "";
     }
 }
