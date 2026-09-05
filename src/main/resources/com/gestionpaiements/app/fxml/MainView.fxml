@@ -19,11 +19,11 @@
             <Label text="Gestion des Paiements" styleClass="sidebar-title" wrapText="true">
                 <padding><Insets top="25" right="15" bottom="25" left="20"/></padding>
             </Label>
-            <Button fx:id="navDashboard" text="🏠  Tableau de bord" onAction="#showDashboard" styleClass="nav-button" maxWidth="Infinity"/>
-            <Button fx:id="navAjouter" text="➕  Ajouter un paiement" onAction="#showAjouterPaiement" styleClass="nav-button" maxWidth="Infinity"/>
-            <Button fx:id="navVacataire" text="👤  Vacataire" onAction="#showVacataire" styleClass="nav-button" maxWidth="Infinity"/>
-            <Button fx:id="navHeureSup" text="🕒  Heure Supplementaire" onAction="#showHeureSup" styleClass="nav-button" maxWidth="Infinity"/>
-            <Button fx:id="navDeplacement" text="🚗  Déplacement" onAction="#showDeplacement" styleClass="nav-button" maxWidth="Infinity"/>
+            <Button fx:id="navDashboard" text=" 🏠  Tableau de bord" onAction="#showDashboard" styleClass="nav-button" maxWidth="Infinity"/>
+            <Button fx:id="navAjouter" text=" ➕  Ajouter un paiement" onAction="#showAjouterPaiement" styleClass="nav-button" maxWidth="Infinity"/>
+            <Button fx:id="navVacataire" text=" 👤  Vacation" onAction="#showVacataire" styleClass="nav-button" maxWidth="Infinity"/>
+            <Button fx:id="navHeureSup" text=" 🕒  Heure Supplementaire" onAction="#showHeureSup" styleClass="nav-button" maxWidth="Infinity"/>
+            <Button fx:id="navDeplacement" text=" 🚗  Déplacement" onAction="#showDeplacement" styleClass="nav-button" maxWidth="Infinity"/>
             
 
             <Region VBox.vgrow="ALWAYS"/>

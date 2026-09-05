@@ -1,0 +1,20 @@
+# Build artifacts
+/target/
+/dist/
+*.class
+*.jar
+*.exe
+*.jar.original
+
+# IDE / outils
+.metals/
+.idea/
+*.iml
+.vscode/
+.bloop/
+
+# Config sensible
+config.properties
+
+# Fichiers Excel générés à l'exécution (données, pas du code)
+/excel/

@@ -88,7 +88,7 @@ public class DashboardController {
                 } else {
                     String display, bg, fg;
                     switch (item) {
-                        case "VACATAIRE": display = "Vacataire"; bg = "#e8f8ee"; fg = "#2e9e5b"; break;
+                        case "VACATAIRE": display = "Vacation"; bg = "#e8f8ee"; fg = "#2e9e5b"; break;
                         case "HEURE_SUP": display = "Heure supplémentaire"; bg = "#e8f1fb"; fg = "#3576d6"; break;
                         case "DEPLACEMENT": display = "Déplacement"; bg = "#fdf1e4"; fg = "#d6822f"; break;
                         default: display = item; bg = "#f1eafc"; fg = "#8455d1";

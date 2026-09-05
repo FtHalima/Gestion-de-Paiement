@@ -26,7 +26,7 @@
 
     <HBox spacing="20">
         <VBox styleClass="stat-card, stat-card-green" HBox.hgrow="ALWAYS">
-            <Label text="VACATAIRE" styleClass="stat-label-green"/>
+            <Label text="VACATION" styleClass="stat-label-green"/>
             <Label fx:id="countVacataire" text="0" styleClass="stat-number-green"/>
             <Label text="Enregistrements" styleClass="stat-sub"/>
         </VBox>

@@ -1,0 +1,20 @@
+# Build artifacts
+/target/
+/dist/
+*.class
+
+# Packaging
+*.jar
+*.exe
+
+# Anciens dossiers de test (si présents dans le projet)
+/excel/
+/data/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Config sensible (identifiants de base de données)
+config.properties

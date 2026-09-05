@@ -13,11 +13,16 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.util.List;
 
+import com.gestionpaiements.app.service.PaiementService;
+
 @Component
 public class ExcelFilesController {
 
     @Autowired
     private ExcelFileManagerService excelFileManagerService;
+
+    @Autowired
+    private PaiementService paiementService;
 
     @FXML private Label pageTitleLabel;
     @FXML private TableView<File> filesTable;
@@ -187,13 +192,19 @@ public class ExcelFilesController {
         confirm.setTitle("Confirmation de suppression");
         confirm.setHeaderText(null);
         confirm.setContentText("Voulez-vous vraiment supprimer définitivement « " + selectedFile.getName() + " » ? "
-                + "Cette action ne supprime pas les paiements de la base de données, seulement le fichier Excel.");
+                + "Cela supprimera aussi TOUS les paiements associés dans la base de données.");
         confirm.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.YES) {
                 try {
+                    List<ExcelFileManagerService.LigneApercu> lignes = excelFileManagerService.lireApercuFichier(selectedFile);
+                    for (ExcelFileManagerService.LigneApercu l : lignes) {
+                        if (l.idPaiement != null) {
+                            paiementService.supprimerParId(l.idPaiement);
+                        }
+                    }
                     excelFileManagerService.deleteFile(selectedFile);
-                    showAlert("Fichier supprimé", "Le fichier a été supprimé.");
+                    showAlert("Fichier supprimé", "Le fichier et les paiements associés ont été supprimés.");
                     showBrowse();
                     loadFiles();
                 } catch (Exception e) {

@@ -32,6 +32,8 @@
         <Button text="Se connecter" fx:id="loginButton" onAction="#handleLogin" maxWidth="Infinity">
             <VBox.margin><Insets top="8"/></VBox.margin>
         </Button>
+
+        <Label text="Par : Halima Ftati" styleClass="login-subtitle"/> 
     </VBox>
 
 </StackPane>

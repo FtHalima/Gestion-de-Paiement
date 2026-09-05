@@ -296,4 +296,9 @@ public class PaiementService {
     public void supprimerPaiements(List<Paiement> paiements) {
         paiementRepository.deleteAll(paiements);
     }
+
+    @Transactional
+    public void supprimerParId(Long id) {
+        paiementRepository.deleteById(id);
+    }
 }

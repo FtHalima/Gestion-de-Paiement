@@ -22,7 +22,7 @@ import com.gestionpaiements.app.model.LigneDeplacement;
 @Service
 public class ExcelFileManagerService {
 
-    private static final String BASE_DIR = "C:/Users/PC/gest-paiement/gestion-paiements-v2/excel";
+    private static final String BASE_DIR = System.getProperty("user.home") + "/GestionPaiements/excel";
     private static final String ARCHIVE_DIR = BASE_DIR + "/archive";
 
     private static final String[] LIGNE1_HEADERS = {
@@ -496,6 +496,7 @@ public class ExcelFileManagerService {
     }
 
     public static class LigneApercu {
+        public Long idPaiement;
         public String cin;
         public String nom;
         public String prenom;
@@ -517,6 +518,10 @@ public class ExcelFileManagerService {
                 if (cin.isEmpty()) continue;
                 LigneApercu l = new LigneApercu();
                 l.cin = cin;
+                Cell idCell = row.getCell(COL_ID_INTERNAL);
+                if (idCell != null && idCell.getCellType() == CellType.NUMERIC) {
+                    l.idPaiement = (long) idCell.getNumericCellValue();
+                }
                 l.nom = getCellStringPublic(row, 9);
                 l.prenom = getCellStringPublic(row, 10);
                 l.dateDebut = getCellStringPublic(row, 1);
@@ -526,6 +531,27 @@ public class ExcelFileManagerService {
             }
         }
         return result;
+    }
+    public void supprimerLigneParPaiementId(File file, Long paiementId) throws IOException {
+        try (FileInputStream fis = new FileInputStream(file);
+            XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
+            Sheet sheet = workbook.getSheetAt(0);
+            int rowIndex = findExistingRowIndex(sheet, paiementId);
+            if (rowIndex >= 0) {
+                Row row = sheet.getRow(rowIndex);
+                if (row != null) {
+                    for (int c = 0; c <= COL_ID_INTERNAL; c++) {
+                        Cell cell = row.getCell(c);
+                        if (cell != null) {
+                            row.removeCell(cell);
+                        }
+                    }
+                }
+            }
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                workbook.write(fos);
+            }
+        }
     }
 
     private String getCellStringPublic(Row row, int colIndex) {
