@@ -4,7 +4,9 @@ Application desktop (JavaFX + Spring Boot) permettant de gérer les paiements de
 professeurs pour trois catégories : **Vacataire**, **Heure Supplémentaire** et
 **Déplacement**. L'application génère des documents PDF officiels, exporte les
 données au format Excel selon une structure administrative précise, et permet
-la gestion complète des professeurs et de leurs paiements.
+la gestion complète des professeurs et de leurs paiements. Elle est distribuée
+sous forme d'un **exécutable Windows autonome** (`.exe`), sans dépendance
+externe à installer.
 
 ---
 
@@ -14,13 +16,14 @@ la gestion complète des professeurs et de leurs paiements.
 2. [Fonctionnalités](#fonctionnalités)
 3. [Architecture technique](#architecture-technique)
 4. [Structure du projet](#structure-du-projet)
-5. [Installation et lancement](#installation-et-lancement)
+5. [Installation et lancement (développement)](#installation-et-lancement-développement)
 6. [Configuration de la base de données](#configuration-de-la-base-de-données)
-7. [Fonctionnement des fichiers Excel](#fonctionnement-des-fichiers-excel)
-8. [Génération des documents PDF](#génération-des-documents-pdf)
-9. [Import de professeurs](#import-de-professeurs)
-10. [Limitations connues](#limitations-connues)
-11. [Pistes d'amélioration](#pistes-daméliorstion)
+7. [Empaquetage en exécutable autonome (.exe)](#empaquetage-en-exécutable-autonome-exe)
+8. [Fonctionnement des fichiers Excel](#fonctionnement-des-fichiers-excel)
+9. [Génération des documents PDF](#génération-des-documents-pdf)
+10. [Import de professeurs](#import-de-professeurs)
+11. [Limitations connues](#limitations-connues)
+12. [Pistes d'amélioration](#pistes-daméliorstion)
 
 ---
 
@@ -40,12 +43,18 @@ Chaque paiement est associé à un professeur (identifié par CIN et PPR), et
 génère automatiquement une ligne dans un fichier Excel actif propre à son
 type, ainsi qu'un document PDF officiel imprimable.
 
+L'application fonctionne **entièrement en local** : chaque installation
+dispose de sa propre base de données embarquée, sans nécessiter de serveur
+de base de données séparé ni de connexion réseau.
+
 ---
 
 ## Fonctionnalités
 
 ### Authentification
 - Écran de connexion (login / mot de passe) avant l'accès à l'application.
+- Un compte administrateur par défaut est créé automatiquement au tout
+  premier lancement (voir [Configuration de la base de données](#configuration-de-la-base-de-données)).
 
 ### Tableau de bord
 - Statistiques en temps réel : nombre de paiements par type + total.
@@ -115,10 +124,12 @@ chaque fichier, il est possible de :
 | Interface graphique | JavaFX (FXML + CSS) |
 | Backend / logique métier | Spring Boot |
 | Persistance | Spring Data JPA (Hibernate) |
-| Base de données | MySQL |
+| Base de données | H2 (base de données embarquée, fichier local) |
 | Génération PDF | iText 7 |
 | Lecture/écriture Excel | Apache POI |
+| Sécurité mot de passe | jBCrypt (hachage) |
 | Build | Maven |
+| Empaquetage | `jpackage` (JDK 21) |
 
 L'application combine Spring Boot et JavaFX dans un seul processus : Spring
 Boot démarre le contexte applicatif (services, repositories, base de
@@ -127,11 +138,10 @@ par Spring (via `FXMLLoader.setControllerFactory(...)`), ce qui permet
 l'injection de dépendances (`@Autowired`) dans les contrôleurs FXML.
 
 ### Interface à une seule fenêtre
-Depuis la refonte du tableau de bord, l'application fonctionne comme une
-application "dashboard" classique : une barre latérale (sidebar) fixe à
-gauche, une zone de contenu centrale qui change dynamiquement selon la page
-sélectionnée (`StackPane` dans `MainView.fxml`), sans ouverture de fenêtres
-séparées pour chaque fonctionnalité.
+L'application fonctionne comme un tableau de bord classique : une barre
+latérale (sidebar) fixe à gauche, une zone de contenu centrale qui change
+dynamiquement selon la page sélectionnée (`StackPane` dans `MainView.fxml`),
+sans ouverture de fenêtres séparées pour chaque fonctionnalité.
 
 ---
 
@@ -145,7 +155,9 @@ src/main/java/com/gestionpaiements/app/
 │   ├── DashboardController.java
 │   ├── AjouterPaiementController.java
 │   ├── ExcelFilesController.java
-│   └── LigneDeplacementUI.java      # Modèle d'édition pour le tableau de trajets
+│   ├── LigneDeplacementUI.java       # Modèle d'édition pour le tableau de trajets
+│   ├── ArchivesController.java       # Ancien contrôleur, conservé mais non utilisé
+│   └── PaiementListController.java   # Ancien contrôleur, conservé mais non utilisé
 ├── model/               # Entités JPA
 │   ├── Professeur.java
 │   ├── Paiement.java
@@ -156,6 +168,7 @@ src/main/java/com/gestionpaiements/app/
 ├── service/             # Logique métier
 │   ├── PaiementService.java
 │   ├── ProfesseurService.java
+│   ├── UtilisateurService.java
 │   ├── PdfGenerationService.java             # PDF Vacataire / Heure Sup
 │   ├── DeplacementPdfGenerationService.java  # PDF Déplacement (format dédié)
 │   ├── ExcelFileManagerService.java          # Gestion des fichiers Excel
@@ -170,17 +183,28 @@ src/main/resources/com/gestionpaiements/app/fxml/
 ├── DashboardView.fxml
 ├── AjouterPaiement.fxml
 ├── ExcelFilesView.fxml
-└── dashboard.css        # Feuille de style unique pour toute l'application
+├── ArchivesView.fxml     # Ancienne vue, conservée mais non liée à la navigation
+├── PaiementList.fxml     # Ancienne vue, conservée mais non liée à la navigation
+└── dashboard.css         # Feuille de style unique pour toute l'application
 ```
+
+> Les fichiers `ArchivesController`/`ArchivesView.fxml` et
+> `PaiementListController`/`PaiementList.fxml` correspondent à une version
+> antérieure de la navigation (page "Archives" séparée, liste de paiements
+> brute). Ils ont été conservés dans le projet à la demande explicite, mais
+> ne sont plus référencés depuis `MainViewController` — leurs fonctionnalités
+> ont été intégrées dans `ExcelFilesController`/`ExcelFilesView.fxml`.
 
 ---
 
-## Installation et lancement
+## Installation et lancement (développement)
 
 ### Prérequis
-- Java 21
+- Java 21 (JDK Eclipse Temurin recommandé)
 - Maven
-- MySQL (serveur local ou accessible)
+
+> Aucune base de données externe à installer : H2 est embarquée et se
+> configure automatiquement au premier lancement.
 
 ### Lancer en développement
 ```bash
@@ -192,22 +216,75 @@ mvn clean spring-boot:run
 mvn clean compile
 ```
 
-> ⚠️ L'empaquetage en exécutable autonome (`.exe` via `jpackage`) et la
-> stratégie de déploiement multi-postes sont en cours de discussion et ne
-> sont pas encore finalisés dans ce projet — voir la section Limitations.
-
 ---
 
 ## Configuration de la base de données
 
-La configuration se trouve dans `src/main/resources/application.properties`
-(URL JDBC, utilisateur, mot de passe, dialecte Hibernate, mode de génération
-du schéma). Adapter ces valeurs selon l'environnement de déploiement.
+La base de données utilisée est **H2**, en mode fichier, configurée dans
+`src/main/resources/application.properties` :
 
-Le schéma de base de données est géré par Hibernate (`ddl-auto`) — vérifier
-la valeur configurée (`update`, `validate`, `none`) avant toute migration de
-production, et privilégier des scripts SQL versionnés pour un déploiement
-définitif.
+```properties
+spring.datasource.url=jdbc:h2:file:${user.home}/GestionPaiements/data/gestion_paiements;AUTO_SERVER=TRUE
+spring.datasource.username=sa
+spring.datasource.password=
+spring.datasource.driver-class-name=org.h2.Driver
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.jpa.hibernate.ddl-auto=update
+```
+
+Le fichier de base de données est stocké dans le dossier personnel de
+l'utilisateur (`C:\Users\<utilisateur>\GestionPaiements\data\`), afin d'éviter
+tout problème de droits d'écriture si l'application est installée dans un
+dossier protégé (ex. `C:\Program Files\`).
+
+### Compte par défaut
+Au tout premier lancement (base vide), un compte administrateur est créé
+automatiquement par `MainApp.java` :
+
+- **Login** : `admin`
+- **Mot de passe** : `admin123`
+
+Ce compte n'est créé qu'une seule fois (l'application vérifie qu'aucun
+utilisateur n'existe déjà avant de le créer). Il n'existe actuellement pas
+de fonctionnalité de changement de mot de passe en libre-service dans
+l'application — une modification du mot de passe nécessiterait une
+intervention directe en base de données ou l'ajout futur de cette
+fonctionnalité (voir [Pistes d'amélioration](#pistes-daméliorstion)).
+
+---
+
+## Empaquetage en exécutable autonome (.exe)
+
+L'application est distribuée sous forme d'un installeur Windows autonome,
+généré avec `jpackage` (outil intégré au JDK 21). Le JDK est embarqué dans
+l'installeur, donc **aucune installation de Java n'est requise** sur les
+postes cibles.
+
+### Étapes de génération
+
+1. Construire le jar exécutable :
+   ```bash
+   mvn clean package
+   ```
+
+2. Générer l'installeur (depuis la racine du projet, avec `JAVA_HOME` pointant
+   vers un JDK 21 et WiX Toolset v3 installé pour la génération `.exe`) :
+   ```bash
+   "%JAVA_HOME%\bin\jpackage" --type exe --name "Gestion Paiements" --input target --main-jar gestion-paiements-v2-0.0.1-SNAPSHOT.jar --icon icon.ico --runtime-image "%JAVA_HOME%" --dest dist --win-shortcut --win-menu --win-dir-chooser --app-version 1.0.0 --vendor "TonNomOuSociete"
+   ```
+
+3. L'installeur généré se trouve dans `dist\Gestion Paiements-1.0.0.exe`.
+
+### Comportement à l'installation
+- L'utilisateur choisit le dossier d'installation (`--win-dir-chooser`).
+- Un raccourci bureau et une entrée dans le menu Démarrer sont créés.
+- Au premier lancement, l'application crée automatiquement :
+  - Le dossier et le fichier de base de données H2 (`GestionPaiements/data/`).
+  - Le dossier des fichiers Excel (`GestionPaiements/excel/`).
+  - Le compte administrateur par défaut.
+
+Ce fonctionnement a été validé sur plusieurs machines, y compris des PC
+n'ayant jamais eu Java ni MySQL installés au préalable.
 
 ---
 
@@ -272,7 +349,7 @@ installées.
 
 ---
 
-## Import de données
+## Import de professeurs
 
 Le bouton "Importer des données" (accessible depuis le tableau de bord)
 importe des **professeurs uniquement** (aucun paiement) depuis un fichier
@@ -298,11 +375,16 @@ pour que l'import détecte automatiquement où commencent les données.
 
 ## Limitations connues
 
-- **Pas de synchronisation réseau entre postes.** Chaque installation de
-  l'application dispose de sa propre base de données locale. Si l'app est
-  installée sur plusieurs PC sans réseau entre eux, les paiements enregistrés
-  sur un poste ne sont visibles que sur ce poste. Seuls les **professeurs**
-  peuvent être transférés d'un poste à l'autre via export/import Excel.
+- **Chaque installation est indépendante.** L'application utilise une base
+  de données locale embarquée (H2) — c'est un choix délibéré permettant une
+  installation en un clic sans configuration réseau. Conséquence directe :
+  les paiements enregistrés sur un poste ne sont visibles que sur ce poste.
+  Seuls les **professeurs** peuvent être transférés d'un poste à l'autre via
+  export/import Excel ; il n'existe pas de mécanisme équivalent pour les
+  paiements.
+- **Pas de fonctionnalité de changement de mot de passe.** Le compte
+  administrateur par défaut (`admin` / `admin123`) ne peut être modifié que
+  par une intervention directe en base de données.
 - **Impression directe non fiable.** Une tentative d'impression directe du
   PDF (sans passer par une sauvegarde manuelle) via `java.awt.Desktop` a été
   testée mais s'est révélée non fonctionnelle dans cet environnement
@@ -316,8 +398,8 @@ pour que l'import détecte automatiquement où commencent les données.
   champ reste en base pour les professeurs déjà existants mais n'est plus
   collecté ni affiché. Dans l'export Excel, la colonne historiquement
   nommée "DDR" contient désormais le **PPR** du professeur.
-- **Empaquetage `.exe` et stratégie de base de données multi-postes** ne
-  sont pas encore finalisés à ce stade du projet.
+- **Dépendance aux polices Windows** pour le PDF Déplacement (voir
+  [Génération des documents PDF](#génération-des-documents-pdf)).
 
 ---
 
@@ -326,8 +408,8 @@ pour que l'import détecte automatiquement où commencent les données.
 - Export/import des **paiements** (pas seulement des professeurs) pour
   permettre un partage de données plus complet entre postes non connectés
   en réseau.
-- Empaquetage natif via `jpackage` (exécutable Windows autonome, JRE inclus).
-- Gestion des utilisateurs et des mots de passe (changement de mot de passe
-  en libre-service).
+- Gestion des utilisateurs et changement de mot de passe en libre-service.
 - Historique des modifications de paiements (actuellement, modifier un
   paiement écrase la version précédente sans conserver d'historique).
+- Génération d'un installeur multiplateforme (actuellement Windows
+  uniquement, via `jpackage --type exe`).
