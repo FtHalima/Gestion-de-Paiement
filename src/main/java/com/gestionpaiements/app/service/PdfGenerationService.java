@@ -62,6 +62,7 @@ public class PdfGenerationService {
 
 
     private static final String LOGO_CLASSPATH = "images/Logo1.png";
+    private static final float POINTS_PER_CM = 72f / 2.54f;
     //private static final String MINISTERE = "Ministère de l'Éducation Nationale, du Préscolaire et des Sports";
     //private static final String DIRECTION = "Direction Provinciale de Nador";
     private static final String TITRE_BASE = "ETAT DES SOMMES DUES POUR FRAIS DE ";
@@ -117,7 +118,7 @@ public class PdfGenerationService {
 
     // ========== SECTION METHODS ==========
     //
-    private void addHeader(Document document, String affectation) {
+    void addHeader(Document document, String affectation) {
         // ROYAUME DU MAROC
         Paragraph royaume = new Paragraph("")
                 .setTextAlignment(TextAlignment.CENTER)
@@ -134,6 +135,9 @@ public class PdfGenerationService {
                         Image logo = new Image(ImageDataFactory.create(logoBytes))
                                 .setWidth(500)
                                 .setAutoScaleHeight(true)
+                                .setRelativePosition(0, -1.6f * POINTS_PER_CM, 0, 0)
+                                // Recover the space below the raised logo for the final signature.
+                                .setMarginBottom(-1.7f * POINTS_PER_CM)
                                 .setHorizontalAlignment(HorizontalAlignment.CENTER);
                         document.add(logo);
                 } else {
@@ -164,7 +168,7 @@ public class PdfGenerationService {
         //addHorizontalLine(document, PRIMARY_BLUE, 2f, 8f);
     }
 
-    private void addMainTitle(Document document, TypePaiement type) {
+    void addMainTitle(Document document, TypePaiement type) {
         String titre = getDynamicTitle(type);
 
         Table titleTable = new Table(1);
@@ -183,7 +187,7 @@ public class PdfGenerationService {
         titleTable.addCell(cell);
         document.add(titleTable);
 
-        addHorizontalLine(document, PRIMARY_BLUE, 1f, 8f);
+        addHorizontalLine(document, BLACK, 1f, 8f);
         }
 
    private void addBudgetBlock(Document document, Paiement paiement) {
@@ -204,9 +208,9 @@ public class PdfGenerationService {
         inner.addCell(budgetGroupCell("Lig : ", getFieldValue(paiement.getLig())));
 
         Cell outerCell = new Cell().add(inner)
-                .setBorder(new SolidBorder(LIGHT_BORDER, 0.5f))
+                .setBorder(new SolidBorder(BLACK, 0.5f))
                 .setBorderRadius(new BorderRadius(6))
-                .setBackgroundColor(LIGHT_GRAY_BG)
+                .setBackgroundColor(WHITE)
                 .setPadding(5);
 
         Table outer = new Table(1);
@@ -233,9 +237,9 @@ public class PdfGenerationService {
         String text = getTexteAdministratif(type);
         Paragraph adminText = new Paragraph(text)
                 .setTextAlignment(TextAlignment.JUSTIFIED)
-                .setFontSize(7)
+                .setFontSize(8)
                 .setFontColor(BLACK)
-                .setItalic()
+                .setBold()
                 .setMarginBottom(4);
         document.add(adminText);
     }
@@ -250,7 +254,7 @@ public class PdfGenerationService {
 
         Table table = new Table(new float[]{1f, 2f, 0.8f, 1.5f, 0.8f, 1.5f});
         table.setWidth(UnitValue.createPercentValue(100));
-        table.setBackgroundColor(LIGHT_GRAY_BG);
+        table.setBackgroundColor(WHITE);
         table.setMarginBottom(8);
 
         // Ligne 1 : Mr Mme / PPR / CIN
@@ -260,7 +264,7 @@ public class PdfGenerationService {
         Cell value1 = new Cell().add(new Paragraph(getFieldValue(professeur.getNom()) + " " + getFieldValue(professeur.getPrenom()))
                 .setBold().setFontColor(BLACK).setFontSize(9))
                 .setBorder(Border.NO_BORDER)
-                .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f))
+                .setBorderBottom(new SolidBorder(BLACK, 0.5f))
                 .setPaddingLeft(3).setPaddingTop(4).setPaddingBottom(2).setPaddingRight(4);
         table.addCell(label1);
         table.addCell(value1);
@@ -271,7 +275,7 @@ public class PdfGenerationService {
         Cell value2 = new Cell().add(new Paragraph(getFieldValue(professeur.getPpr()))
                 .setBold().setFontColor(BLACK).setFontSize(9))
                 .setBorder(Border.NO_BORDER)
-                .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f))
+                .setBorderBottom(new SolidBorder(BLACK, 0.5f))
                 .setPaddingLeft(3).setPaddingTop(4).setPaddingBottom(2).setPaddingRight(4);
         table.addCell(label2);
         table.addCell(value2);
@@ -282,7 +286,7 @@ public class PdfGenerationService {
         Cell value3 = new Cell().add(new Paragraph(getFieldValue(professeur.getCin()))
                 .setBold().setFontColor(BLACK).setFontSize(9))
                 .setBorder(Border.NO_BORDER)
-                .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f))
+                .setBorderBottom(new SolidBorder(BLACK, 0.5f))
                 .setPaddingLeft(3).setPaddingTop(4).setPaddingBottom(2).setPaddingRight(4);
         table.addCell(label3);
         table.addCell(value3);
@@ -294,7 +298,7 @@ public class PdfGenerationService {
         Cell value4 = new Cell().add(new Paragraph(getFieldValue(professeur.getGrade()))
                 .setBold().setFontColor(BLACK).setFontSize(9))
                 .setBorder(Border.NO_BORDER)
-                .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f))
+                .setBorderBottom(new SolidBorder(BLACK, 0.5f))
                 .setPaddingLeft(3).setPaddingTop(4).setPaddingBottom(2).setPaddingRight(4);
         table.addCell(label4);
         table.addCell(value4);
@@ -305,7 +309,7 @@ public class PdfGenerationService {
         Cell value5 = new Cell().add(new Paragraph(getFieldValue(professeur.getEchelle() != null ? professeur.getEchelle().toString() : ""))
                 .setBold().setFontColor(BLACK).setFontSize(9))
                 .setBorder(Border.NO_BORDER)
-                .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f))
+                .setBorderBottom(new SolidBorder(BLACK, 0.5f))
                 .setPaddingLeft(3).setPaddingTop(4).setPaddingBottom(2).setPaddingRight(4);
         table.addCell(label5);
         table.addCell(value5);
@@ -316,7 +320,7 @@ public class PdfGenerationService {
         Cell value6 = new Cell().add(new Paragraph(getFieldValue(professeur.getAffectation()))
                 .setBold().setFontColor(BLACK).setFontSize(9))
                 .setBorder(Border.NO_BORDER)
-                .setBorderBottom(new SolidBorder(LIGHT_BORDER, 0.5f))
+                .setBorderBottom(new SolidBorder(BLACK, 0.5f))
                 .setPaddingLeft(3).setPaddingTop(4).setPaddingBottom(2).setPaddingRight(4);
         table.addCell(label6);
         table.addCell(value6);
@@ -341,7 +345,7 @@ public class PdfGenerationService {
                 .setTextAlignment(TextAlignment.CENTER);
 
         Cell cell = new Cell().add(ribPara)
-                .setBorder(new DottedBorder(LIGHT_BORDER, 1f))
+                .setBorder(new DottedBorder(BLACK, 1f))
                 .setBorderRadius(new BorderRadius(18))
                 .setPadding(5);
         table.addCell(cell);
@@ -354,15 +358,15 @@ public class PdfGenerationService {
         table.setWidth(UnitValue.createPercentValue(100));
         table.setMarginBottom(4);
 
-        table.setBorder(new SolidBorder(LIGHT_BORDER, 1f));
+        table.setBorder(new SolidBorder(BLACK, 1f));
         table.setBorderRadius(new BorderRadius(18));
 
-        addTableHeaderCell(table, "NATURE DES OPÉRATIONS", PRIMARY_BLUE, WHITE);
-        addTableHeaderCell(table, "DATE DÉBUT", PRIMARY_BLUE, WHITE);
-        addTableHeaderCell(table, "DATE FIN", PRIMARY_BLUE, WHITE);
-        addTableHeaderCell(table, "HEURES", PRIMARY_BLUE, WHITE);
-        addTableHeaderCell(table, "TAUX", PRIMARY_BLUE, WHITE);
-        addTableHeaderCell(table, "MONTANT BRUT", PRIMARY_BLUE, WHITE);
+        addTableHeaderCell(table, "NATURE DES OPÉRATIONS", WHITE, BLACK);
+        addTableHeaderCell(table, "DATE DÉBUT", WHITE, BLACK);
+        addTableHeaderCell(table, "DATE FIN", WHITE, BLACK);
+        addTableHeaderCell(table, "HEURES", WHITE, BLACK);
+        addTableHeaderCell(table, "TAUX", WHITE, BLACK);
+        addTableHeaderCell(table, "MONTANT BRUT", WHITE, BLACK);
 
         String heuresValue = getFieldValue(paiement.getNombreHeures() != null
                 ? paiement.getNombreHeures().stripTrailingZeros().toPlainString() : "");
@@ -381,28 +385,28 @@ public class PdfGenerationService {
 
         /* 
         for (int i = 0; i < 6; i++) {
-                table.addCell(new Cell().setBorder(new SolidBorder(LIGHT_BORDER, 0.5f)).setHeight(10));
+                table.addCell(new Cell().setBorder(new SolidBorder(BLACK, 0.5f)).setHeight(10));
         }
         */
 
         // Ligne TOTAL fusionnée : vide | vide | "Total :" | heures | "Total brut:" | montant
         Cell totalLabel = new Cell(1, 3) // colspan = 3 (Nature + DateDébut + DateFin)
             .add(new Paragraph("Total :").setBold().setFontSize(9).setTextAlignment(TextAlignment.RIGHT))
-            .setBackgroundColor(LIGHT_GRAY_BG)
-            .setBorder(new SolidBorder(LIGHT_BORDER, 0.5f))
+            .setBackgroundColor(WHITE)
+            .setBorder(new SolidBorder(BLACK, 0.5f))
             .setPadding(4);
         table.addCell(totalLabel);
 
         table.addCell(new Cell()
             .add(new Paragraph(heuresValue).setBold().setFontSize(9).setTextAlignment(TextAlignment.CENTER))
-            .setBackgroundColor(LIGHT_GRAY_BG).setBorder(new SolidBorder(LIGHT_BORDER, 0.5f)).setPadding(4));
+            .setBackgroundColor(WHITE).setBorder(new SolidBorder(BLACK, 0.5f)).setPadding(4));
 
         table.addCell(new Cell() // Taux : vide
-            .setBackgroundColor(LIGHT_GRAY_BG).setBorder(new SolidBorder(LIGHT_BORDER, 0.5f)));
+            .setBackgroundColor(WHITE).setBorder(new SolidBorder(BLACK, 0.5f)));
 
         table.addCell(new Cell()
             .add(new Paragraph("Total brut : " + montantBrutStr).setBold().setFontSize(9).setTextAlignment(TextAlignment.CENTER))
-            .setBackgroundColor(LIGHT_GRAY_BG).setBorder(new SolidBorder(LIGHT_BORDER, 0.5f)).setPadding(4));
+            .setBackgroundColor(WHITE).setBorder(new SolidBorder(BLACK, 0.5f)).setPadding(4));
 
         document.add(table);
 
@@ -435,10 +439,10 @@ public class PdfGenerationService {
         addTableHeaderCellSpan(table, "MONTANT", 2, 1);
 
         // Ligne d'en-tête 2 (sous-colonnes : uniquement les groupes qui en ont)
-        addTableHeaderCell(table, "DÉPART", PRIMARY_BLUE, WHITE);
-        addTableHeaderCell(table, "ARRIVÉE", PRIMARY_BLUE, WHITE);
-        addTableHeaderCell(table, "DÉPART", PRIMARY_BLUE, WHITE);
-        addTableHeaderCell(table, "RETOUR", PRIMARY_BLUE, WHITE);
+        addTableHeaderCell(table, "DÉPART", WHITE, BLACK);
+        addTableHeaderCell(table, "ARRIVÉE", WHITE, BLACK);
+        addTableHeaderCell(table, "DÉPART", WHITE, BLACK);
+        addTableHeaderCell(table, "RETOUR", WHITE, BLACK);
 
         // Ligne de données
         addOperationsDataCell(table, paiement.getDateDebut() != null ? paiement.getDateDebut().toString() : "", null);
@@ -458,15 +462,15 @@ public class PdfGenerationService {
         private void addTableHeaderCellSpan(Table table, String text, int rowSpan, int colSpan) {
         Cell cell = new Cell(rowSpan, colSpan).add(new Paragraph(text).setFontSize(8))
                 .setBold()
-                .setBackgroundColor(PRIMARY_BLUE)
-                .setFontColor(WHITE)
+                .setBackgroundColor(WHITE)
+                .setFontColor(BLACK)
                 .setTextAlignment(TextAlignment.CENTER)
                 .setVerticalAlignment(VerticalAlignment.MIDDLE)
                 .setPadding(5);
         table.addCell(cell);
         }
 
-        private void addArreteDeSomme(Document document, BigDecimal montantNet) {
+        void addArreteDeSomme(Document document, BigDecimal montantNet) {
                 String amountInWords = getMontantEnLettres(montantNet);
                 Paragraph textPara = new Paragraph("Arrêté à la somme de: ")
                         .setFontSize(9)
@@ -481,10 +485,10 @@ public class PdfGenerationService {
                 document.add(textPara);
         }
 
-    private void addIntermediateSignatures(Document document) {
+    void addIntermediateSignatures(Document document) {
         Table signaturesTable = new Table(new float[]{1, 1});
         signaturesTable.setWidth(UnitValue.createPercentValue(100));
-        signaturesTable.setMarginBottom(30);
+        signaturesTable.setMarginBottom(2 * POINTS_PER_CM);
 
         signaturesTable.addCell(new Cell().add(new Paragraph("Fait à Oujda, le __________"))
                 .setFontSize(9)
@@ -493,7 +497,7 @@ public class PdfGenerationService {
                 .setFontSize(9)
                 .setBorder(Border.NO_BORDER));
 
-        signaturesTable.addCell(new Cell().add(new Paragraph("Le Responsable").setBold().setUnderline().setMarginTop(12))
+        signaturesTable.addCell(new Cell().add(new Paragraph("Vu certifié exact").setBold().setUnderline().setMarginTop(12))
                 .setTextAlignment(TextAlignment.CENTER) 
                 .setFontSize(9)             // ✅ décalé, plus sous "Fait à"
                 .setBorder(Border.NO_BORDER));
@@ -512,7 +516,7 @@ public class PdfGenerationService {
         outerTable.setHorizontalAlignment(HorizontalAlignment.CENTER);
         outerTable.setMarginTop(14);
         outerTable.setMarginBottom(8);
-        outerTable.setBorder(new SolidBorder(LIGHT_BORDER, 1f));
+        outerTable.setBorder(new SolidBorder(BLACK, 1f));
         outerTable.setBorderRadius(new BorderRadius(18));
         outerTable.setPadding(0);
 
@@ -548,17 +552,17 @@ public class PdfGenerationService {
         // NET À PAYER
         innerTable.addCell(new Cell().add(new Paragraph("NET À PAYER :"))
                 .setBold().setFontSize(11).setFontColor(NET_LABEL_GRAY)
-                .setBorder(Border.NO_BORDER).setBorderTop(new SolidBorder(LIGHT_BORDER, 1f)).setPadding(5));
+                .setBorder(Border.NO_BORDER).setBorderTop(new SolidBorder(BLACK, 1f)).setPadding(5));
         innerTable.addCell(new Cell().add(new Paragraph(formatMontant(paiement.getMontantNet()) + " DH"))
                 .setBold().setFontSize(11).setFontColor(NET_LABEL_GRAY)
                 .setTextAlignment(TextAlignment.RIGHT)
-                .setBorder(Border.NO_BORDER).setBorderTop(new SolidBorder(LIGHT_BORDER, 1f)).setPadding(5));
+                .setBorder(Border.NO_BORDER).setBorderTop(new SolidBorder(BLACK, 1f)).setPadding(5));
 
         outerTable.addCell(new Cell().add(innerTable).setBorder(Border.NO_BORDER));
         document.add(outerTable);
   }
 
-    private void addFooterValidation(Document document, BigDecimal montantNet) {
+    void addFooterValidation(Document document, BigDecimal montantNet) {
         // Paragraphe centré : "Arrêté par nous sous-Ordonnateur à la somme de: "
         Paragraph labelPara = new Paragraph("Arrêté par nous sous-Ordonnateur à la somme de: ")
                 .setTextAlignment(TextAlignment.CENTER)
@@ -585,7 +589,7 @@ public class PdfGenerationService {
         // Ensuite : "le sous-Ordonnateur" (gras, centré)
         Paragraph rolePara = new Paragraph("le sous-Ordonnateur")
                 .setTextAlignment(TextAlignment.CENTER)
-                .setFontSize(10)
+                .setFontSize(13)
                 .setBold()
                 .setFontColor(BLACK);
         document.add(rolePara);
@@ -666,7 +670,7 @@ public class PdfGenerationService {
         Cell cell = new Cell().add(new Paragraph(value)
                 .setFontSize(9))
                 .setTextAlignment(TextAlignment.CENTER)
-                .setBorder(new SolidBorder(LIGHT_BORDER, 1f))
+                .setBorder(new SolidBorder(BLACK, 1f))
                 .setPadding(3);
         if (bg != null) {
             cell.setBackgroundColor(bg);
@@ -676,6 +680,7 @@ public class PdfGenerationService {
 
     private void addTableHeaderCell(Table table, String text, Color bgColor, Color textColor) {
         Cell cell = new Cell().add(new Paragraph(text).setFontSize(8))
+                .setBorder(new SolidBorder(BLACK, 0.5f))
                 .setBold()
                 .setBackgroundColor(bgColor)
                 .setFontColor(textColor)

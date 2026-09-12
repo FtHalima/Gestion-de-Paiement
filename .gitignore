@@ -18,3 +18,25 @@ config.properties
 
 # Fichiers Excel générés à l'exécution (données, pas du code)
 /excel/
+
+# Logs et fichiers temporaires
+*.log
+*.pid
+cp.txt
+cp.txt.backup
+temp_*.java
+temp_*.txt
+
+# Outils personnels
+.claude/
+/.github/modernize/
+
+# Aperçus, essais et documents locaux (hors application)
+/tmp/
+/output/
+/conception/
+/Logo.png
+
+# Bases de données locales
+*.mv.db
+*.trace.db

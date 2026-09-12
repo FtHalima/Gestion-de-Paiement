@@ -47,13 +47,12 @@ public class DeplacementPdfGenerationService {
     @Autowired
     private PaiementRepository paiementRepository;
 
+    @Autowired
+    private PdfGenerationService pdfGenerationService;
+
     private static final Color BLACK = ColorConstants.BLACK;
     private static final Color WHITE = ColorConstants.WHITE;
-    private static final Color LIGHT_BORDER = new DeviceRgb(208, 213, 221);
-    private static final Color YELLOW = new DeviceRgb(255, 184, 22); // Yellow for title
-    private static final Color LIGHT_BLUE = new DeviceRgb(221, 235, 247); // Light blue for table header 173, 213, 230
 
-    private static final String LOGO_CLASSPATH = "images/Logo2.png";
     
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter HEURE_FORMAT = DateTimeFormatter.ofPattern("H'H'");
@@ -64,7 +63,6 @@ public class DeplacementPdfGenerationService {
     private static final String CALIBRI_BOLD_ITALIC_PATH = "C:/Windows/Fonts/calibriz.ttf";
     private static final String TIMES_PATH = "C:/Windows/Fonts/times.ttf";
 
-    private static final int NB_LIGNES_TABLEAU = 8; // nombre total de lignes affichées (remplies + vides)
 
     private PdfFont calibriRegular;
     private PdfFont calibriBold;
@@ -108,78 +106,19 @@ public class DeplacementPdfGenerationService {
         Professeur prof = paiement.getProfesseur();
         String affectation = (prof != null) ? prof.getAffectation() : null;
 
-        addHeader(document, affectation);
-        //addMainTitle(document);
+        pdfGenerationService.addHeader(document, affectation);
+        pdfGenerationService.addMainTitle(document, com.gestionpaiements.app.model.TypePaiement.DEPLACEMENT);
         addBudgetLine(document, paiement);
         addIdentificationBlock(document, prof);
         addMotifLigne(document, paiement);
         BigDecimal total = addTrajetsTable(document, paiement);
-        // Add "Arrêté le présent état à la somme de: [amount in words in bold]" after the table
-        addArreteLine(document, "Arrêté le présent état à la somme de:", total);
-        addTexteAdministratifBas(document);
-        addSignatureEtDeclaration(document, total);
+        pdfGenerationService.addArreteDeSomme(document, total);
+        pdfGenerationService.addIntermediateSignatures(document);
+        pdfGenerationService.addFooterValidation(document, total);
 
         document.close();
         return new ByteArrayInputStream(baos.toByteArray());
     }
-
-    private void addHeader(Document document, String affectation) {
-       // Paragraph royaume = new Paragraph("ROYAUME DU MAROC")
-        Paragraph royaume = new Paragraph("")
-                .setFont(calibriBold)
-                .setTextAlignment(TextAlignment.CENTER)
-                .setFontSize(14)
-                .setFontColor(BLACK);
-        document.add(royaume);
-
-        try {
-            ClassPathResource logoResource = new ClassPathResource(LOGO_CLASSPATH);
-            if (logoResource.exists()) {
-                byte[] logoBytes = logoResource.getInputStream().readAllBytes();
-                Image logo = new Image(ImageDataFactory.create(logoBytes))
-                        .setWidth(500)
-                        .setAutoScaleHeight(true)
-                        .setHorizontalAlignment(HorizontalAlignment.CENTER);
-                document.add(logo);
-            }
-        } catch (Exception ignored) {
-        }
-
-        /*Paragraph ministere = new Paragraph(MINISTERE)
-                .setFont(calibriBold)
-                .setTextAlignment(TextAlignment.CENTER)
-                .setFontSize(10)
-                .setFontColor(BLACK);
-        document.add(ministere);
-
-        if (affectation != null && !affectation.isBlank()) {
-            Paragraph direction = new Paragraph(affectation)
-                    .setFont(calibriRegular)
-                    .setTextAlignment(TextAlignment.CENTER)
-                    .setFontSize(10)
-                    .setFontColor(BLACK);
-            document.add(direction);
-        }
-*/
-
-       /*  Table lineTable = new Table(1);
-        lineTable.setWidth(UnitValue.createPercentValue(100));
-        lineTable.setMarginBottom(8);
-        Cell cell = new Cell().setBorderBottom(new SolidBorder(BLACK, 1f)).setPadding(0);
-        lineTable.addCell(cell);
-        document.add(lineTable); */
-    }
-
-    /* private void addMainTitle(Document document) {
-        Paragraph titre = new Paragraph("ETAT DES SOMMES DUES POUR FRAIS DE DÉPLACEMENT")
-                .setFont(calibriBold)
-                .setTextAlignment(TextAlignment.CENTER)
-                .setFontSize(14)
-                .setFontColor(YELLOW)
-                .setMarginBottom(8);
-        document.add(titre);
-    }
-        */
 
     private void addBudgetLine(Document document, Paiement paiement) {
         Paragraph line = new Paragraph()
@@ -327,9 +266,11 @@ public class DeplacementPdfGenerationService {
         addHeaderCell(table, "Retour", 1, 1);
 
         BigDecimal total = BigDecimal.ZERO;
-        int filledRows = paiement.getLignesDeplacement().size();
+        var trajets = paiement.getLignesDeplacement().stream()
+                .filter(this::estTrajetRempli).toList();
 
-        for (LigneDeplacement l : paiement.getLignesDeplacement()) {
+
+        for (LigneDeplacement l : trajets) {
                 addDataCellCalibri(table, l.getDateDepart() != null ? l.getDateDepart().format(DATE_FORMAT) : "");
                 addDataCellCalibri(table, l.getDateArrivee() != null ? l.getDateArrivee().format(DATE_FORMAT) : "");
                 addDataCellCalibri(table, getFieldValue(l.getParcours()));
@@ -348,23 +289,10 @@ public class DeplacementPdfGenerationService {
                 table.addCell(montantCell);
         }
 
-        // Lignes vides (texte blanc, invisibles à l'impression)
-        int emptyRows = Math.max(0, NB_LIGNES_TABLEAU - filledRows);
-        for (int i = 0; i < emptyRows; i++) {
-                for (int c = 0; c < 8; c++) {
-                Cell empty = new Cell().add(new Paragraph("0,00").setFont(calibriRegular).setFontSize(8.28f).setFontColor(WHITE))
-                        .setTextAlignment(TextAlignment.CENTER)
-                        .setBorder(new SolidBorder(BLACK, 1.2f))
-                        .setPadding(3);
-                table.addCell(empty);
-                }
-        }
-
-
 // Ligne Total Général : label sur 5 colonnes (Dates + Parcours + Heures),
         // Somme du "Nombre de taux de base" sur tous les trajets
         BigDecimal sommeNombre = BigDecimal.ZERO;
-        for (LigneDeplacement l : paiement.getLignesDeplacement()) {
+        for (LigneDeplacement l : trajets) {
         if (l.getNombreTauxBase() != null) {
                 sommeNombre = sommeNombre.add(l.getNombreTauxBase());
         }
@@ -409,10 +337,22 @@ public class DeplacementPdfGenerationService {
         Cell cell = new Cell(rowSpan, colSpan).add(new Paragraph(text).setFont(calibriBold).setFontSize(8.28f))
                 .setTextAlignment(TextAlignment.CENTER)
                 .setVerticalAlignment(VerticalAlignment.MIDDLE)
-                .setBackgroundColor(LIGHT_BLUE)
+                .setBackgroundColor(WHITE)
                 .setBorder(new SolidBorder(BLACK, 1.2f))
                 .setPadding(2);
         table.addCell(cell);
+    }
+
+    private boolean estTrajetRempli(LigneDeplacement ligne) {
+        return ligne != null && (ligne.getDateDepart() != null || ligne.getDateArrivee() != null
+                || !getFieldValue(ligne.getParcours()).isBlank()
+                || ligne.getHeureDepart() != null || ligne.getHeureRetour() != null
+                || estNonNul(ligne.getNombreTauxBase()) || estNonNul(ligne.getTauxBaseApplique())
+                || estNonNul(ligne.getMontant()));
+    }
+
+    private boolean estNonNul(BigDecimal valeur) {
+        return valeur != null && valeur.signum() != 0;
     }
 
     private void addDataCellCalibri(Table table, String value) {
@@ -432,106 +372,6 @@ public class DeplacementPdfGenerationService {
     }
 
     
-
-    private void addMontantEnLettres(Document document, BigDecimal montant, boolean italic) {
-        PdfFont font = italic ? calibriBoldItalic : calibriBold;
-        String texte = MontantEnLettresConverter.convertir(montant != null ? montant : BigDecimal.ZERO);
-        Paragraph p = new Paragraph(texte.toUpperCase())
-                .setFont(font)
-                .setFontSize(9)
-                .setTextAlignment(TextAlignment.CENTER)
-                .setMarginTop(6)
-                .setMarginBottom(6);
-        document.add(p);
-    }
-
-        private void addArreteLine(Document document, String label, BigDecimal total) {
-                String words = MontantEnLettresConverter.convertir(total != null ? total : BigDecimal.ZERO).toUpperCase();
-                Paragraph p = new Paragraph()
-                        .add(new com.itextpdf.layout.element.Text(label + "                    ").setFont(calibriBold).setFontSize(9))
-                        .add(new com.itextpdf.layout.element.Text(words).setFont(calibriBold).setFontSize(11))
-                        .setTextAlignment(TextAlignment.LEFT)
-                        .setMarginTop(4)
-                        .setMarginBottom(10);
-                document.add(p);
-        }
-
-    private void addTexteAdministratifBas(Document document) {
-        Paragraph certifiePara = new Paragraph("Cértifié exact:")
-                .setFont(calibriBold)
-                .setFontSize(7.56f)
-                .setTextAlignment(TextAlignment.LEFT)
-                .setMarginLeft(180) // aligné approximativement au-dessus de "des raisons de"
-                .setMarginBottom(6);
-        document.add(certifiePara);
-
-        Table table = new Table(new float[]{1f, 1f});
-        table.setWidth(UnitValue.createPercentValue(100));
-        table.setMarginBottom(6);
-
-        Cell leftCell = new Cell().add(new Paragraph("Les déplacements mentionnés ont eu lieu pour des raisons de service.")
-                        .setFont(calibriRegular).setFontSize(8.28f).setTextAlignment(TextAlignment.LEFT))
-                .setBorder(Border.NO_BORDER)
-                .setVerticalAlignment(VerticalAlignment.TOP)
-                .setPadding(2);
-
-        Cell rightCell = new Cell()
-                .add(new Paragraph("Par le (la) sousigné(e), qui atteste la veracité")
-                        .setFont(calibriRegular).setFontSize(8.28f).setTextAlignment(TextAlignment.LEFT).setMarginBottom(0))
-                .add(new Paragraph("des informations, et atteste n'avoir béneficier")
-                        .setFont(calibriRegular).setFontSize(8.28f).setTextAlignment(TextAlignment.LEFT).setMarginBottom(0))
-                .add(new Paragraph("d'aucune réduction de tarif à titre personnel")
-                        .setFont(calibriRegular).setFontSize(8.28f).setTextAlignment(TextAlignment.LEFT).setMarginBottom(0))
-                .add(new Paragraph("et d'aucun hébergement et réstauration.")
-                        .setFont(calibriRegular).setFontSize(8.28f).setTextAlignment(TextAlignment.LEFT).setMarginBottom(4))
-                .add(new Paragraph("Fait à Oujda le:")
-                        .setFont(calibriRegular).setFontSize(7.56f).setTextAlignment(TextAlignment.LEFT).setMarginBottom(6))
-                .add(new Paragraph("l'interessé:")
-                        .setFont(calibriBold).setFontSize(7.56f).setTextAlignment(TextAlignment.LEFT).setMarginLeft(60))
-                .setBorder(Border.NO_BORDER)
-                .setVerticalAlignment(VerticalAlignment.TOP)
-                .setPadding(2);
-
-        table.addCell(leftCell);
-        table.addCell(rightCell);
-        document.add(table);
-        }
-
-    private void addSignatureEtDeclaration(Document document, BigDecimal total) {
-        Paragraph faitOujda2 = new Paragraph("Fait à Oujda le:")
-                .setFont(calibriRegular)
-                .setFontSize(7.56f)
-                .setTextAlignment(TextAlignment.LEFT)
-                .setMarginTop(10)
-                .setMarginBottom(8);
-        document.add(faitOujda2);
-
-        Paragraph labelPara = new Paragraph("Arrêté par nous sous-ordonateur à la somme de:")
-                .setFont(calibriBold)
-                .setFontSize(9)
-                .setTextAlignment(TextAlignment.LEFT)
-                .setMarginLeft(60)
-                .setMarginTop(6)
-                .setMarginBottom(4);
-        document.add(labelPara);
-
-        String words = MontantEnLettresConverter.convertir(total != null ? total : BigDecimal.ZERO).toUpperCase();
-        Paragraph resultPara = new Paragraph(words)
-                .setFont(calibriBold)
-                .setFontSize(11)
-                .setTextAlignment(TextAlignment.LEFT)
-                .setMarginLeft(120)
-                .setMarginBottom(8);
-        document.add(resultPara);
-        }
-
-    private void addPhraseFinale(Document document, BigDecimal total) {
-        Paragraph p1 = new Paragraph("Arrêté par nous sous-ordonateur à la somme de:")
-                .setFont(calibriBold).setFontSize(9).setMarginBottom(4);
-        document.add(p1);
-
-        addMontantEnLettres(document, total, true);
-    }
 
     private String getFieldValue(String value) {
         return value != null ? value : "";

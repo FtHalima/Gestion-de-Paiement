@@ -73,6 +73,12 @@
     -fx-font-weight: bold;
 }
 
+.sidebar-credit {
+    -fx-text-fill: #b8c5d8;
+    -fx-font-size: 11px;
+    -fx-padding: 0 0 2 0;
+}
+
 /* Boutons de navigation */
 .nav-button {
     -fx-background-color: transparent;

@@ -29,8 +29,10 @@
             <Region VBox.vgrow="ALWAYS"/>
 
             <Button text="⎋  Déconnexion" onAction="#handleLogout" styleClass="nav-button, nav-button-logout" maxWidth="Infinity">
-                <VBox.margin><Insets bottom="20"/></VBox.margin>
             </Button>
+            <Label text="Fait par Halima Ftati" styleClass="sidebar-credit" wrapText="true" maxWidth="Infinity" alignment="CENTER">
+                <VBox.margin><Insets right="15" bottom="18" left="15"/></VBox.margin>
+            </Label>
         </VBox>
     </left>
     <center>

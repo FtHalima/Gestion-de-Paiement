@@ -427,17 +427,17 @@ public class AjouterPaiementController {
 
     private void loadProfessorIntoEditFields(Professeur prof) {
         // Set CIN and PPR (though they are already in search fields)
-        cinField.setText(prof.getCin());
-        pprField.setText(prof.getPpr());
-        nomField.setText(prof.getNom());
-        prenomField.setText(prof.getPrenom());
+        cinField.setText(java.util.Objects.toString(prof.getCin(), ""));
+        pprField.setText(java.util.Objects.toString(prof.getPpr(), ""));
+        nomField.setText(java.util.Objects.toString(prof.getNom(), ""));
+        prenomField.setText(java.util.Objects.toString(prof.getPrenom(), ""));
         gradeField.setValue(prof.getGrade());
         echelleField.setText(prof.getEchelle() != null ? prof.getEchelle().toString() : "");
-        affectationField.setText(prof.getAffectation());
-        banqueField.setText(prof.getRibBanque());
-        villeField.setText(prof.getRibVille());
-        numeroCompteField.setText(prof.getRibNumeroCompte());
-        cleField.setText(prof.getRibCle());
+        affectationField.setText(java.util.Objects.toString(prof.getAffectation(), ""));
+        banqueField.setText(java.util.Objects.toString(prof.getRibBanque(), ""));
+        villeField.setText(java.util.Objects.toString(prof.getRibVille(), ""));
+        numeroCompteField.setText(java.util.Objects.toString(prof.getRibNumeroCompte(), ""));
+        cleField.setText(java.util.Objects.toString(prof.getRibCle(), ""));
     }
 
     private void showProfessorDisplay() {
@@ -927,6 +927,16 @@ public class AjouterPaiementController {
 
     @FXML
     private void saveAction() {
+        try {
+            savePaiement();
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Impossible d'enregistrer le paiement : "
+                    + java.util.Objects.toString(e.getMessage(), e.getClass().getSimpleName()));
+        }
+    }
+
+    private void savePaiement() {
         if (!validateForm()) {
             return;
         }
