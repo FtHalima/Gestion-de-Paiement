@@ -29,6 +29,7 @@ public class MainViewController {
     private SessionUtilisateur sessionUtilisateur;
 
     @FXML private StackPane contentArea;
+    @FXML private javafx.scene.control.ComboBox<String> themeChoice;
 
     @FXML private Button navDashboard;
     @FXML private Button navAjouter;
@@ -38,6 +39,13 @@ public class MainViewController {
 
     @FXML
     public void initialize() {
+        themeChoice.getItems().setAll("Moderne", "Classique");
+        themeChoice.setValue(com.gestionpaiements.app.util.AppTheme.estModerne() ? "Moderne" : "Classique");
+        themeChoice.valueProperty().addListener((obs, ancien, choix) -> {
+            if (themeChoice.getScene() != null) {
+                com.gestionpaiements.app.util.AppTheme.choisir(themeChoice.getScene().getRoot(), "Moderne".equals(choix));
+            }
+        });
         showDashboard();
     }
 
@@ -113,6 +121,7 @@ public class MainViewController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/gestionpaiements/app/fxml/login.fxml"));
             loader.setControllerFactory(MainApp.staticApplicationContext::getBean);
             Parent root = loader.load();
+            com.gestionpaiements.app.util.AppTheme.appliquer(root);
             Stage loginStage = new Stage();
             loginStage.setTitle("Connexion");
             loginStage.setScene(new Scene(root));

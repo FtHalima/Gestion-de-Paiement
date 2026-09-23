@@ -1,0 +1,150 @@
+/* Surcouche réversible : aucune règle ne s'applique au thème Classique. */
+.modern {
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 13px;
+    -fx-background-color: #f3f6fa;
+    -fx-accent: #087f8c;
+    -fx-focus-color: #087f8c;
+    -fx-faint-focus-color: #087f8c20;
+}
+.modern .label { -fx-text-fill: #24354b; }
+.modern .sidebar {
+    -fx-background-color: linear-gradient(to bottom, #12263d, #19384b);
+    -fx-padding: 0 12 0 12;
+    -fx-spacing: 10;
+    -fx-pref-width: 248;
+}
+.modern .sidebar-title { -fx-font-size: 21px; -fx-text-fill: #ffffff; }
+.modern .sidebar-credit { -fx-text-fill: #acbdcf; }
+.modern .nav-button, .modern .nav-button-active {
+    -fx-padding: 13 12;
+    -fx-font-size: 13px;
+    -fx-font-weight: normal;
+    -fx-text-fill: #d8e5ee;
+    -fx-background-insets: 0;
+    -fx-background-radius: 9;
+    -fx-border-width: 0;
+    -fx-effect: none;
+}
+.modern .nav-button:hover { -fx-background-color: #25475c; }
+.modern .nav-button-active, .modern .nav-button-active:hover {
+    -fx-background-color: #087f8c;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+.modern .nav-button-logout { -fx-text-fill: #d7e1ea; }
+.modern .topbar { -fx-background-color: white; -fx-border-color: #e2e9f1; }
+.modern .user-label {
+    -fx-background-color: #edf5f6;
+    -fx-background-radius: 18;
+    -fx-padding: 8 15;
+    -fx-text-fill: #20535a;
+}
+.modern .content-area, .modern .dashboard-root, .modern .scroll-pane > .viewport {
+    -fx-background-color: #f3f6fa;
+}
+.modern .page-title { -fx-font-size: 26px; -fx-text-fill: #142d44; }
+.modern .section-title { -fx-font-size: 16px; -fx-text-fill: #263b51; }
+.modern .button {
+    -fx-background-color: #087f8c;
+    -fx-background-radius: 8;
+    -fx-text-fill: white;
+    -fx-padding: 10 17;
+    -fx-effect: none;
+}
+.modern .button:hover { -fx-background-color: #066573; }
+.modern .button:pressed { -fx-background-color: #054d59; }
+.modern .button:focused { -fx-border-color: #54b6c1; -fx-border-radius: 8; }
+.modern .btn-secondary {
+    -fx-background-color: white;
+    -fx-border-color: #cad7e2;
+    -fx-border-width: 1;
+    -fx-text-fill: #31516a;
+}
+.modern .btn-secondary:hover { -fx-background-color: #eaf2f5; }
+.modern .btn-danger { -fx-background-color: #bd4351; }
+.modern .btn-danger:hover { -fx-background-color: #9e3440; }
+.modern .btn-warning { -fx-background-color: #aa6922; }
+.modern .btn-success { -fx-background-color: #21745b; }
+/* Les règles de navigation priment sur les boutons d'action. */
+.modern .sidebar .nav-button { -fx-background-color: transparent; -fx-text-fill: #d8e5ee; }
+.modern .sidebar .nav-button:hover { -fx-background-color: #25475c; }
+.modern .sidebar .nav-button-active { -fx-background-color: #087f8c; -fx-text-fill: white; }
+.modern .text-field, .modern .text-area, .modern .combo-box-base {
+    -fx-background-color: white;
+    -fx-border-color: #ced9e4;
+    -fx-border-width: 1;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-text-fill: #24354b;
+    -fx-prompt-text-fill: #718399;
+}
+.modern .text-field { -fx-padding: 8 10; }
+.modern .text-field:focused, .modern .text-area:focused, .modern .combo-box-base:focused {
+    -fx-border-color: #087f8c;
+    -fx-effect: dropshadow(gaussian, #087f8c20, 5, 0, 0, 0);
+}
+.modern .date-picker > .text-field { -fx-border-width: 0; -fx-background-color: transparent; }
+.modern .date-picker > .arrow-button { -fx-background-color: #edf4f7; -fx-background-radius: 0 7 7 0; }
+.modern .combo-box > .list-cell { -fx-padding: 7 10; }
+.modern .titled-pane { -fx-text-fill: #24475b; -fx-font-weight: bold; }
+.modern .titled-pane > .title {
+    -fx-background-color: #eaf1f6;
+    -fx-background-radius: 9 9 0 0;
+    -fx-padding: 12 15;
+    -fx-border-color: #dce5ed;
+    -fx-border-radius: 9 9 0 0;
+}
+.modern .titled-pane > .content {
+    -fx-background-color: white;
+    -fx-border-color: #dce5ed;
+    -fx-border-radius: 0 0 9 9;
+    -fx-background-radius: 0 0 9 9;
+    -fx-padding: 15;
+    -fx-font-weight: normal;
+}
+.modern .stat-card {
+    -fx-background-color: white;
+    -fx-border-color: #e0e8f0;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 22;
+    -fx-spacing: 9;
+    -fx-effect: dropshadow(gaussian, #142d440b, 12, 0, 0, 3);
+}
+.modern .stat-card-green { -fx-border-color: #c7e7df; }
+.modern .stat-card-blue { -fx-border-color: #d0e1f2; }
+.modern .stat-card-orange { -fx-border-color: #eddcc4; }
+.modern .stat-card-purple { -fx-background-color: #19384b; -fx-border-color: #19384b; }
+.modern .stat-label-green, .modern .stat-number-green { -fx-text-fill: #21745b; }
+.modern .stat-label-blue, .modern .stat-number-blue { -fx-text-fill: #366a9b; }
+.modern .stat-label-orange, .modern .stat-number-orange { -fx-text-fill: #9b6228; }
+.modern .stat-label-purple, .modern .stat-number-purple { -fx-text-fill: white; }
+.modern .stat-sub { -fx-text-fill: #65768b; }
+.modern .stat-card-purple .stat-sub { -fx-text-fill: #bcd1df; }
+.modern .table-view { -fx-border-color: #dce5ed; -fx-padding: 0; }
+.modern .recents-table { -fx-min-height: 175; }
+.modern .table-view .column-header-background { -fx-background-color: #eaf1f6; }
+.modern .table-view .column-header .label { -fx-text-fill: #456177; }
+.modern .table-row-cell { -fx-cell-size: 36; -fx-border-color: transparent transparent #edf1f5 transparent; }
+.modern .table-row-cell:odd { -fx-background-color: #f8fafc; }
+.modern .table-row-cell:filled:hover { -fx-background-color: #eef6f7; }
+.modern .table-row-cell:selected { -fx-background-color: #dceff1; }
+.modern .table-cell { -fx-text-fill: #24354b; -fx-padding: 7 9; }
+.modern .list-cell:filled:selected { -fx-background-color: #dceff1; -fx-text-fill: #24354b; }
+.modern .total-label { -fx-background-color: #e1f1ed; -fx-text-fill: #1d6252; -fx-padding: 12 18; }
+.modern.login-root { -fx-background-color: linear-gradient(to bottom right, #12263d, #205667); }
+.modern .login-card {
+    -fx-max-width: 390;
+    -fx-max-height: 390;
+    -fx-padding: 32;
+    -fx-background-radius: 18;
+    -fx-effect: dropshadow(gaussian, #06152340, 35, 0, 0, 12);
+}
+.modern .login-title { -fx-font-size: 23px; -fx-text-fill: #142d44; }
+.modern .login-subtitle { -fx-text-fill: #65768b; -fx-font-size: 13px; }
+.modern .login-field-label { -fx-text-fill: #456177; -fx-font-size: 11px; }
+
+/* Champs de règlement compacts, sans modifier la disposition classique. */
+.modern #typePaiementCombo { -fx-pref-width: 230; -fx-max-width: 230; }
+.modern #dateDebutField, .modern #dateFinField { -fx-pref-width: 175; -fx-max-width: 175; }

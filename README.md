@@ -51,6 +51,16 @@ de base de données séparé ni de connexion réseau.
 
 ## Fonctionnalités
 
+### Nouveautés de la version Windows 1.0.4
+- Apparence moderne avec retour immédiat à l'apparence précédente via **Apparence → Classique** ; le choix est mémorisé.
+- Connexion directe à l'application après authentification, avec messages uniquement en cas d'erreur.
+- Dates générales de début et de fin facultatives ; les dates des trajets restent nécessaires.
+- Déplacements : barème automatique par échelle (5 : 30 DH ; 6–7 : 40 DH ; 8–10 : 60 DH ; 11 : 80 DH ; 12 : 100 DH).
+- Calcul des créneaux 00 h–05 h, 11 h–14 h et 18 h–21 h sur la durée réelle du déplacement : jours de départ et de retour partiels, 3 taux par jour intermédiaire. Un contact à la borne sans durée ne compte pas.
+- Refus des dates de trajets qui se chevauchent pour un même professeur, dans le formulaire et dans les paiements déjà enregistrés (dates inclusives).
+- Motif « Raison de service » automatique ; le PDF de déplacement inclut un ordre de mission par trajet, avec espace de signature du directeur.
+- Port HTTP choisi automatiquement pour éviter les conflits au démarrage.
+
 ### Authentification
 - Écran de connexion (login / mot de passe) avant l'accès à l'application.
 - Un compte administrateur par défaut est créé automatiquement au tout
@@ -270,10 +280,12 @@ postes cibles.
 2. Générer l'installeur (depuis la racine du projet, avec `JAVA_HOME` pointant
    vers un JDK 21 et WiX Toolset v3 installé pour la génération `.exe`) :
    ```bash
-   "%JAVA_HOME%\bin\jpackage" --type exe --name "Gestion Paiements" --input target --main-jar gestion-paiements-v2-0.0.1-SNAPSHOT.jar --icon icon.ico --runtime-image "%JAVA_HOME%" --dest dist --win-shortcut --win-menu --win-dir-chooser --app-version 1.0.0 --vendor "TonNomOuSociete"
+   mkdir target\windows-input
+   copy target\gestion-paiements-v2-0.0.1-SNAPSHOT.jar target\windows-input\
+   "%JAVA_HOME%\bin\jpackage" --type exe --name "Gestion Paiements" --input target\windows-input --main-jar gestion-paiements-v2-0.0.1-SNAPSHOT.jar --icon icon.ico --runtime-image "%JAVA_HOME%" --dest dist --win-shortcut --win-menu --win-dir-chooser --app-version 1.0.4 --vendor "FtHalima"
    ```
 
-3. L'installeur généré se trouve dans `dist\Gestion Paiements-1.0.0.exe`.
+3. L'installeur généré se trouve dans `dist\Gestion Paiements-1.0.4.exe`. Seul le JAR est placé dans le dossier d'entrée : les classes de test et fichiers temporaires ne sont pas embarqués.
 
 ### Comportement à l'installation
 - L'utilisateur choisit le dossier d'installation (`--win-dir-chooser`).

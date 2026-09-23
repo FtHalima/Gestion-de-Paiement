@@ -169,7 +169,10 @@ public class PdfGenerationService {
     }
 
     void addMainTitle(Document document, TypePaiement type) {
-        String titre = getDynamicTitle(type);
+        addMainTitle(document, getDynamicTitle(type));
+    }
+
+    void addMainTitle(Document document, String titre) {
 
         Table titleTable = new Table(1);
         titleTable.setWidth(UnitValue.createPercentValue(75)); // ✅ largeur réduite

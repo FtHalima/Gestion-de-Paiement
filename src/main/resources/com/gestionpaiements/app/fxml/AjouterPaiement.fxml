@@ -242,7 +242,7 @@
                 GridPane.columnIndex="0"
                 GridPane.rowIndex="1"/>
 
-            <DatePicker fx:id="dateDebutField"
+            <DatePicker fx:id="dateDebutField" promptText="Facultative"
                         GridPane.columnIndex="1"
                         GridPane.rowIndex="1"
                         maxWidth="Infinity"/>
@@ -251,7 +251,7 @@
                 GridPane.columnIndex="3"
                 GridPane.rowIndex="1"/>
 
-            <DatePicker fx:id="dateFinField"
+            <DatePicker fx:id="dateFinField" promptText="Facultative"
                         GridPane.columnIndex="4"
                         GridPane.rowIndex="1"
                         maxWidth="Infinity"/>
@@ -374,7 +374,7 @@
     </TitledPane>
 
     <!-- Section: Paiement -->
-    <TitledPane text="Paiement">
+    <TitledPane fx:id="paiementSection" text="Paiement">
         <GridPane hgap="10" vgap="8">
             <columnConstraints>
                 <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="140"/>

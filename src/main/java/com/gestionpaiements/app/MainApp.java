@@ -49,6 +49,7 @@ public class MainApp extends Application {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/gestionpaiements/app/fxml/login.fxml"));
             loader.setControllerFactory(applicationContext::getBean);
             Parent root = loader.load();
+            com.gestionpaiements.app.util.AppTheme.appliquer(root);
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.setTitle("Connexion");

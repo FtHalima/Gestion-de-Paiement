@@ -46,6 +46,7 @@ public class PaiementService {
      */
     @Transactional
     public Paiement calculerEtEnregistrer(Paiement paiement) {
+        verifierDisponibiliteDeplacement(paiement);
         // Deleguer le calcul à la méthode unique
         TauxIRResult result = calculerMontants(paiement.getTypePaiement(), paiement.getNombreHeures(), paiement.getTaux(), paiement.getTauxIr());
         paiement.setMontantBrut(result.getMontantBrut());
@@ -207,6 +208,7 @@ public class PaiementService {
         // Sauvegarde ou récupération du professeur
         Professeur savedProf = professeurService.creerOuRecuperer(paiement.getProfesseur());
         paiement.setProfesseur(savedProf);
+        verifierDisponibiliteDeplacement(paiement);
 
         // Utilisateur connecté
         Utilisateur utilisateur = sessionUtilisateur.getUtilisateurConnecte();
@@ -295,6 +297,21 @@ public class PaiementService {
     @Transactional
     public void supprimerPaiements(List<Paiement> paiements) {
         paiementRepository.deleteAll(paiements);
+    }
+
+    @Transactional(readOnly = true)
+    public void verifierDisponibiliteDeplacement(Paiement paiement) {
+        if (paiement.getTypePaiement() != TypePaiement.DEPLACEMENT) return;
+        java.util.ArrayList<com.gestionpaiements.app.model.LigneDeplacement> existants = new java.util.ArrayList<>();
+        if (paiement.getProfesseur() != null && paiement.getProfesseur().getIdProfesseur() != null) {
+            for (Paiement autre : paiementRepository.findDeplacementsAvecTrajets(
+                    paiement.getProfesseur(), TypePaiement.DEPLACEMENT)) {
+                // La version enregistrée du paiement modifié est remplacée par les lignes du formulaire.
+                if (paiement.getIdPaiement() != null && paiement.getIdPaiement().equals(autre.getIdPaiement())) continue;
+                existants.addAll(autre.getLignesDeplacement());
+            }
+        }
+        DeplacementDisponibilite.verifier(paiement.getLignesDeplacement(), existants);
     }
 
     @Transactional

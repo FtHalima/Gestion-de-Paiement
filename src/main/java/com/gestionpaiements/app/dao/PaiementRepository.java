@@ -18,6 +18,11 @@ public interface PaiementRepository extends JpaRepository<Paiement, Long> {
     List<Paiement> findByTypePaiement(TypePaiement type);
     List<Paiement> findByProfesseur(Professeur professeur);
 
+    @Query("select distinct p from Paiement p join fetch p.lignesDeplacement "
+            + "where p.professeur = :professeur and p.typePaiement = :type")
+    List<Paiement> findDeplacementsAvecTrajets(@Param("professeur") Professeur professeur,
+                                            @Param("type") TypePaiement type);
+
     @Query("select p from Paiement p join fetch p.professeur where p.typePaiement = :type")
     List<Paiement> findByTypePaiementWithProfesseur(TypePaiement type);
 

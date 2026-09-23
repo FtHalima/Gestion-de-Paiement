@@ -55,7 +55,7 @@ public class DeplacementPdfGenerationService {
 
     
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final DateTimeFormatter HEURE_FORMAT = DateTimeFormatter.ofPattern("H'H'");
+    private static final DateTimeFormatter HEURE_FORMAT = DateTimeFormatter.ofPattern("H'H'mm");
 
     // Chemins des polices Windows — bascule automatiquement sur une police standard si introuvable
     private static final String CALIBRI_PATH = "C:/Windows/Fonts/calibri.ttf";
@@ -116,8 +116,63 @@ public class DeplacementPdfGenerationService {
         pdfGenerationService.addIntermediateSignatures(document);
         pdfGenerationService.addFooterValidation(document, total);
 
+        for (LigneDeplacement trajet : paiement.getLignesDeplacement()) {
+            if (estTrajetRempli(trajet)) {
+                addOrdreMission(document, paiement, trajet);
+            }
+        }
+
         document.close();
         return new ByteArrayInputStream(baos.toByteArray());
+    }
+
+    private void addOrdreMission(Document document, Paiement paiement, LigneDeplacement trajet) {
+        document.add(new com.itextpdf.layout.element.AreaBreak(
+                com.itextpdf.layout.properties.AreaBreakType.NEXT_PAGE));
+        Professeur prof = paiement.getProfesseur();
+        pdfGenerationService.addHeader(document, prof != null ? prof.getAffectation() : null);
+        pdfGenerationService.addMainTitle(document, "Ordre de mission");
+        addIdentificationBlock(document, prof);
+        addMotifLigne(document, paiement);
+
+        Table table = new Table(new float[]{1.2f, 1.2f, 3f, 1f, 1f});
+        table.setWidth(UnitValue.createPercentValue(100));
+        addHeaderCell(table, "Date de déplacement", 1, 2);
+        addHeaderCell(table, "Indication précise du parcours", 2, 1);
+        addHeaderCell(table, "Heures", 1, 2);
+        addHeaderCell(table, "Départ", 1, 1);
+        addHeaderCell(table, "Arrivée", 1, 1);
+        addHeaderCell(table, "Départ", 1, 1);
+        addHeaderCell(table, "Retour", 1, 1);
+        addDataCellCalibri(table, trajet.getDateDepart() != null ? trajet.getDateDepart().format(DATE_FORMAT) : "");
+        addDataCellCalibri(table, trajet.getDateArrivee() != null ? trajet.getDateArrivee().format(DATE_FORMAT) : "");
+        addDataCellCalibri(table, getFieldValue(trajet.getParcours()));
+        addDataCellTimes(table, trajet.getHeureDepart() != null ? trajet.getHeureDepart().format(HEURE_FORMAT) : "");
+        addDataCellTimes(table, trajet.getHeureRetour() != null ? trajet.getHeureRetour().format(HEURE_FORMAT) : "");
+        // Place le tableau 3 cm au-dessus du centre, avec la signature dans le flux en dessous.
+        var area = document.getRenderer().getCurrentArea();
+        var renderer = table.createRendererSubTree().setParent(document.getRenderer());
+        var layout = renderer.layout(new com.itextpdf.layout.layout.LayoutContext(
+                new com.itextpdf.layout.layout.LayoutArea(area.getPageNumber(), area.getBBox().clone())));
+        if (layout.getStatus() == com.itextpdf.layout.layout.LayoutResult.FULL) {
+            float hauteur = layout.getOccupiedArea().getBBox().getHeight();
+            float centre = document.getPdfDocument().getDefaultPageSize().getHeight() / 2 + 3 * 72f / 2.54f;
+            table.setMarginTop(Math.max(0, area.getBBox().getTop() - centre - hauteur / 2));
+        }
+        table.setHorizontalAlignment(HorizontalAlignment.CENTER);
+        document.add(table);
+
+        Table signature = new Table(UnitValue.createPercentArray(new float[]{1, 1})).useAllAvailableWidth();
+        signature.setFixedLayout();
+        signature.setKeepTogether(true);
+        signature.setMarginTop(18);
+        signature.addCell(new Cell().setBorder(Border.NO_BORDER));
+        signature.addCell(new Cell().setBorder(Border.NO_BORDER)
+                .add(new Paragraph("Le Directeur").setFont(calibriBold).setFontSize(10)
+                        .setTextAlignment(TextAlignment.CENTER))
+                .add(new Paragraph("Fait à Oujda, le").setFont(calibriBold).setFontSize(9)
+                        .setMarginTop(85).setTextAlignment(TextAlignment.CENTER)));
+        document.add(signature);
     }
 
     private void addBudgetLine(Document document, Paiement paiement) {
@@ -241,7 +296,7 @@ public class DeplacementPdfGenerationService {
     private void addMotifLigne(Document document, Paiement paiement) {
         Paragraph p = new Paragraph()
                 .add(new com.itextpdf.layout.element.Text("Motif de déplacement: ").setFont(calibriBold).setFontSize(10.5f))
-                .add(new com.itextpdf.layout.element.Text(getFieldValue(paiement.getMotifDeplacement())).setFont(calibriRegular).setFontSize(10.5f))
+                .add(new com.itextpdf.layout.element.Text("Raison de service").setFont(calibriRegular).setFontSize(10.5f))
                 .setMarginBottom(8);
         document.add(p);
     }
