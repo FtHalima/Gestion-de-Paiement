@@ -547,8 +547,8 @@ public class AjouterPaiementController {
     }
 
     private void setupTrajetsTable() {
-        paiementSection.visibleProperty().bind(com.gestionpaiements.app.util.AppTheme.moderneProperty().not());
-        paiementSection.managedProperty().bind(paiementSection.visibleProperty());
+        paiementSection.setVisible(false);
+        paiementSection.setManaged(false);
         colDateDepart.setCellValueFactory(d -> d.getValue().dateDepartProperty());
         colDateArrivee.setCellValueFactory(d -> d.getValue().dateArriveeProperty());
         colParcours.setCellValueFactory(d -> d.getValue().parcoursProperty());

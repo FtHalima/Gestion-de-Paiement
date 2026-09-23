@@ -51,6 +51,9 @@ de base de données séparé ni de connexion réseau.
 
 ## Fonctionnalités
 
+### Version Windows 1.0.6
+L'application utilise uniquement l'apparence moderne. Le sélecteur de thème a été retiré et les anciennes préférences classiques sont ignorées.
+
 ### Version Windows 1.0.5
 L'apparence moderne est activée au premier démarrage de cette version, même après une ancienne installation configurée en classique. Le sélecteur **Apparence** reste disponible et les choix ultérieurs sont mémorisés.
 
@@ -285,10 +288,10 @@ postes cibles.
    ```bash
    mkdir target\windows-input
    copy target\gestion-paiements-v2-0.0.1-SNAPSHOT.jar target\windows-input\
-   "%JAVA_HOME%\bin\jpackage" --type exe --name "Gestion Paiements" --input target\windows-input --main-jar gestion-paiements-v2-0.0.1-SNAPSHOT.jar --icon icon.ico --runtime-image "%JAVA_HOME%" --dest dist --win-shortcut --win-menu --win-dir-chooser --app-version 1.0.5 --vendor "FtHalima"
+   "%JAVA_HOME%\bin\jpackage" --type exe --name "Gestion Paiements" --input target\windows-input --main-jar gestion-paiements-v2-0.0.1-SNAPSHOT.jar --icon icon.ico --runtime-image "%JAVA_HOME%" --dest dist --win-shortcut --win-menu --win-dir-chooser --app-version 1.0.6 --vendor "FtHalima"
    ```
 
-3. L'installeur généré se trouve dans `dist\Gestion Paiements-1.0.5.exe`. Seul le JAR est placé dans le dossier d'entrée : les classes de test et fichiers temporaires ne sont pas embarqués.
+3. L'installeur généré se trouve dans `dist\Gestion Paiements-1.0.6.exe`. Seul le JAR est placé dans le dossier d'entrée : les classes de test et fichiers temporaires ne sont pas embarqués.
 
 ### Comportement à l'installation
 - L'utilisateur choisit le dossier d'installation (`--win-dir-chooser`).
