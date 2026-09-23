@@ -5,13 +5,16 @@ import java.util.prefs.Preferences;
 
 /** Le thème classique conserve la feuille de style d'origine. */
 public final class AppTheme {
+    // Cette version démarre en moderne, même si l'ancien thème avait été mémorisé.
+    // Les changements explicites faits ensuite par l'utilisateur restent conservés.
+    private static final String PREFERENCE_THEME = "themeModerne.v2";
     private static boolean moderne = lirePreference();
     private static final javafx.beans.property.ReadOnlyBooleanWrapper themeModerne =
             new javafx.beans.property.ReadOnlyBooleanWrapper(moderne);
     private AppTheme() {}
 
     private static boolean lirePreference() {
-        try { return Preferences.userNodeForPackage(AppTheme.class).getBoolean("themeModerne", true); }
+        try { return Preferences.userNodeForPackage(AppTheme.class).getBoolean(PREFERENCE_THEME, true); }
         catch (SecurityException e) { return true; }
     }
 
@@ -32,7 +35,7 @@ public final class AppTheme {
         moderne = nouveauTheme;
         themeModerne.set(nouveauTheme);
         appliquer(root);
-        try { Preferences.userNodeForPackage(AppTheme.class).putBoolean("themeModerne", moderne); }
+        try { Preferences.userNodeForPackage(AppTheme.class).putBoolean(PREFERENCE_THEME, moderne); }
         catch (SecurityException ignored) { /* Le choix reste actif pour la session. */ }
     }
 }
