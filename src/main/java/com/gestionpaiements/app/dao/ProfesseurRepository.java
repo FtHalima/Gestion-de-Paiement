@@ -10,6 +10,8 @@ import java.util.Optional;
 
 @Repository
 public interface ProfesseurRepository extends JpaRepository<Professeur, Long> {
+    Optional<Professeur> findByCinIgnoreCase(String cin);
+    Optional<Professeur> findByPpr(String ppr);
     Optional<Professeur> findByCinAndPpr(String cin, String ppr);
 
     @Query("SELECT p FROM Professeur p WHERE ((:cin IS NOT NULL AND p.cin = :cin) OR (:ppr IS NOT NULL AND p.ppr = :ppr))")

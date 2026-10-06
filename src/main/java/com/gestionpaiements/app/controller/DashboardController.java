@@ -31,9 +31,12 @@ public class DashboardController {
 
         
     @Autowired
-    private ProfesseurService professeurService;
+    private com.gestionpaiements.app.service.ImportProfesseursService importService;
 
-    @FXML private Button importButton;
+    @Autowired private ImportProfesseursView importView;
+    @FXML private Button dernierImportButton;
+
+    @FXML private javafx.scene.control.SplitMenuButton importButton;
 
     @FXML private Label countVacataire;
     @FXML private Label countHeureSup;
@@ -50,6 +53,7 @@ public class DashboardController {
 
     @FXML
     public void initialize() {
+        configurerStructureImport();
         // ⚠️ Méthodes supposées existantes sur PaiementService — à vérifier/adapter
         long nbVacataire = paiementService.compterParType(TypePaiement.VACATAIRE);
         long nbHeureSup = paiementService.compterParType(TypePaiement.HEURE_SUP);
@@ -129,78 +133,52 @@ public class DashboardController {
         File file = fileChooser.showOpenDialog(importButton.getScene().getWindow());
         if (file == null) return;
 
-        int imported = 0;
-        int skipped = 0;
-
-        try (java.io.FileInputStream fis = new java.io.FileInputStream(file);
-            org.apache.poi.xssf.usermodel.XSSFWorkbook workbook = new org.apache.poi.xssf.usermodel.XSSFWorkbook(fis)) {
-
-            org.apache.poi.ss.usermodel.Sheet sheet = workbook.getSheetAt(0);
-            int lastRow = sheet.getLastRowNum();
-
-            int headerRowIndex = -1;
-            for (int r = 0; r <= lastRow; r++) {
-                org.apache.poi.ss.usermodel.Row row = sheet.getRow(r);
-                if (row == null) continue;
-                if (getCellString(row, 0).trim().equalsIgnoreCase("CIN")) {
-                    headerRowIndex = r;
-                    break;
-                }
-            }
-            if (headerRowIndex == -1) {
-                showAlert("Erreur", "En-tête introuvable : la colonne 'CIN' n'a pas été trouvée dans le fichier.");
-                return;
-            }
-
-            for (int r = headerRowIndex + 1; r <= lastRow; r++) {
-                org.apache.poi.ss.usermodel.Row row = sheet.getRow(r);
-                if (row == null) continue;
-                String cin = getCellString(row, 0);
-                if (cin.isEmpty()) continue;
-
-                try {
-                    com.gestionpaiements.app.model.Professeur prof = new com.gestionpaiements.app.model.Professeur();
-                    prof.setCin(cin);
-                    prof.setPpr(getCellString(row, 1));
-                    prof.setNom(getCellString(row, 2));
-                    prof.setPrenom(getCellString(row, 3));
-                    prof.setGrade(getCellString(row, 4));
-                    String echelleStr = getCellString(row, 5);
-                    if (!echelleStr.isEmpty()) {
-                        try { prof.setEchelle(Integer.parseInt(echelleStr.trim())); } catch (Exception ignored) {}
-                    }
-                    prof.setRibBanque(getCellString(row, 6));
-                    prof.setRibVille(getCellString(row, 7));
-                    prof.setRibNumeroCompte(getCellString(row, 8));
-                    prof.setRibCle(getCellString(row, 9));
-
-                    professeurService.creerOuRecuperer(prof);
-                    imported++;
-                } catch (Exception rowEx) {
-                    rowEx.printStackTrace();
-                    skipped++;
-                }
-            }
-
-            showAlert("Import terminé", imported + " professeur(s) importé(s), " + skipped + " ligne(s) ignorée(s).");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible d'importer le fichier : " + e.getMessage());
-        }
+        javafx.concurrent.Task<com.gestionpaiements.app.model.ImportProfesseurs> task = new javafx.concurrent.Task<>() {
+            @Override protected com.gestionpaiements.app.model.ImportProfesseurs call() { return importService.importer(file); }
+        };
+        importButton.setDisable(true); dernierImportButton.setDisable(true);
+        importButton.setText("Import en cours…");
+        Runnable restore = () -> {
+            importButton.setDisable(false); dernierImportButton.setDisable(false);
+            importButton.setText("Importer des données");
+        };
+        task.setOnSucceeded(e -> { restore.run(); importView.afficher(importButton.getScene().getWindow(), task.getValue()); });
+        task.setOnFailed(e -> { restore.run(); showAlert("Erreur", "Impossible d’enregistrer cet import. Vérifiez l’accès à la base de données."); });
+        Thread thread = new Thread(task, "import-professeurs");
+        thread.setDaemon(true); thread.start();
     }
 
-    private String getCellString(org.apache.poi.ss.usermodel.Row row, int colIndex) {
-        org.apache.poi.ss.usermodel.Cell cell = row.getCell(colIndex);
-        if (cell == null) return "";
-        if (cell.getCellType() == org.apache.poi.ss.usermodel.CellType.NUMERIC) {
-            double val = cell.getNumericCellValue();
-            if (val == Math.floor(val)) return String.valueOf((long) val);
-            return String.valueOf(val);
-        }
-        return cell.getStringCellValue() != null ? cell.getStringCellValue().trim() : "";
+    @FXML private void handleVoirImport() {
+        importView.dernier(importButton.getScene().getWindow());
     }
 
+    private void configurerStructureImport() {
+        javafx.scene.layout.GridPane colonnes = new javafx.scene.layout.GridPane();
+        colonnes.setHgap(18); colonnes.setVgap(8);
+        String[] regles = {"Obligatoire · texte · unique", "Obligatoire · texte · unique",
+                "Obligatoire", "Obligatoire", "Facultatif", "Entier positif, si renseigné",
+                "3 chiffres", "3 chiffres", "16 chiffres · format texte", "2 chiffres"};
+        colonnes.addRow(0, new Label("Colonne Excel"), new Label("En-tête"), new Label("Règle"));
+        for (int i = 0; i < 10; i++) {
+            Label position = new Label(String.valueOf((char) ('A' + i)));
+            Label champ = new Label(com.gestionpaiements.app.service.ImportProfesseursService.COLONNES.get(i));
+            champ.setStyle("-fx-font-weight: bold;");
+            colonnes.addRow(i + 1, position, champ, new Label(regles[i]));
+        }
+        Label titre = new Label("Structure du fichier Excel à importer");
+        titre.setStyle("-fx-font-size: 15px; -fx-font-weight: bold;");
+        Label aide = new Label("Fichier .xlsx · première feuille · une personne par ligne.\n"
+                + "Placez ces en-têtes sur une même ligne, puis les données en dessous.\n"
+                + "Le RIB doit être complet (banque, ville, compte et clé) ou entièrement vide.\n"
+                + "Utilisez le format texte pour CIN, PPR et RIB afin de garder les zéros.");
+        aide.setWrapText(true); aide.setMaxWidth(510);
+        javafx.scene.layout.VBox contenu = new javafx.scene.layout.VBox(14, titre, colonnes, aide);
+        contenu.setPadding(new javafx.geometry.Insets(14));
+        javafx.scene.control.ScrollPane scroll = new javafx.scene.control.ScrollPane(contenu);
+        scroll.setFitToWidth(true); scroll.setPrefViewportWidth(550); scroll.setPrefViewportHeight(440);
+        javafx.scene.control.CustomMenuItem structure = new javafx.scene.control.CustomMenuItem(scroll, false);
+        importButton.getItems().setAll(structure);
+    }
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);

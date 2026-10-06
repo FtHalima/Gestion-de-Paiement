@@ -316,3 +316,14 @@
 .table-cell {
     -fx-text-fill: #1c2333;
 }
+
+/* Le menu du modèle reste intégré au bouton d’import. */
+.import-menu > .label, .import-menu > .arrow-button {
+    -fx-background-color: #4763e4;
+    -fx-padding: 8 14;
+}
+.import-menu > .label { -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8 0 0 8; }
+.import-menu > .arrow-button { -fx-background-radius: 0 8 8 0; }
+.import-menu > .arrow-button > .arrow { -fx-background-color: white; }
+.modern .import-menu > .label, .modern .import-menu > .arrow-button { -fx-background-color: #087f8c; }
+.modern .import-menu > .label { -fx-text-fill: white; }

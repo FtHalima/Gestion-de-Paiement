@@ -386,8 +386,28 @@ Excel structuré ainsi :
 | I | Numéro de compte (RIB) |
 | J | Clé (RIB) |
 
-La ligne d'en-tête doit contenir le mot **"CIN"** dans sa première colonne
-pour que l'import détecte automatiquement où commencent les données.
+L'import lit la première feuille d'un fichier `.xlsx` et reconnaît les dix
+colonnes par leur en-tête, même si leur ordre change. Les colonnes CIN et PPR
+permettent de repérer la ligne d'en-tête. CIN, PPR, nom et prénom sont obligatoires.
+Le RIB peut rester entièrement vide ; lorsqu'il est renseigné, ses quatre parties
+doivent contenir respectivement 3, 3, 16 et 2 chiffres. Saisir les identifiants et
+coordonnées bancaires au format texte dans Excel pour conserver tous les chiffres.
+
+- **Voir les données importées** affiche les lignes du dernier fichier, avec
+  recherche par nom, CIN ou PPR et un filtre sur les erreurs.
+- La flèche du bouton **Importer des données** affiche directement la structure
+  du fichier dans l’application : colonnes A à J, en-têtes et règles de saisie.
+- **Historique des imports**, accessible sous le tableau de consultation,
+  conserve le nom et la date de chaque fichier,
+  ainsi que ses lignes et leurs résultats, dans la base locale après redémarrage.
+- Seules les cellules concernées par une erreur et leur motif sont affichés
+  en rouge ; les autres cellules gardent leur apparence habituelle. **Modifier /
+  corriger la ligne** permet de vérifier puis enregistrer une correction. Une
+  ligne refusée devient un nouveau professeur une fois valide ; une ligne déjà
+  importée met à jour sa fiche. Les doublons de CIN/PPR sont refusés. Une fiche
+  modifiée ailleurs depuis l'import ne peut pas être écrasée depuis l'historique.
+- Les valeurs initiales restent conservées séparément des valeurs corrigées.
+  Les imports antérieurs à cette fonctionnalité ne peuvent pas être reconstitués.
 
 ---
 
