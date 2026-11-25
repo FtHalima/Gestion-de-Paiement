@@ -55,6 +55,8 @@ public class DeplacementPdfGenerationService {
 
     
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter DATE_SIGNATURE_FORMAT =
+            DateTimeFormatter.ofPattern("d MMMM yyyy", java.util.Locale.FRANCE);
     private static final DateTimeFormatter HEURE_FORMAT = DateTimeFormatter.ofPattern("H'H'mm");
 
     // Chemins des polices Windows — bascule automatiquement sur une police standard si introuvable
@@ -144,8 +146,7 @@ public class DeplacementPdfGenerationService {
         addHeaderCell(table, "Arrivée", 1, 1);
         addHeaderCell(table, "Départ", 1, 1);
         addHeaderCell(table, "Retour", 1, 1);
-        // L'ordre de mission commence la veille, sans modifier les dates du déplacement enregistré.
-        addDataCellCalibri(table, trajet.getDateDepart() != null ? trajet.getDateDepart().minusDays(1).format(DATE_FORMAT) : "");
+        addDataCellCalibri(table, trajet.getDateDepart() != null ? trajet.getDateDepart().format(DATE_FORMAT) : "");
         addDataCellCalibri(table, trajet.getDateArrivee() != null ? trajet.getDateArrivee().format(DATE_FORMAT) : "");
         addDataCellCalibri(table, getFieldValue(trajet.getParcours()));
         addDataCellTimes(table, trajet.getHeureDepart() != null ? trajet.getHeureDepart().format(HEURE_FORMAT) : "");
@@ -171,7 +172,9 @@ public class DeplacementPdfGenerationService {
         signature.addCell(new Cell().setBorder(Border.NO_BORDER)
                 .add(new Paragraph("Le Directeur").setFont(calibriBold).setFontSize(10)
                         .setTextAlignment(TextAlignment.CENTER))
-                .add(new Paragraph("Fait à Driouch, le").setFont(calibriBold).setFontSize(9)
+                .add(new Paragraph("Fait à Oujda, le " + (trajet.getDateDepart() != null
+                        ? trajet.getDateDepart().minusDays(1).format(DATE_SIGNATURE_FORMAT) : "__________"))
+                        .setFont(calibriBold).setFontSize(9)
                         .setMarginTop(85).setTextAlignment(TextAlignment.CENTER)));
         document.add(signature);
     }

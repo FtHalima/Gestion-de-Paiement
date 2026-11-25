@@ -10,7 +10,7 @@ import java.util.Properties;
 /** Choix des en-têtes PDF, conservé indépendamment des données de paiement. */
 public final class PdfVersion {
     public enum Version {
-        ANCIEN("Ancien", "images/logo-academie-oriental.jpeg"),
+        ANCIEN("Ancien", "images/Logo1.png"),
         NOUVEAU("Nouveau", "images/logo-nouveau.png");
 
         private final String libelle;

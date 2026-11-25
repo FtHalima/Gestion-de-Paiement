@@ -78,13 +78,15 @@ public class DeplacementRegression {
                 String text = PdfTextExtractor.getTextFromPage(pdf.getPage(page));
                 check(text.contains("Ordre de mission") && text.contains("Le Directeur") && text.contains("Raison de service"), "Contenu ordre");
                 check(!text.contains("EXERCICE") && !text.contains("Total Général"), "Pas de budget ni total dans l'ordre");
-                check(text.contains("19/09/2026") && text.contains("28/09/2026") && !text.contains("20/09/2026"), "Seul le départ de l'ordre est avancé d'un jour");
+                check(text.contains("20/09/2026") && text.contains("28/09/2026") && !text.contains("19/09/2026"), "Dates du trajet identiques dans l'ordre");
+                check(text.contains("Fait à Oujda, le 19 septembre 2026"), "Signature datée de la veille du départ");
                 for (int i = 1; i <= 5; i++)
                     check(text.contains("Destination " + i) == (i == page - 1), "Un seul trajet par ordre");
             }
         }
         var format = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        for (LocalDate depart : new LocalDate[]{LocalDate.of(2026,10,18), LocalDate.of(2026,11,1), LocalDate.of(2027,1,1), LocalDate.of(2028,3,1)}) {
+        var signatureFormat = java.time.format.DateTimeFormatter.ofPattern("d MMMM yyyy", java.util.Locale.FRANCE);
+        for (LocalDate depart : new LocalDate[]{LocalDate.of(2026,11,26), LocalDate.of(2026,11,1), LocalDate.of(2027,1,1), LocalDate.of(2028,3,1)}) {
             LigneDeplacement trajet = paiement.getLignesDeplacement().get(0);
             paiement.getLignesDeplacement().clear(); paiement.getLignesDeplacement().add(trajet);
             LocalDate retour = depart.plusDays(3);
@@ -94,7 +96,9 @@ public class DeplacementRegression {
                 String etat = PdfTextExtractor.getTextFromPage(pdf.getPage(1));
                 String ordre = PdfTextExtractor.getTextFromPage(pdf.getPage(2));
                 check(etat.contains(depart.format(format)) && etat.contains(retour.format(format)), "Dates de déplacement inchangées");
-                check(ordre.contains(depart.minusDays(1).format(format)) && ordre.contains(retour.format(format)), "Dates de l'ordre : " + depart);
+                check(ordre.contains(depart.format(format)) && ordre.contains(retour.format(format)), "Dates de l'ordre : " + depart);
+                check(ordre.contains("Fait à Oujda, le " + depart.minusDays(1).format(signatureFormat)), "Date de signature : " + depart);
+                check(etat.contains("Fait à Oujda") && !etat.contains("Fait à Driouch") && !ordre.contains("Fait à Driouch"), "Ville des signatures");
                 check(trajet.getDateDepart().equals(depart) && trajet.getDateArrivee().equals(retour), "Données du trajet non modifiées");
             }
         }

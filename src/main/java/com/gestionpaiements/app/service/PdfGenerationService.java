@@ -141,6 +141,11 @@ public class PdfGenerationService {
                                 .setHorizontalAlignment(HorizontalAlignment.CENTER);
                         if (PdfVersion.getCourante() == PdfVersion.Version.NOUVEAU) {
                             logo.setBackgroundColor(WHITE);
+                        } else {
+                            // Le logo historique contient de larges marges blanches.
+                            logo.scaleToFit(500, 160)
+                                    .setRelativePosition(0, -1.6f * POINTS_PER_CM, 0, 0)
+                                    .setMarginBottom(-1.7f * POINTS_PER_CM);
                         }
                         document.add(logo);
                 } else {
@@ -496,10 +501,10 @@ public class PdfGenerationService {
         signaturesTable.setWidth(UnitValue.createPercentValue(100));
         signaturesTable.setMarginBottom(2 * POINTS_PER_CM);
 
-        signaturesTable.addCell(new Cell().add(new Paragraph("Fait à Driouch, le __________"))
+        signaturesTable.addCell(new Cell().add(new Paragraph("Fait à Oujda, le __________"))
                 .setFontSize(9)
                 .setBorder(Border.NO_BORDER));
-        signaturesTable.addCell(new Cell().add(new Paragraph("Fait à Driouch, le __________"))
+        signaturesTable.addCell(new Cell().add(new Paragraph("Fait à Oujda, le __________"))
                 .setFontSize(9)
                 .setBorder(Border.NO_BORDER));
 
@@ -585,8 +590,8 @@ public class PdfGenerationService {
                 .setFontColor(BLACK);
         document.add(amountPara);
 
-        // Ensuite : "Fait à Driouch, le __________"
-        Paragraph datePara = new Paragraph("Fait à Driouch, le __________")
+        // Ensuite : "Fait à Oujda, le __________"
+        Paragraph datePara = new Paragraph("Fait à Oujda, le __________")
                 .setTextAlignment(TextAlignment.CENTER)
                 .setFontSize(10)
                 .setFontColor(BLACK);
