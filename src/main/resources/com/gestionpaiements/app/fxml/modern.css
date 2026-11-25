@@ -33,6 +33,8 @@
     -fx-font-weight: bold;
 }
 .modern .nav-button-logout { -fx-text-fill: #d7e1ea; }
+.modern .pdf-version-menu > .label { -fx-text-fill: #d8e5ee; -fx-padding: 0; }
+.modern .pdf-version-menu > .arrow-button > .arrow { -fx-background-color: #d8e5ee; }
 .modern .topbar { -fx-background-color: white; -fx-border-color: #e2e9f1; }
 .modern .user-label {
     -fx-background-color: #edf5f6;

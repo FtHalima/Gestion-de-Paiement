@@ -3,11 +3,15 @@ package com.gestionpaiements.app.controller;
 import com.gestionpaiements.app.MainApp;
 import com.gestionpaiements.app.model.TypePaiement;
 import com.gestionpaiements.app.service.ExcelFileManagerService;
+import com.gestionpaiements.app.util.PdfVersion;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.RadioMenuItem;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.StackPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,10 +39,36 @@ public class MainViewController {
     @FXML private Button navVacataire;
     @FXML private Button navHeureSup;
     @FXML private Button navDeplacement;
+    @FXML private MenuButton versionPdfButton;
+    @FXML private RadioMenuItem versionPdfNouveau;
+    @FXML private RadioMenuItem versionPdfAncien;
 
     @FXML
     public void initialize() {
+        ToggleGroup versions = new ToggleGroup();
+        versionPdfNouveau.setToggleGroup(versions);
+        versionPdfAncien.setToggleGroup(versions);
+        actualiserVersionPdf();
         showDashboard();
+    }
+
+    private void actualiserVersionPdf() {
+        PdfVersion.Version version = PdfVersion.getCourante();
+        versionPdfButton.setText("Version PDF : " + version.getLibelle());
+        versionPdfNouveau.setSelected(version == PdfVersion.Version.NOUVEAU);
+        versionPdfAncien.setSelected(version == PdfVersion.Version.ANCIEN);
+    }
+
+    @FXML private void choisirPdfNouveau() { choisirVersionPdf(PdfVersion.Version.NOUVEAU); }
+    @FXML private void choisirPdfAncien() { choisirVersionPdf(PdfVersion.Version.ANCIEN); }
+
+    private void choisirVersionPdf(PdfVersion.Version version) {
+        try {
+            PdfVersion.choisir(version);
+        } catch (java.io.IOException e) {
+            showError("Impossible de mémoriser la version PDF : " + e.getMessage());
+        }
+        actualiserVersionPdf();
     }
 
     private void loadIntoContent(String fxmlPath, Button activeButton) {

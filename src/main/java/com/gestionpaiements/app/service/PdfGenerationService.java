@@ -5,6 +5,7 @@ import com.gestionpaiements.app.model.Paiement;
 import com.gestionpaiements.app.model.TypePaiement;
 import com.gestionpaiements.app.model.Professeur;
 import com.gestionpaiements.app.util.MontantEnLettresConverter;
+import com.gestionpaiements.app.util.PdfVersion;
 import com.itextpdf.kernel.colors.Color;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.colors.DeviceRgb;
@@ -61,7 +62,6 @@ public class PdfGenerationService {
     private static final Color BLACK = ColorConstants.BLACK;
 
 
-    private static final String LOGO_CLASSPATH = "images/Logo1.png";
     private static final float POINTS_PER_CM = 72f / 2.54f;
     //private static final String MINISTERE = "Ministère de l'Éducation Nationale, du Préscolaire et des Sports";
     //private static final String DIRECTION = "Direction Provinciale de Nador";
@@ -128,20 +128,23 @@ public class PdfGenerationService {
         document.add(royaume);
 
         // Try to add logo
+        String logoClasspath = PdfVersion.getCourante().getLogo();
         try {
-                ClassPathResource logoResource = new ClassPathResource(LOGO_CLASSPATH);
+                ClassPathResource logoResource = new ClassPathResource(logoClasspath);
                 if (logoResource.exists()) {
-                        byte[] logoBytes = logoResource.getInputStream().readAllBytes();
+                        byte[] logoBytes;
+                        try (var input = logoResource.getInputStream()) {
+                            logoBytes = input.readAllBytes();
+                        }
                         Image logo = new Image(ImageDataFactory.create(logoBytes))
-                                .setWidth(500)
-                                .setAutoScaleHeight(true)
-                                .setRelativePosition(0, -1.6f * POINTS_PER_CM, 0, 0)
-                                // Recover the space below the raised logo for the final signature.
-                                .setMarginBottom(-1.7f * POINTS_PER_CM)
+                                .scaleToFit(300, 160)
                                 .setHorizontalAlignment(HorizontalAlignment.CENTER);
+                        if (PdfVersion.getCourante() == PdfVersion.Version.NOUVEAU) {
+                            logo.setBackgroundColor(WHITE);
+                        }
                         document.add(logo);
                 } else {
-                    System.err.println("WARNING: Logo not found in classpath at " + LOGO_CLASSPATH);
+                    System.err.println("WARNING: Logo not found in classpath at " + logoClasspath);
                }
         } catch (Exception e) {
         System.err.println("ERROR loading logo: " + e.getMessage());
@@ -493,10 +496,10 @@ public class PdfGenerationService {
         signaturesTable.setWidth(UnitValue.createPercentValue(100));
         signaturesTable.setMarginBottom(2 * POINTS_PER_CM);
 
-        signaturesTable.addCell(new Cell().add(new Paragraph("Fait à Oujda, le __________"))
+        signaturesTable.addCell(new Cell().add(new Paragraph("Fait à Driouch, le __________"))
                 .setFontSize(9)
                 .setBorder(Border.NO_BORDER));
-        signaturesTable.addCell(new Cell().add(new Paragraph("Fait à Oujda, le __________"))
+        signaturesTable.addCell(new Cell().add(new Paragraph("Fait à Driouch, le __________"))
                 .setFontSize(9)
                 .setBorder(Border.NO_BORDER));
 
@@ -582,8 +585,8 @@ public class PdfGenerationService {
                 .setFontColor(BLACK);
         document.add(amountPara);
 
-        // Ensuite : "Fait à Oujda, le __________"
-        Paragraph datePara = new Paragraph("Fait à Oujda, le __________")
+        // Ensuite : "Fait à Driouch, le __________"
+        Paragraph datePara = new Paragraph("Fait à Driouch, le __________")
                 .setTextAlignment(TextAlignment.CENTER)
                 .setFontSize(10)
                 .setFontColor(BLACK);
